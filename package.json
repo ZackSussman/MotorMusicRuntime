@@ -17,7 +17,9 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "cd main && tsc"
+        "generate" : "/Users/zacksussman/Library/Python/3.9/bin/antlr4 -Dlanguage=TypeScript ./MotorMusicParser.g4 ./MotorMusicLexer.g4 -o generated",  
+        "build": "npm run generate && tsc",
+        "prepare": "npm run build"
     },
     "keywords": [],
     "license": "ISC",
