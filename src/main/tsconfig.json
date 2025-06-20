@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+      "target": "ES2023",
+      "module": "ES2020",
+      "moduleResolution": "Node",    
+      "esModuleInterop":true,
+      "sourceMap": true,
+      "outDir": "generated-javascript",
+      "rootDirs": ["src"],
+      "lib": ["ES2023", "dom"],
+      "types": ["node"]
+    },
+    "include" : [
+      "src/typescript"
+    ]
+  }
