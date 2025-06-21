@@ -4,7 +4,7 @@
     "author": "Zack Sussman",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/ZackSussman/LangMotormusic2.0.git"
+        "url": "git+https://github.com/ZackSussman/MotorMusicRuntime.git"
     },
     "dependencies": {
         "antlr4": "^4.13.0",
