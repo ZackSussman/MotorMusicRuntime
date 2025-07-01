@@ -59,7 +59,7 @@ export async function beginNewPlayback() {
   } catch (e) {
     try {
       const version = Date.now(); // Unique version for cache busting
-      await audioContext.audioWorklet.addModule(`src/audio/AudioGenerator.js?version=${version}`);
+      await audioContext.audioWorklet.addModule(`/audio/AudioGenerator.js?version=${version}`);
       processorNode = new AudioWorkletNode(audioContext, "AudioGenerator", {
         channelCount: 2,
         channelCountMode: 'explicit',

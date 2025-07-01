@@ -30,3 +30,5 @@ class AudioGenerator extends AudioWorkletProcessor {
 }
 
 registerProcessor("AudioGenerator", AudioGenerator);
+
+export default AudioGenerator;
