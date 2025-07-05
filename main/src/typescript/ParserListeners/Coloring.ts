@@ -21,11 +21,21 @@ class ParenData {
     } 
 }
 
+class SingleObjectData {
+    ranges : range[]; //the _ or syllable as well as any time tag
+    constructor(ranges : range[]) {
+        this.ranges = ranges;
+    }
+}
+
 //this class walks the parse tree to build a map which stores for each range corresponding to a Paren, what color should be used 
 //for that range 
 export class ParenColoringListener extends MotorMusicParserListener {
 
     finalizedData : ParenData[]; 
+
+    //in the case that the program consists of just one syllable (no parens), we store the relevant data herer
+    singleObjectData : SingleObjectData;
 
     //the current stack of Parens - when Parens leave and enter, we make the necessary updates
     //only on exit of a Paren can we transfer some of the finalized data to the finalizedData as they are finalized
@@ -66,21 +76,37 @@ export class ParenColoringListener extends MotorMusicParserListener {
     }
 
     enterSyllable =  (ctx: SyllableContext) => {
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
+        if (this.currentParensInScope.length > 0)
+            this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
+        else
+            this.singleObjectData = new SingleObjectData([terminalNodeToRange(ctx.SYLLABLE())]);
     }
 
     enterTimeTaggedSyllable =  (ctx: TimeTaggedSyllableContext) => {
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.NUMBER()));
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
+        if (this.currentParensInScope.length > 0) {
+            this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.NUMBER()));
+            this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
+        }
+        else {
+            this.singleObjectData = new SingleObjectData([terminalNodeToRange(ctx.NUMBER()), terminalNodeToRange(ctx.SYLLABLE())]);
+        }
     }
 
     enterEmpty = (ctx: EmptyContext) => {
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.UNDERSCORE()));
+        if (this.currentParensInScope.length > 0)
+            this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.UNDERSCORE()));
+        else
+            this.singleObjectData = new SingleObjectData([terminalNodeToRange(ctx.UNDERSCORE())]);
     }
 
     enterTimeTaggedEmpty = (ctx: TimeTaggedEmptyContext) => {
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.NUMBER()));
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.UNDERSCORE()));
+        if (this.currentParensInScope.length > 0) {
+            this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.NUMBER()));
+            this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push(terminalNodeToRange(ctx.UNDERSCORE()));
+        }
+        else {
+            this.singleObjectData = new SingleObjectData([terminalNodeToRange(ctx.NUMBER()), terminalNodeToRange(ctx.UNDERSCORE())]);
+        }
     }
 
 
@@ -167,6 +193,13 @@ private hslToHex(h: number, s: number, l: number): string {
             }
                                                                            
         }
+        //this can only happen when there is no paren, in other words we should be gauranteed to have a single object data present
+        if (res.size == 0) {
+            for (let range of this.singleObjectData.ranges) {
+                res.set(serializeRange(range), this.getDistinctColor(0, 1));
+            }
+        }
+        
         return res;
     }
 }
