@@ -35,13 +35,13 @@ export function initializeMotorMusicRuntime() {
     let animationRuntime = initializeAnimationRuntime(new AnimationRuntimeData(getAnimationInfoFunction, startTime, areWeCurrentlyPlayingBack, intervalId, currentColors, colorClassNames));
     
     return {
-        audioContext,
-        computedAudio,
-        getAnimationInfoFunction,
-        areWeCurrentlyPlayingBack,
-        currentColors,
-        audioRuntime,
-        animationRuntime
+        audioContext: audioContext,
+        computedAudio: computedAudio,
+        getAnimationInfoFunction: getAnimationInfoFunction,
+        areWeCurrentlyPlayingBack: areWeCurrentlyPlayingBack,
+        currentColors: currentColors,
+        audioRuntime: audioRuntime,
+        animationRuntime: animationRuntime
     }
 
 }
