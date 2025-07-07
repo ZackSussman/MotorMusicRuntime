@@ -199,6 +199,7 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
                     return;
                 }
 
+                
                 /*we must compute the color for each object in the current animation info and add all the data to a map
                 then, we will send it into our alterColors function 
                 
@@ -224,7 +225,7 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
                     if (!(currentRangesBeingAnimated.has(serializeRange(range)))) 
                         currentRangesBeingAnimated.add(serializeRange(range));
                 }
-    
+            
                 
                 //1--------------------- syllable ranges
                 let syllableBaselineColor = initialColorStateMap.get(serializeRange(syllableRangeValues[0])); //there is always at least one and they are the same color
@@ -232,7 +233,6 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
                 let syllableColorToUse = morphToWhite(syllableBaselineColor, Math.pow(Math.sin(Math.PI * animationInfo.currentSyllableLocation), .66) ); //square for a tighter animation
                 for (let range of syllableRangeValues) {
                     colorsToSet.set(serializeRange(range), syllableColorToUse);
-                    colorsToSet.delete(serializeRange(range));
                 }
                 //-----------------------
 
