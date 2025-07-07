@@ -68,6 +68,14 @@ export class AnimationRuntimeData {
     //this allows us to only make coloring changes if they are necessary 
     currentColors; //initialize to new Map()
     colorClassNames; //initialize to new Map()
+    constructor(getAnimationInfoFunction, startTime, areWeCurrentlyPlayingBack, intervalId, currentColors, colorClassNames) {
+        this.getAnimationInfoFunction = getAnimationInfoFunction;
+        this.startTime = startTime;
+        this.areWeCurrentlyPlayingBack = areWeCurrentlyPlayingBack;
+        this.intervalId = intervalId;
+        this.currentColors = currentColors;
+        this.colorClassNames = colorClassNames;
+    }
 }
 
 export function initializeAnimationRuntime(audioContext, animationRuntimeData) {

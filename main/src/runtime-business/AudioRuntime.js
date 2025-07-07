@@ -7,6 +7,12 @@ export class AudioRuntimeData {
   processorNode; //initialize to null
   gainNode; //initialyize to null
   computedAudio; //initialize to undefined
+  constructor(audioContext, processorNode, gainNode, computedAudio) {
+    this.audioContext = audioContext;
+    this.processorNode = processorNode;
+    this.gainNode = gainNode;
+    this.computedAudio = computedAudio;
+  }
 }
 
 export function initializeAudioRuntime(audioRuntimeData) {
