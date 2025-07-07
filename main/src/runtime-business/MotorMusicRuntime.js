@@ -32,7 +32,7 @@ export function initializeMotorMusicRuntime() {
     let intervalId = undefined ; //initialize to undefined
     let currentColors = new Map(); 
     let colorClassNames = new Map();
-    let animationRuntime = initializeAnimationRuntime(new AnimationRuntimeData(getAnimationInfoFunction, startTime, areWeCurrentlyPlayingBack, intervalId, currentColors, colorClassNames));
+    let animationRuntime = initializeAnimationRuntime(audioContext, new AnimationRuntimeData(getAnimationInfoFunction, startTime, areWeCurrentlyPlayingBack, intervalId, currentColors, colorClassNames));
     
     return {
         audioContext: audioContext,
