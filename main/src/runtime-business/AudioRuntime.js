@@ -1,102 +1,109 @@
-export let audioContext = null;
-let processorNode = null;
-let gainNode = null;
 
 
 import { PLAYBACK_SAMPLE_RATE } from "../../generated-javascript/main/src/runtime-business/RuntimeConstants.js";
-// audio for the current code
-// stored as an array of arrays of arrays. 
-// [block1, block2, block3], where each blocki = [[left1, right1], [left2, right2], ...]
-let computedAudio = undefined;
 
-export function initializeAudioRuntime() {
-  if (!audioContext || audioContext.state === 'closed') {
-    audioContext = new AudioContext({ latencyHint: "interactive", sampleRate: PLAYBACK_SAMPLE_RATE});
-    audioContext.resume();
-  }
-  return audioContext;
+export class AudioRuntimeData {
+  audioContext; //initialize to null
+  processorNode; //initialize to null
+  gainNode; //initialyize to null
+  computedAudio; //initialize to undefined
 }
 
-export function setComputedAudio(audio) {
-  computedAudio = audio;
-}
+export function initializeAudioRuntime(audioRuntimeData) {
+  return {
 
-//returns the starting time of audio playback
-export async function beginNewPlayback() {
-  audioContext = initializeAudioRuntime();
-
-  if (computedAudio == undefined) {
-    throw new Error("error: cannot playback when computedAudio is undefined");
-  }
-
-  try {
-    await audioContext.resume();
-  } catch (error) {
-    console.error("Unable to resume audio context:", error);
-    return;
-  }
-
-  // Disconnect previous nodes if they exist
-  if (processorNode) {
-    try { processorNode.disconnect(); } catch (_) {}
-    processorNode = null;
-  }
-
-  if (gainNode) {
-    try { gainNode.disconnect(); } catch (_) {}
-    gainNode = null;
-  }
-
-  try {
-     processorNode = new AudioWorkletNode(audioContext, "AudioGenerator", {
-      channelCount: 2,
-      channelCountMode: 'explicit',
-      channelInterpretation: 'speakers',
-      processorOptions: {
-        sampleArrays: computedAudio,
+    initializeAudioRuntime: function initializeAudioRuntime() {
+      if (!audioRuntimeData.audioContext || audioRuntimeData.audioContext.state === 'closed') {
+        audioRuntimeData.audioContext = new AudioContext({ latencyHint: "interactive", sampleRate: PLAYBACK_SAMPLE_RATE});
+        audioRuntimeData.audioContext.resume();
       }
-  });
-  } catch (e) {
-    try {
-      const version = Date.now(); // Unique version for cache busting
-      await audioContext.audioWorklet.addModule(`/audio/AudioGenerator.js?version=${version}`);
-      processorNode = new AudioWorkletNode(audioContext, "AudioGenerator", {
-        channelCount: 2,
-        channelCountMode: 'explicit',
-        channelInterpretation: 'speakers',
-        processorOptions: {
-          sampleArrays: computedAudio,
-        }
+      return audioRuntimeData.audioContext;
+    },
+
+    setComputedAudio: function setComputedAudio(audio) {
+      audioRuntimeData.computedAudio = audio;
+    },
+
+    //returns the starting time of audio playback
+    beginNewPlayback: async function beginNewPlayback() {
+      audioRuntimeData.audioContext = initializeAudioRuntime();
+
+      if (audioRuntimeData.computedAudio == undefined) {
+        throw new Error("error: cannot playback when computedAudio is undefined");
+      }
+
+      try {
+        await audioRuntimeData.audioContext.resume();
+      } catch (error) {
+        console.error("Unable to resume audio context:", error);
+        return;
+      }
+
+      // Disconnect previous nodes if they exist
+      if (audioRuntimeData.processorNode) {
+        try { audioRuntimeData.processorNode.disconnect(); } catch (_) {}
+        audioRuntimeData.processorNode = null;
+      }
+
+      if (audioRuntimeData.gainNode) {
+        try { audioRuntimeData.gainNode.disconnect(); } catch (_) {}
+        audioRuntimeData.gainNode = null;
+      }
+
+      try {
+        audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext, "AudioGenerator", {
+          channelCount: 2,
+          channelCountMode: 'explicit',
+          channelInterpretation: 'speakers',
+          processorOptions: {
+            sampleArrays: audioRuntimeData.computedAudio,
+          }
       });
-    } catch (e2) {
-      console.error("Error creating AudioWorkletNode:", e2);
-      return;
+      } catch (e) {
+        try {
+          const version = Date.now(); // Unique version for cache busting
+          await audioRuntimeData.audioContext.audioWorklet.addModule(`/audio/AudioGenerator.js?version=${version}`);
+          audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext, "AudioGenerator", {
+            channelCount: 2,
+            channelCountMode: 'explicit',
+            channelInterpretation: 'speakers',
+            processorOptions: {
+              sampleArrays: audioRuntimeData.computedAudio,
+            }
+          });
+        } catch (e2) {
+          console.error("Error creating AudioWorkletNode:", e2);
+          return;
+        }
+      }
+
+      audioRuntimeData.gainNode = audioRuntimeData.audioContext.createGain();
+      audioRuntimeData.processorNode.connect(audioRuntimeData.gainNode).connect(audioRuntimeData.audioContext.destination);
+      return audioRuntimeData.audioContext.currentTime;
+    },
+
+    fadeOutAudio: function fadeOutAudio() {
+      if (!audioRuntimeData.audioContext || !audioRuntimeData.gainNode || !audioRuntimeData.processorNode) return;
+
+      const fadeOutDuration = 0.1;
+      const currentTime = audioRuntimeData.audioContext.currentTime;
+
+      audioRuntimeData.gainNode.gain.setValueAtTime(audioRuntimeData.gainNode.gain.value, currentTime);
+      audioRuntimeData.gainNode.gain.linearRampToValueAtTime(0, currentTime + fadeOutDuration);
+
+      setTimeout(() => {
+        try { audioRuntimeData.processorNode.disconnect(); } catch (_) {}
+        try { audioRuntimeData.gainNode.disconnect(); } catch (_) {}
+        audioRuntimeData.processorNode = null;
+        audioRuntimeData.gainNode = null;
+
+        try {
+          audioRuntimeData.audioContext.close();
+        } catch (_) {}
+        audioRuntimeData.audioContext = null;
+      }, fadeOutDuration * 1000);
     }
+
   }
 
-  gainNode = audioContext.createGain();
-  processorNode.connect(gainNode).connect(audioContext.destination);
-  return audioContext.currentTime;
-}
-
-export function fadeOutAudio() {
-  if (!audioContext || !gainNode || !processorNode) return;
-
-  const fadeOutDuration = 0.1;
-  const currentTime = audioContext.currentTime;
-
-  gainNode.gain.setValueAtTime(gainNode.gain.value, currentTime);
-  gainNode.gain.linearRampToValueAtTime(0, currentTime + fadeOutDuration);
-
-  setTimeout(() => {
-    try { processorNode.disconnect(); } catch (_) {}
-    try { gainNode.disconnect(); } catch (_) {}
-    processorNode = null;
-    gainNode = null;
-
-    try {
-      audioContext.close();
-    } catch (_) {}
-    audioContext = null;
-  }, fadeOutDuration * 1000);
 }
