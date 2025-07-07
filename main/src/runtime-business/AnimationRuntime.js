@@ -143,7 +143,7 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
 
         setSyllableTime: function setSyllableTime(syllableTime) {
             const idealFrameDuration = 1000/60; //60FPS
-            numFramesWeWillFit = Math.ceil (syllableTime / idealFrameDuration);//ceil because we want to be at LEAST 60 FPS
+            let numFramesWeWillFit = Math.ceil (syllableTime / idealFrameDuration);//ceil because we want to be at LEAST 60 FPS
             actualFrameDuration = syllableTime / numFramesWeWillFit;
         },
 
