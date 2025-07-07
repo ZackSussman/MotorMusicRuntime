@@ -146,6 +146,20 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
         } 
     }
 
+    function repaintColors(editor, document, colorsToSet) {
+            //1) remove all previuos decorations
+            editor.deltaDecorations(Array.from(animationRuntimeData.currentColors.values()).map(([_, id]) => id), []);
+            for (const range of colorsToSet.keys()) {
+                let colorToSet = colorsToSet.get(range);
+                let classNameForNewColor = ensureCssHasAClassForThisColorAndReturnClassName(document, colorToSet);
+                let [thisUpdateId] = editor.deltaDecorations([], [ {
+                    range: fakeRangeToRange(deserializeRange(range)),
+                    options: { inlineClassName: classNameForNewColor }
+                }]);
+                animationRuntimeData.currentColors.set(range, [colorToSet, thisUpdateId]);
+            } 
+        }
+
     //store the list of ranges that we are currently animating. When we drop the scope of one of these ranges and need to remove it from this list,
     //that tells us that we need to repaint its color its natural color. This is to avoid colors changing to slightly different colors due to a slight issue in timing. 
     let currentRangesBeingAnimated = new Set();
@@ -165,19 +179,7 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
 
 
         //completely clears all colors and repaints them according to colorsToSet
-        repaintColors: function repaintColors(editor, document, colorsToSet) {
-            //1) remove all previuos decorations
-            editor.deltaDecorations(Array.from(animationRuntimeData.currentColors.values()).map(([_, id]) => id), []);
-            for (const range of colorsToSet.keys()) {
-                let colorToSet = colorsToSet.get(range);
-                let classNameForNewColor = ensureCssHasAClassForThisColorAndReturnClassName(document, colorToSet);
-                let [thisUpdateId] = editor.deltaDecorations([], [ {
-                    range: fakeRangeToRange(deserializeRange(range)),
-                    options: { inlineClassName: classNameForNewColor }
-                }]);
-                animationRuntimeData.currentColors.set(range, [colorToSet, thisUpdateId]);
-            } 
-        },
+        repaintColors: repaintColors,
 
         //initialColorStateMap is the map of initial colors of the program state before animation begins, mapping ranges to their baseline colors
         initiateAnimation: function initiateAnimation(editor, document, initialColorStateMap, audioStartTime) {
