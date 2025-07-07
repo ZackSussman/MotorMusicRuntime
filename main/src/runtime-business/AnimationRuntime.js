@@ -177,7 +177,7 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
         },
 
         //initialColorStateMap is the map of initial colors of the program state before animation begins, mapping ranges to their baseline colors
-        initiateeAnimation: function initiateAnimation(editor, document, initialColorStateMap, audioStartTime) {
+        initiateAnimation: function initiateAnimation(editor, document, initialColorStateMap, audioStartTime) {
             animationRuntimeData.areWeCurrentlyPlayingBack = true;
             animationRuntimeData.startTime = audioStartTime;
             //console.log("start time is " + startTime);
