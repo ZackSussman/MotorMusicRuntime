@@ -146,6 +146,9 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
         } 
     }
 
+    //store the list of ranges that we are currently animating. When we drop the scope of one of these ranges and need to remove it from this list,
+    //that tells us that we need to repaint its color its natural color. This is to avoid colors changing to slightly different colors due to a slight issue in timing. 
+    let currentRangesBeingAnimated = new Set();
 
     return  {
 
@@ -208,13 +211,28 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
                 let colorsToSet = new Map();
                 let syllableRangeValues = animationInfo.currentSyllableRanges;
                 let parenInfos = animationInfo.parensInfo;
-            
+
+                let rangesWeAreGoingToColorNow = parenInfos.map(i => [i.openParenRange, i.closeParenRange].concat(i.directionIndicatorRanges)).flat();
+                for (let range of currentRangesBeingAnimated) {
+                    if (!(deserializeRange(range) in rangesWeAreGoingToColorNow)) {
+                        //test for removal of a range, in this case we need to re color it naturally 
+                        colorsToSet.set(range, initialColorStateMap.get(range));
+                        currentRangesBeingAnimated.delete(range);
+                    }
+                }
+                for (let range of rangesWeAreGoingToColorNow) {
+                    if (!(currentRangesBeingAnimated.has(serializeRange(range)))) 
+                        currentRangesBeingAnimated.add(serializeRange(range));
+                }
+    
+                
                 //1--------------------- syllable ranges
                 let syllableBaselineColor = initialColorStateMap.get(serializeRange(syllableRangeValues[0])); //there is always at least one and they are the same color
                 let factor = animationInfo.currentSyllableLocation;
                 let syllableColorToUse = morphToWhite(syllableBaselineColor, Math.pow(Math.sin(Math.PI * animationInfo.currentSyllableLocation), .66) ); //square for a tighter animation
                 for (let range of syllableRangeValues) {
                     colorsToSet.set(serializeRange(range), syllableColorToUse);
+                    colorsToSet.delete(serializeRange(range));
                 }
                 //-----------------------
 
