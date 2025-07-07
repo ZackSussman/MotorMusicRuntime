@@ -32,7 +32,7 @@ export function initializeAudioRuntime(audioRuntimeData) {
 
     //returns the starting time of audio playback
     beginNewPlayback: async function beginNewPlayback() {
-      audioRuntimeData.audioContext = initializeAudioRuntime();
+      audioRuntimeData.audioContext = initializeAudioContext();
 
       if (audioRuntimeData.computedAudio == undefined) {
         throw new Error("error: cannot playback when computedAudio is undefined");
