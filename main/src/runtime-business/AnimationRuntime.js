@@ -216,6 +216,7 @@ export function initializeAnimationRuntime(audioContext, animationRuntimeData) {
                 let parenInfos = animationInfo.parensInfo;
 
                 let rangesWeAreGoingToColorNow = parenInfos.map(i => [i.openParenRange, i.closeParenRange].concat(i.directionIndicatorRanges)).flat();
+                console.log("the ranges we are going to color now are " + rangesWeAreGoingToColorNow);
                 for (let range of currentRangesBeingAnimated) {
                     if (!(deserializeRange(range) in rangesWeAreGoingToColorNow)) {
                         //test for removal of a range, in this case we need to re color it naturally 
