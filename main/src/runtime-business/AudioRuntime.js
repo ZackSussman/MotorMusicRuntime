@@ -19,11 +19,11 @@ export function initializeAudioRuntime(audioRuntimeData) {
 
 
   function initializeAudioContext() {
-      if (!audioRuntimeData.audioContext || audioRuntimeData.audioContext.state === 'closed') {
-        audioRuntimeData.audioContext = new AudioContext({ latencyHint: "interactive", sampleRate: PLAYBACK_SAMPLE_RATE});
-        audioRuntimeData.audioContext.resume();
+      if (!audioRuntimeData.audioContext.value || audioRuntimeData.audioContext.value.state === 'closed') {
+        audioRuntimeData.audioContext.value = new AudioContext({ latencyHint: "interactive", sampleRate: PLAYBACK_SAMPLE_RATE});
+        audioRuntimeData.audioContext.value.resume();
       }
-      return audioRuntimeData.audioContext;
+      return audioRuntimeData.audioContext.value;
     }
 
   return {
@@ -36,14 +36,14 @@ export function initializeAudioRuntime(audioRuntimeData) {
 
     //returns the starting time of audio playback
     beginNewPlayback: async function beginNewPlayback() {
-      audioRuntimeData.audioContext = initializeAudioContext();
+      audioRuntimeData.audioContext.value = initializeAudioContext();
 
       if (audioRuntimeData.computedAudio == undefined) {
         throw new Error("error: cannot playback when computedAudio is undefined");
       }
 
       try {
-        await audioRuntimeData.audioContext.resume();
+        await audioRuntimeData.audioContext.value.resume();
       } catch (error) {
         console.error("Unable to resume audio context:", error);
         return;
@@ -61,7 +61,7 @@ export function initializeAudioRuntime(audioRuntimeData) {
       }
 
       try {
-        audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext, "AudioGenerator", {
+        audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext.value, "AudioGenerator", {
           channelCount: 2,
           channelCountMode: 'explicit',
           channelInterpretation: 'speakers',
@@ -72,8 +72,8 @@ export function initializeAudioRuntime(audioRuntimeData) {
       } catch (e) {
         try {
           const version = Date.now(); // Unique version for cache busting
-          await audioRuntimeData.audioContext.audioWorklet.addModule(`/audio/AudioGenerator.js?version=${version}`);
-          audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext, "AudioGenerator", {
+          await audioRuntimeData.audioContext.value.audioWorklet.addModule(`/audio/AudioGenerator.js?version=${version}`);
+          audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext.value, "AudioGenerator", {
             channelCount: 2,
             channelCountMode: 'explicit',
             channelInterpretation: 'speakers',
@@ -87,16 +87,16 @@ export function initializeAudioRuntime(audioRuntimeData) {
         }
       }
 
-      audioRuntimeData.gainNode = audioRuntimeData.audioContext.createGain();
-      audioRuntimeData.processorNode.connect(audioRuntimeData.gainNode).connect(audioRuntimeData.audioContext.destination);
-      return audioRuntimeData.audioContext.currentTime;
+      audioRuntimeData.gainNode = audioRuntimeData.audioContext.value.createGain();
+      audioRuntimeData.processorNode.connect(audioRuntimeData.gainNode).connect(audioRuntimeData.audioContext.value.destination);
+      return audioRuntimeData.audioContext.value.currentTime;
     },
 
     fadeOutAudio: function fadeOutAudio() {
-      if (!audioRuntimeData.audioContext || !audioRuntimeData.gainNode || !audioRuntimeData.processorNode) return;
+      if (!audioRuntimeData.audioContext.value || !audioRuntimeData.gainNode || !audioRuntimeData.processorNode) return;
 
       const fadeOutDuration = 0.1;
-      const currentTime = audioRuntimeData.audioContext.currentTime;
+      const currentTime = audioRuntimeData.audioContext.value.currentTime;
 
       audioRuntimeData.gainNode.gain.setValueAtTime(audioRuntimeData.gainNode.gain.value, currentTime);
       audioRuntimeData.gainNode.gain.linearRampToValueAtTime(0, currentTime + fadeOutDuration);
@@ -108,9 +108,9 @@ export function initializeAudioRuntime(audioRuntimeData) {
         audioRuntimeData.gainNode = null;
 
         try {
-          audioRuntimeData.audioContext.close();
+          audioRuntimeData.audioContext.value.close();
         } catch (_) {}
-        audioRuntimeData.audioContext = null;
+        audioRuntimeData.audioContext.value = null;
       }, fadeOutDuration * 1000);
     }
 
