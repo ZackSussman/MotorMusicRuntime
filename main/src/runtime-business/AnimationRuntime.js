@@ -78,7 +78,7 @@ export class AnimationRuntimeData {
     }
 }
 
-export function initializeAnimationRuntime(audioRuntime, animationRuntimeData) {
+export function initializeAnimationRuntime(audioRuntimeData, animationRuntimeData) {
 
     function ensureCssHasAClassForThisColorAndReturnClassName(document, color) {
         // If already added, return the existing class name
@@ -188,7 +188,7 @@ export function initializeAnimationRuntime(audioRuntime, animationRuntimeData) {
             //the runtime logic of the animation...this function will get called from an interval and its job is to continually
             //update the colors based on the computed animation function 
             function animationRuntime() {
-                const elapsedTime = (audioRuntime.audioContext.currentTime - animationRuntimeData.startTime) * 1000;  // Time elapsed in ms
+                const elapsedTime = (audioRuntimeData.audioContext.currentTime - animationRuntimeData.startTime) * 1000;  // Time elapsed in ms
                 //console.log("elapside time is " + elapsedTime);
                 
                 let animationInfo = animationRuntimeData.getAnimationInfoFunction(Math.max(elapsedTime - DELAY_BEFORE_PLAYBACK_START + CORRECTION_FACTOR, 0)); //apply a .1 second shift to align with the delay the audio is forced to have

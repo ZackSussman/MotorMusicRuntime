@@ -11,6 +11,7 @@ export function initializeMotorMusicRuntime() {
 
     let audioRuntimeData = new AudioRuntimeData(null, null, null, undefined);
     let audioRuntime = initializeAudioRuntime(audioRuntimeData);
+    console.log("the audio context is " + audioRuntimeData.audioContext);
     let animationRuntimeData = new AnimationRuntimeData(undefined, undefined, false, undefined, new Map(), new Map());
     let animationRuntime = initializeAnimationRuntime(audioRuntimeData, animationRuntimeData);
     return {
