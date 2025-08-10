@@ -18,11 +18,11 @@ export class AudioRuntimeData {
 export function initializeAudioRuntime(audioRuntimeData) {
 
   function initializeAudioContext() {
-      if (!audioRuntimeData.audioContext.value || audioRuntimeData.audioContext.value.state === 'closed') {
-        audioRuntimeData.audioContext.value = new AudioContext({ latencyHint: "interactive", sampleRate: PLAYBACK_SAMPLE_RATE});
-        audioRuntimeData.audioContext.value.resume();
+      if (!audioRuntimeData.audioContext || audioRuntimeData.audioContext.state === 'closed') {
+        audioRuntimeData.audioContext = new AudioContext({ latencyHint: "interactive", sampleRate: PLAYBACK_SAMPLE_RATE});
+        audioRuntimeData.audioContext.resume();
       }
-      return audioRuntimeData.audioContext.value;
+      return audioRuntimeData.audioContext;
     }
 
   return {
@@ -42,7 +42,7 @@ export function initializeAudioRuntime(audioRuntimeData) {
       }
 
       try {
-        await audioRuntimeData.audioContext.value.resume();
+        await audioRuntimeData.audioContext.resume();
       } catch (error) {
         console.error("Unable to resume audio context:", error);
         return;
@@ -60,7 +60,7 @@ export function initializeAudioRuntime(audioRuntimeData) {
       }
 
       try {
-        audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext.value, "AudioGenerator", {
+        audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext, "AudioGenerator", {
           channelCount: 2,
           channelCountMode: 'explicit',
           channelInterpretation: 'speakers',
@@ -71,8 +71,8 @@ export function initializeAudioRuntime(audioRuntimeData) {
       } catch (e) {
         try {
           const version = Date.now(); // Unique version for cache busting
-          await audioRuntimeData.audioContext.value.audioWorklet.addModule(`./audio/AudioGenerator.js?version=${version}`);
-          audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext.value, "AudioGenerator", {
+          await audioRuntimeData.audioContext.audioWorklet.addModule(`./audio/AudioGenerator.js?version=${version}`);
+          audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext, "AudioGenerator", {
             channelCount: 2,
             channelCountMode: 'explicit',
             channelInterpretation: 'speakers',
@@ -86,16 +86,16 @@ export function initializeAudioRuntime(audioRuntimeData) {
         }
       }
 
-      audioRuntimeData.gainNode = audioRuntimeData.audioContext.value.createGain();
-      audioRuntimeData.processorNode.connect(audioRuntimeData.gainNode).connect(audioRuntimeData.audioContext.value.destination);
-      return audioRuntimeData.audioContext.value.currentTime;
+      audioRuntimeData.gainNode = audioRuntimeData.audioContext.createGain();
+      audioRuntimeData.processorNode.connect(audioRuntimeData.gainNode).connect(audioRuntimeData.audioContext.destination);
+      return audioRuntimeData.audioContext.currentTime;
     },
 
     fadeOutAudio: function fadeOutAudio() {
-      if (!audioRuntimeData.audioContext.value|| !audioRuntimeData.gainNode || !audioRuntimeData.processorNode) return;
+      if (!audioRuntimeData.audioContext|| !audioRuntimeData.gainNode || !audioRuntimeData.processorNode) return;
 
       const fadeOutDuration = 0.1;
-      const currentTime = audioRuntimeData.audioContext.value.currentTime;
+      const currentTime = audioRuntimeData.audioContext.currentTime;
 
       audioRuntimeData.gainNode.gain.setValueAtTime(audioRuntimeData.gainNode.gain.value, currentTime);
       audioRuntimeData.gainNode.gain.linearRampToValueAtTime(0, currentTime + fadeOutDuration);
@@ -107,9 +107,9 @@ export function initializeAudioRuntime(audioRuntimeData) {
         audioRuntimeData.gainNode = null;
 
         try {
-          audioRuntimeData.audioContext.value.close();
+          audioRuntimeData.audioContext.close();
         } catch (_) {}
-        audioRuntimeData.audioContext.value = null;
+        audioRuntimeData.audioContext = null;
       }, fadeOutDuration * 1000);
     }
 
