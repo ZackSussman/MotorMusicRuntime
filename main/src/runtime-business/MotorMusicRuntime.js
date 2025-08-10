@@ -19,7 +19,7 @@ export class MotorMusicRuntimeData {
 export function initializeMotorMusicRuntime() {
 
     //first create the audio runtime
-    let audioContext = null; //we store the auido context within an object so that it can be shared by the audio and animation runtimes
+    let audioContext = {value: null}; //we store the auido context within an object so that it can be shared by the audio and animation runtimes
     let processorNode = null;
     let gainNode = null;
     let computedAudio = undefined;
