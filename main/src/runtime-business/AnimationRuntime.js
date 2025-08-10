@@ -78,7 +78,7 @@ export class AnimationRuntimeData {
     }
 }
 
-export function initializeAnimationRuntime(audioRuntimeData, animationRuntimeData) {
+export function initializeAnimationRuntime(audioRuntimeData, animationRuntimeData, onPlaybackStart, onPlaybackStop) {
 
     function ensureCssHasAClassForThisColorAndReturnClassName(document, color) {
         // If already added, return the existing class name
@@ -183,6 +183,7 @@ export function initializeAnimationRuntime(audioRuntimeData, animationRuntimeDat
         //initialColorStateMap is the map of initial colors of the program state before animation begins, mapping ranges to their baseline colors
         initiateAnimation: function initiateAnimation(editor, document, initialColorStateMap, audioStartTime) {
             animationRuntimeData.areWeCurrentlyPlayingBack = true;
+            onPlaybackStart();
             animationRuntimeData.startTime = audioStartTime;
             //console.log("start time is " + startTime);
             //the runtime logic of the animation...this function will get called from an interval and its job is to continually
@@ -197,6 +198,7 @@ export function initializeAnimationRuntime(audioRuntimeData, animationRuntimeDat
                     clearInterval(animationRuntimeData.intervalId);
                     repaintColors(editor, document, initialColorStateMap);
                     animationRuntimeData.areWeCurrentlyPlayingBack = false;
+                    onPlaybackStop();
                     return;
                 }
 

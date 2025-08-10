@@ -7,13 +7,13 @@ import  {initializeAudioRuntime, AudioRuntimeData } from "./AudioRuntime"
 //we collapse the result into one runtime which may be used by anyone
 //who wishes to use the MotorMusic runtime 
 
-export function initializeMotorMusicRuntime() {
+                                      // the client can pass in these functions to be ran at the appropriate times
+export function initializeMotorMusicRuntime(onPlaybackStart = () => {}, onPlaybackStop = () => {}) {
 
     let audioRuntimeData = new AudioRuntimeData(null, null, null, undefined);
     let audioRuntime = initializeAudioRuntime(audioRuntimeData);
-    console.log("the audio context is " + audioRuntimeData.audioContext);
     let animationRuntimeData = new AnimationRuntimeData(undefined, undefined, false, undefined, new Map(), new Map());
-    let animationRuntime = initializeAnimationRuntime(audioRuntimeData, animationRuntimeData);
+    let animationRuntime = initializeAnimationRuntime(audioRuntimeData, animationRuntimeData, onPlaybackStart, onPlaybackStop);
     return {
         audioRuntimeData: audioRuntimeData,
         audioRuntime: audioRuntime,
