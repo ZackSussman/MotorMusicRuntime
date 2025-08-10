@@ -9,17 +9,17 @@ import  {initializeAudioRuntime, AudioRuntimeData } from "./AudioRuntime"
 
 //here is the data available to anyone who wishes to use the MotorMusic runtime
 export class MotorMusicRuntimeData {
-    audioContext; //the audio context being used for playback
-    computedAudio; //the audio computed from the program 
-    getAnimationInfoFunction; //the computed animation info function
-    areWeCurrentlyPlayingBack; //whether we are currently playing back
-    currentColors; //a map from monaco ranges to their current colors
+    getAudioContext; //the audio context being used for playback
+    getComputedAudio; //the audio computed from the program 
+    getGetAnimationInfoFunction; //the computed animation info function
+    getAreWeCurrentlyPlayingBack; //whether we are currently playing back
+    getCurrentColors; //a map from monaco ranges to their current colors
 }
 
 export function initializeMotorMusicRuntime() {
 
     //first create the audio runtime
-    let audioContext = {value: null}; //we store the auido context within an object so that it can be shared by the audio and animation runtimes
+    let audioContext = null; //we store the auido context within an object so that it can be shared by the audio and animation runtimes
     let processorNode = null;
     let gainNode = null;
     let computedAudio = undefined;
@@ -35,11 +35,11 @@ export function initializeMotorMusicRuntime() {
     let animationRuntime = initializeAnimationRuntime(audioContext, new AnimationRuntimeData(getAnimationInfoFunction, startTime, areWeCurrentlyPlayingBack, intervalId, currentColors, colorClassNames));
     
     return {
-        audioContext: audioContext,
-        computedAudio: computedAudio,
-        getAnimationInfoFunction: getAnimationInfoFunction,
-        areWeCurrentlyPlayingBack: areWeCurrentlyPlayingBack,
-        currentColors: currentColors,
+        getAudioContext: () => audioContext,
+        getComputedAudio: () => computedAudio,
+        getGetAnimationInfoFunction: () => getAnimationInfoFunction,
+        getAreWeCurrentlyPlayingBack: () => areWeCurrentlyPlayingBack,
+        getCurrentColors: () => currentColors,
         audioRuntime: audioRuntime,
         animationRuntime: animationRuntime
     }
