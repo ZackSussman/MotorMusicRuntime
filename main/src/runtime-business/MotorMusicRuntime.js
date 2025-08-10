@@ -9,12 +9,15 @@ import  {initializeAudioRuntime, AudioRuntimeData } from "./AudioRuntime"
 
 export function initializeMotorMusicRuntime() {
 
-    let audioRuntime = initializeAudioRuntime(new AudioRuntimeData(null, null, null, undefined));
-    let animationRuntime = initializeAnimationRuntime(audioRuntime, 
-        new AnimationRuntimeData(undefined, undefined, false, undefined, new Map(), new Map()));
+    let audioRuntimeData = new AudioRuntimeData(null, null, null, undefined);
+    let audioRuntime = initializeAudioRuntime(audioRuntimeData);
+    let animationRuntimeData = new AnimationRuntimeData(undefined, undefined, false, undefined, new Map(), new Map());
+    let animationRuntime = initializeAnimationRuntime(audioRuntimeData, animationRuntimeData);
     return {
+        audioRuntimeData: audioRuntimeData,
         audioRuntime: audioRuntime,
-        animationRuntime: animationRuntime
+        animationRuntime: animationRuntime,
+        animationRuntimeData: animationRuntimeData
     }
 
 }
