@@ -27,6 +27,7 @@ export function initializeMotorMusicRuntime(onPlaybackStart = () => {}, onPlayba
     let animationRuntimeData = new AnimationRuntimeData(undefined, undefined, false, undefined, new Map(), new Map());
     let animationRuntime = initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, animationRuntimeData, onPlaybackStart, onPlaybackStop);
     
+    console.log("the syllable time is " + globalRuntimeData.syllableTime);
     let globalRuntime = initializeGlobalRuntime(globalRuntimeData);
 
     return {
