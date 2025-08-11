@@ -78,7 +78,7 @@ export class AnimationRuntimeData {
     }
 }
 
-export function initializeAnimationRuntime(audioRuntimeData, animationRuntimeData, onPlaybackStart, onPlaybackStop) {
+export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, animationRuntimeData, onPlaybackStart, onPlaybackStop) {
 
     function ensureCssHasAClassForThisColorAndReturnClassName(document, color) {
         // If already added, return the existing class name
@@ -169,6 +169,7 @@ export function initializeAnimationRuntime(audioRuntimeData, animationRuntimeDat
             const idealFrameDuration = 1000/60; //60FPS
             let numFramesWeWillFit = Math.ceil (syllableTime / idealFrameDuration);//ceil because we want to be at LEAST 60 FPS
             actualFrameDuration = syllableTime / numFramesWeWillFit;
+            globalRuntimeData.syllableTime = syllableTime;
         },
 
 
