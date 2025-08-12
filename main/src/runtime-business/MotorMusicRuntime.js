@@ -14,7 +14,7 @@ import { DEFAULT_SYLLABLE_TIME } from "./RuntimeConstants";
 class GlobalRuntimeData {
    syllableTime; 
    constructor(syllableTime) {
-    syllableTime = syllableTime;
+    this.syllableTime = syllableTime;
    }
 }
 
@@ -27,7 +27,6 @@ export function initializeMotorMusicRuntime(onPlaybackStart = () => {}, onPlayba
     let animationRuntimeData = new AnimationRuntimeData(undefined, undefined, false, undefined, new Map(), new Map());
     let animationRuntime = initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, animationRuntimeData, onPlaybackStart, onPlaybackStop);
     
-    console.log("the syllable time is " + globalRuntimeData.syllableTime);
     let globalRuntime = initializeGlobalRuntime(globalRuntimeData);
 
     return {
