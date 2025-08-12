@@ -86,7 +86,7 @@ import {audioStream} from "./audio/Audio";
 import {range} from "./ParserListeners/ParserListenerUtils";
 
 
-function makeProcessForSyllableTime(syllableTime : number) {
+function makeProcessForSyllableTime(globalRuntimeData) {
     function process(input : string) : 
         [Map<range, string>, animationFunction, audioStream , Error[]] 
         {
@@ -96,13 +96,13 @@ function makeProcessForSyllableTime(syllableTime : number) {
         ParseTreeWalker.DEFAULT.walk(staticAnalysisListener, tree);
         errors = errors.concat(staticAnalysisListener.errors);
         if (errors.length === 0) {
-            let animationListener = new AnimationListener(syllableTime);
+            let animationListener = new AnimationListener(globalRuntimeData.syllableTime);
             ParseTreeWalker.DEFAULT.walk(animationListener, tree);
             function packageGetAnimationInfo(x : number) {
                 return animationListener.getAnimationInfoForTime(x);
             }
     
-            let audioGeneratorListener = new AudioGeneratorListener(syllableTime, animationListener.parensAccumData);
+            let audioGeneratorListener = new AudioGeneratorListener(globalRuntimeData.syllableTime, animationListener.parensAccumData);
             ParseTreeWalker.DEFAULT.walk(audioGeneratorListener, tree);
 
 
@@ -120,6 +120,6 @@ function makeProcessForSyllableTime(syllableTime : number) {
 
 export function initializeGlobalRuntime(globalRuntimeData) {
     return {
-        process: makeProcessForSyllableTime(globalRuntimeData.syllableTime)
+        process: makeProcessForSyllableTime(globalRuntimeData)
     };
 }
