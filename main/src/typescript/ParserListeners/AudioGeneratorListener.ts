@@ -152,15 +152,12 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         let syllableLengthMultiplier = Number(ctx.NUMBER().getText());
         let thisSyllableLength = this.syllableLength * syllableLengthMultiplier;
         let attackTime = thisSyllableLength / 10;
-        console.log("the attack time is " + attackTime);
         let tensionLowerBound = this.computeTensionLowerBound();
         let tensionRampedFromZeroToOne = 1;
         if (tensionLowerBound < 1)
             tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
     
         let decay  = (thisSyllableLength - attackTime) * Math.pow(tensionRampedFromZeroToOne, 0.5);
-        console.log("the decay time is " + decay);
-        console.log("the total time is " + thisSyllableLength);
         if (decay < attackTime) {
             decay = attackTime;
         }

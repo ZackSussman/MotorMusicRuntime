@@ -1,4 +1,4 @@
-import {audio, seconds, durationToSamples, sampleMap} from "../Audio"
+import {audio, seconds, durationToSamples, sampleMap, numSamplesToDuration} from "../Audio"
 
 //applies an adsr to the signal
 //the sustain is from 0 to 1 and specifies how big the envelop should go
@@ -17,6 +17,18 @@ export function applyAdsr(input : audio,
 
     //basic guards
     if (sustainNumSamples < 0 ) {
+        console.log("bad times: ");
+        console.log("attack: " + attack);
+        console.log("decay: " + decay);
+        console.log("release: " + release);
+        console.log("total time: " + numSamplesToDuration(input.length));
+
+        console.log("attack num samples: " + attackNumSamples);
+        console.log("decay num samples: " + decayNumSamples);
+        console.log("release num samples: " + releaseNumSamples);
+        console.log("total length: " + input.length);
+    
+
         throw new Error("invalid adsr: the times are longer than the signal, would require a negative sustain");
     }
     if (sustain > 1 || sustain < 0) {
