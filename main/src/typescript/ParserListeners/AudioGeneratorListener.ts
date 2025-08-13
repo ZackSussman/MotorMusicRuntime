@@ -48,6 +48,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
 
+    //.5 is the lower bound for each level, and we have this.currentParensInScope.length levels,
+    //where we are always taking a product of the tension from each level
     private computeTensionLowerBound() {
         return Math.pow(0.5, this.currentParensInScope.length);
     }
@@ -148,14 +150,17 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     enterTimeTaggedSyllable = (ctx : TimeTaggedSyllableContext) => {
         let tension = this.getCurrentSyllableTension();
         let syllableLengthMultiplier = Number(ctx.NUMBER().getText());
-        let attackTime = this.syllableLength * syllableLengthMultiplier / 10;
         let thisSyllableLength = this.syllableLength * syllableLengthMultiplier;
+        let attackTime = thisSyllableLength / 10;
+        console.log("the attack time is " + attackTime);
         let tensionLowerBound = this.computeTensionLowerBound();
         let tensionRampedFromZeroToOne = 1;
         if (tensionLowerBound < 1)
             tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
     
         let decay  = (thisSyllableLength - attackTime) * Math.pow(tensionRampedFromZeroToOne, 0.5);
+        console.log("the decay time is " + decay);
+        console.log("the total time is " + thisSyllableLength);
         if (decay < attackTime) {
             decay = attackTime;
         }
