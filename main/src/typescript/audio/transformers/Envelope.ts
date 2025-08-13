@@ -15,21 +15,13 @@ export function applyAdsr(input : audio,
     let releaseNumSamples = durationToSamples(release);
     let sustainNumSamples = input.length - attackNumSamples - decayNumSamples - releaseNumSamples;
 
-    //basic guards
-    if (sustainNumSamples < 0 ) {
-        console.log("bad times: ");
-        console.log("attack: " + attack);
-        console.log("decay: " + decay);
-        console.log("release: " + release);
-        console.log("total time: " + numSamplesToDuration(input.length));
-
-        console.log("attack num samples: " + attackNumSamples);
-        console.log("decay num samples: " + decayNumSamples);
-        console.log("release num samples: " + releaseNumSamples);
-        console.log("total length: " + input.length);
-    
-
-        throw new Error("invalid adsr: the times are longer than the signal, would require a negative sustain");
+    //SPECIAL CASE: due to some kind of weird edge case rounding error, we sometimes have this case where 
+    //the attack and decay num samples add to more than the total length. 
+    //In order to adjust, we note that the sustainNumSamples is the amount that we overshot by, so we just remove that from the attack time. 
+    if (sustainNumSamples <  0) {
+        console.log("WARNING: rounding error lead to a negative sustain in sin wave generation, borrowing from attack by " + sustainNumSamples + " samples");
+        attackNumSamples += sustainNumSamples;
+        sustainNumSamples = 0;
     }
     if (sustain > 1 || sustain < 0) {
         throw new Error("invalid sustain value: " + sustain);
