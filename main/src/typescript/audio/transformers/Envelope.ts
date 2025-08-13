@@ -19,7 +19,7 @@ export function applyAdsr(input : audio,
     //the attack and decay num samples add to more than the total length. 
     //In order to adjust, we note that the sustainNumSamples is the amount that we overshot by, so we just remove that from the attack time. 
     if (sustainNumSamples <  0) {
-        console.log("WARNING: rounding error lead to a negative sustain in sin wave generation, borrowing from attack by " + sustainNumSamples + " samples");
+        console.log("WARNING: rounding error lead to a negative sustain in sin wave generation, borrowing from attack by " + sustainNumSamples*(-1) + " samples");
         attackNumSamples += sustainNumSamples;
         sustainNumSamples = 0;
     }
