@@ -12,7 +12,7 @@ export abstract class PitchSpecification {
 
 
 //gives the same behavior as MotorMusic 0.0 
-export class DefaultPitchSpecification extends PitchSpecification {
+export class Default extends PitchSpecification {
     //already validated by the parser
     validateSyllable(syllable : string) : boolean {
         // Regex: [qtplkjgfdszxcvbnmhrw]+[aeiuyo]*[qtplkjgfdszxcvbnmhrw]* | [aeiuyo]+[qtplkjgfdszxcvbnmhrw]*
@@ -34,7 +34,7 @@ export class DefaultPitchSpecification extends PitchSpecification {
 }
 
 
-export class TwelveTETPitchSpecification extends PitchSpecification {
+export class TwelveTET extends PitchSpecification {
     frequencyOfA4 : number;
     constructor(frequencyOfA4 : number) {
         super();
@@ -89,15 +89,19 @@ export function resolvePitchSpecificationString(pitchSpecificationString : strin
 
     // Restrict to only allowed class instantiations
     const allowedClasses = [
-        "DefaultPitchSpecification",
-        "TwelveTETPitchSpecification"
+        "Default",
+        "TwelveTET"
     ];
-    // Regex: new <ClassName>(...)
-    const instantiationRegex = new RegExp(`^new\\s+(${allowedClasses.join("|")})\\s*\\((.*)\\)$`);
-    if (!instantiationRegex.test(tsCode)) {
+    // Regex: [new] <ClassName>(...)
+    const instantiationRegex = new RegExp(`^(?:new\\s+)?(${allowedClasses.join("|")})\\s*\\((.*)\\)$`);
+    const match = tsCode.match(instantiationRegex);
+    if (!match) {
         throw new Error("Pitch specification string must be an instantiation of an allowed class.");
     }
-
+    // If 'new' is missing, add it
+    if (!tsCode.startsWith("new")) {
+        tsCode = "new " + tsCode;
+    }
     // eslint-disable-next-line no-eval
     return eval(tsCode) as PitchSpecification;
 }
