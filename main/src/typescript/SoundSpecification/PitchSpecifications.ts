@@ -92,11 +92,10 @@ export function resolvePitchSpecificationString(pitchSpecificationString : strin
         "Default",
         "TwelveTET"
     ];
-    // Regex: [new] <ClassName>(...)
-    const instantiationRegex = new RegExp(`^(?:new\\s+)?(${allowedClasses.join("|")})\\s*\\((.*)\\)$`);
-    const match = tsCode.match(instantiationRegex);
-    if (!match) {
-        throw new Error("Pitch specification string must be an instantiation of an allowed class.");
+    // Regex: must start with allowed class name and end with parentheses
+    const instantiationRegex = new RegExp(`^(${allowedClasses.join("|")})\\s*\(.*\)$`);
+    if (!instantiationRegex.test(tsCode)) {
+        throw new Error("Pitch specification string must start with an allowed class name and end with parentheses.");
     }
     // If 'new' is missing, add it
     if (!tsCode.startsWith("new")) {
