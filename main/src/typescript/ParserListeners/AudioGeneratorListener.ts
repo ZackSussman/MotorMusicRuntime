@@ -190,7 +190,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
 
     enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
-        this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: new DefaultPitchSpecification()");
+        this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: Default()");
     }
 
     enterNonEmptyProgarmWithPitchSpecification = (ctx : NonEmptyProgramWithPitchSpecificationContext) => {
