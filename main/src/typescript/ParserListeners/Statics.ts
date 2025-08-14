@@ -2,7 +2,9 @@
 import {Error} from "../Compile";
 import {ParserRuleContext} from "antlr4";
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
-import { TimeTaggedSyllableContext } from "../../../../antlr/generated/MotorMusicParser";
+import { NonEmptyProgramWithDefaultPitchSpecificationContext, NonEmptyProgramWithPitchSpecificationContext, SyllableContext, TimeTaggedSyllableContext } from "../../../../antlr/generated/MotorMusicParser";
+
+import { resolvePitchSpecificationString, PitchSpecification, } from "../SoundSpecification/PitchSpecifications";
 
 //we have to check that the parse tree actually encompasses the entire code
 export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserListener {
@@ -12,6 +14,9 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	parsedText : string
 
 	programText : string
+
+
+	pitchSpecification : PitchSpecification
 
     constructor(programText) {
         super();
@@ -32,7 +37,24 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 		if (time == 0) {
 			this.addError("Time scales must be non-zero", ctx);
 		}
+
+		if (!this.pitchSpecification.validateSyllable(ctx.SYLLABLE().getText())) {
+			this.addError("Invalid syllable for pitch specification: " + ctx.SYLLABLE().getText(), ctx);
+		}
 	}
 
+	enterSyllable = (ctx: SyllableContext) => {
+		if (!this.pitchSpecification.validateSyllable(ctx.SYLLABLE().getText())) {
+			this.addError("Invalid syllable for pitch specification: " + ctx.SYLLABLE().getText(), ctx);
+		}
+	}
+
+	enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
+		this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: new DefaultPitchSpecification()");
+	}
+
+	enterNonEmptyProgramWithPitchSpecification = (ctx: NonEmptyProgramWithPitchSpecificationContext) => {
+		this.pitchSpecification = resolvePitchSpecificationString(ctx.PITCH_SPECIFICATION().getText());
+	}
 	
 }

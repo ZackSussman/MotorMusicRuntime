@@ -3,7 +3,7 @@
 /// <reference path="../../../../node_modules/monaco-editor/monaco.d.ts" />
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 
-import {EmptyProgramContext, NonEmptyProgramContext, SyllableContext, TimeTaggedEmptyContext, TimeTaggedSyllableContext, EmptyContext, DirectionSpecContext} from "../../../../antlr/generated/MotorMusicParser";
+import {EmptyProgramContext, NonEmptyProgramWithPitchSpecificationContext, SyllableContext, TimeTaggedEmptyContext, TimeTaggedSyllableContext, EmptyContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext} from "../../../../antlr/generated/MotorMusicParser";
 import { durationToSamples } from "../audio/Audio";
  import {DELAY_BEFORE_PLAYBACK_START} from "../../runtime-business/RuntimeConstants";
 import {audio, audioStream, audioToAudioStream, silence, seconds, sampleMap} from "../audio/Audio";
@@ -12,12 +12,13 @@ import {applyAdsr} from "../audio/transformers/Envelope";
 
 import {BraceAccumData} from "./Animations";
 
-import { map_unit_range_to_major_scale_freq } from "../music_theory/Scales";
+import { resolvePitchSpecificationString, PitchSpecification} from "../SoundSpecification/PitchSpecifications";
 
 export class AudioGeneratorListener extends MotorMusicParserListener {
 
     syllableLength : seconds;
 
+    pitchSpecification : PitchSpecification;
 
     //this is where we will write the final audio to
     audioStream : audioStream;
@@ -110,13 +111,13 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     
 
     //construct the audio for a syllable and add to our built up audio
-    enterSyllable =  (_ : SyllableContext) => {
+    enterSyllable =  (ctx : SyllableContext) => {
         let tension = this.getCurrentSyllableTension();
         let tensionLowerBound = this.computeTensionLowerBound();
         let tensionRampedFromZeroToOne = 1; //this is the value if tensionLowerBound == 1
         if (tensionLowerBound < 1)
             tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
-        let sinWave : audio = makeSin(map_unit_range_to_major_scale_freq(tensionRampedFromZeroToOne), this.syllableLength);
+        let sinWave : audio = makeSin(this.pitchSpecification.syllableAndTensionToPitch(ctx.SYLLABLE().getText(), tensionRampedFromZeroToOne), this.syllableLength);
         let attackTime = this.syllableLength / 10;
         let decay =  (this.syllableLength - attackTime) * Math.pow(tensionRampedFromZeroToOne, 0.5);
         if (decay < attackTime) {
@@ -164,7 +165,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.addToAudio(
             applyAdsr
                 (
-                    makeSin(map_unit_range_to_major_scale_freq(tensionRampedFromZeroToOne), thisSyllableLength),
+                    makeSin(this.pitchSpecification.syllableAndTensionToPitch(ctx.SYLLABLE().getText(), tensionRampedFromZeroToOne), thisSyllableLength),
                     attackTime,
                     decay,
                     0,
@@ -188,8 +189,19 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
 
+    enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
+        this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: new DefaultPitchSpecification()");
+    }
+
+    enterNonEmptyProgarmWithPitchSpecification = (ctx : NonEmptyProgramWithPitchSpecificationContext) => {
+        this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: " + ctx.PITCH_SPECIFICATION().getText());
+    }
+
     //when finished, convert our built up audio to the audio stream
-    exitNonEmptyProgram =  (_ : NonEmptyProgramContext) => {
+    exitNonEmptyProgramWithDefaultPitchSpecification =  (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
+        this.audioStream = audioToAudioStream(this.audio);
+    }
+    exitNonEmptyProgramWithPitchSpecification =  (_ : NonEmptyProgramWithPitchSpecificationContext) => {
         this.audioStream = audioToAudioStream(this.audio);
     }
     exitEmptyProgram =  (_ : EmptyProgramContext) => {

@@ -4,7 +4,8 @@ import {ParseTreeListener} from "antlr4";
 
 
 import { EmptyProgramContext } from "./MotorMusicParser.js";
-import { NonEmptyProgramContext } from "./MotorMusicParser.js";
+import { NonEmptyProgramWithDefaultPitchSpecificationContext } from "./MotorMusicParser.js";
+import { NonEmptyProgramWithPitchSpecificationContext } from "./MotorMusicParser.js";
 import { RaisedSingleContext } from "./MotorMusicParser.js";
 import { RaisedMultiContext } from "./MotorMusicParser.js";
 import { SingleMotionSpecDownContext } from "./MotorMusicParser.js";
@@ -38,17 +39,29 @@ export default class MotorMusicParserListener extends ParseTreeListener {
 	 */
 	exitEmptyProgram?: (ctx: EmptyProgramContext) => void;
 	/**
-	 * Enter a parse tree produced by the `NonEmptyProgram`
+	 * Enter a parse tree produced by the `NonEmptyProgramWithDefaultPitchSpecification`
 	 * labeled alternative in `MotorMusicParser.compilationUnit`.
 	 * @param ctx the parse tree
 	 */
-	enterNonEmptyProgram?: (ctx: NonEmptyProgramContext) => void;
+	enterNonEmptyProgramWithDefaultPitchSpecification?: (ctx: NonEmptyProgramWithDefaultPitchSpecificationContext) => void;
 	/**
-	 * Exit a parse tree produced by the `NonEmptyProgram`
+	 * Exit a parse tree produced by the `NonEmptyProgramWithDefaultPitchSpecification`
 	 * labeled alternative in `MotorMusicParser.compilationUnit`.
 	 * @param ctx the parse tree
 	 */
-	exitNonEmptyProgram?: (ctx: NonEmptyProgramContext) => void;
+	exitNonEmptyProgramWithDefaultPitchSpecification?: (ctx: NonEmptyProgramWithDefaultPitchSpecificationContext) => void;
+	/**
+	 * Enter a parse tree produced by the `NonEmptyProgramWithPitchSpecification`
+	 * labeled alternative in `MotorMusicParser.compilationUnit`.
+	 * @param ctx the parse tree
+	 */
+	enterNonEmptyProgramWithPitchSpecification?: (ctx: NonEmptyProgramWithPitchSpecificationContext) => void;
+	/**
+	 * Exit a parse tree produced by the `NonEmptyProgramWithPitchSpecification`
+	 * labeled alternative in `MotorMusicParser.compilationUnit`.
+	 * @param ctx the parse tree
+	 */
+	exitNonEmptyProgramWithPitchSpecification?: (ctx: NonEmptyProgramWithPitchSpecificationContext) => void;
 	/**
 	 * Enter a parse tree produced by the `RaisedSingle`
 	 * labeled alternative in `MotorMusicParser.raised_gesture_list`.

@@ -32,6 +32,7 @@ export default class MotorMusicParser extends Parser {
 	public static readonly DOT = 13;
 	public static readonly CARROT = 14;
 	public static readonly UNRECOGNIZED = 15;
+	public static readonly PITCH_SPECIFICATION = 16;
 	public static override readonly EOF = Token.EOF;
 	public static readonly RULE_compilationUnit = 0;
 	public static readonly RULE_raised_gesture_list = 1;
@@ -54,7 +55,8 @@ export default class MotorMusicParser extends Parser {
                                                              "RSQBRACKET", 
                                                              "UNDERSCORE", 
                                                              "DOT", "CARROT", 
-                                                             "UNRECOGNIZED" ];
+                                                             "UNRECOGNIZED", 
+                                                             "PITCH_SPECIFICATION" ];
 	// tslint:disable:no-trailing-whitespace
 	public static readonly ruleNames: string[] = [
 		"compilationUnit", "raised_gesture_list", "motion_spec_list", "gesture",
@@ -78,7 +80,7 @@ export default class MotorMusicParser extends Parser {
 		let localctx: CompilationUnitContext = new CompilationUnitContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 0, MotorMusicParser.RULE_compilationUnit);
 		try {
-			this.state = 12;
+			this.state = 16;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
 			case -1:
@@ -93,12 +95,24 @@ export default class MotorMusicParser extends Parser {
 			case 3:
 			case 6:
 			case 12:
-				localctx = new NonEmptyProgramContext(this, localctx);
+				localctx = new NonEmptyProgramWithDefaultPitchSpecificationContext(this, localctx);
 				this.enterOuterAlt(localctx, 2);
 				{
 				this.state = 9;
-				(localctx as NonEmptyProgramContext)._e = this.gesture();
+				(localctx as NonEmptyProgramWithDefaultPitchSpecificationContext)._e = this.gesture();
 				this.state = 10;
+				this.match(MotorMusicParser.EOF);
+				}
+				break;
+			case 16:
+				localctx = new NonEmptyProgramWithPitchSpecificationContext(this, localctx);
+				this.enterOuterAlt(localctx, 3);
+				{
+				this.state = 12;
+				(localctx as NonEmptyProgramWithPitchSpecificationContext)._p = this.match(MotorMusicParser.PITCH_SPECIFICATION);
+				this.state = 13;
+				(localctx as NonEmptyProgramWithPitchSpecificationContext)._e = this.gesture();
+				this.state = 14;
 				this.match(MotorMusicParser.EOF);
 				}
 				break;
@@ -125,14 +139,14 @@ export default class MotorMusicParser extends Parser {
 		let localctx: Raised_gesture_listContext = new Raised_gesture_listContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 2, MotorMusicParser.RULE_raised_gesture_list);
 		try {
-			this.state = 18;
+			this.state = 22;
 			this._errHandler.sync(this);
 			switch ( this._interp.adaptivePredict(this._input, 1, this._ctx) ) {
 			case 1:
 				localctx = new RaisedSingleContext(this, localctx);
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 14;
+				this.state = 18;
 				(localctx as RaisedSingleContext)._top = this.gesture();
 				}
 				break;
@@ -140,9 +154,9 @@ export default class MotorMusicParser extends Parser {
 				localctx = new RaisedMultiContext(this, localctx);
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 15;
+				this.state = 19;
 				(localctx as RaisedMultiContext)._top = this.gesture();
-				this.state = 16;
+				this.state = 20;
 				(localctx as RaisedMultiContext)._rest = this.raised_gesture_list();
 				}
 				break;
@@ -167,16 +181,16 @@ export default class MotorMusicParser extends Parser {
 		let localctx: Motion_spec_listContext = new Motion_spec_listContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 4, MotorMusicParser.RULE_motion_spec_list);
 		try {
-			this.state = 42;
+			this.state = 46;
 			this._errHandler.sync(this);
 			switch ( this._interp.adaptivePredict(this._input, 2, this._ctx) ) {
 			case 1:
 				localctx = new SingleMotionSpecDownContext(this, localctx);
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 20;
+				this.state = 24;
 				(localctx as SingleMotionSpecDownContext)._top = this.raised_gesture_list();
-				this.state = 21;
+				this.state = 25;
 				this.match(MotorMusicParser.DOT);
 				}
 				break;
@@ -184,9 +198,9 @@ export default class MotorMusicParser extends Parser {
 				localctx = new SingleMotionSpecUpContext(this, localctx);
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 23;
+				this.state = 27;
 				(localctx as SingleMotionSpecUpContext)._top = this.raised_gesture_list();
-				this.state = 24;
+				this.state = 28;
 				this.match(MotorMusicParser.CARROT);
 				}
 				break;
@@ -194,11 +208,11 @@ export default class MotorMusicParser extends Parser {
 				localctx = new TowardsPrefixMotionSpecContext(this, localctx);
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 26;
+				this.state = 30;
 				(localctx as TowardsPrefixMotionSpecContext)._top = this.raised_gesture_list();
-				this.state = 27;
+				this.state = 31;
 				this.match(MotorMusicParser.DOT);
-				this.state = 28;
+				this.state = 32;
 				(localctx as TowardsPrefixMotionSpecContext)._rest = this.motion_spec_list();
 				}
 				break;
@@ -206,11 +220,11 @@ export default class MotorMusicParser extends Parser {
 				localctx = new AwayPrefixMotionSpecContext(this, localctx);
 				this.enterOuterAlt(localctx, 4);
 				{
-				this.state = 30;
+				this.state = 34;
 				(localctx as AwayPrefixMotionSpecContext)._top = this.raised_gesture_list();
-				this.state = 31;
+				this.state = 35;
 				this.match(MotorMusicParser.CARROT);
-				this.state = 32;
+				this.state = 36;
 				(localctx as AwayPrefixMotionSpecContext)._rest = this.motion_spec_list();
 				}
 				break;
@@ -218,11 +232,11 @@ export default class MotorMusicParser extends Parser {
 				localctx = new EndAwayFromMotionSpecContext(this, localctx);
 				this.enterOuterAlt(localctx, 5);
 				{
-				this.state = 34;
+				this.state = 38;
 				(localctx as EndAwayFromMotionSpecContext)._top = this.raised_gesture_list();
-				this.state = 35;
+				this.state = 39;
 				this.match(MotorMusicParser.DOT);
-				this.state = 36;
+				this.state = 40;
 				(localctx as EndAwayFromMotionSpecContext)._rest = this.raised_gesture_list();
 				}
 				break;
@@ -230,11 +244,11 @@ export default class MotorMusicParser extends Parser {
 				localctx = new EndTowardsMotionSpecContext(this, localctx);
 				this.enterOuterAlt(localctx, 6);
 				{
-				this.state = 38;
+				this.state = 42;
 				(localctx as EndTowardsMotionSpecContext)._top = this.raised_gesture_list();
-				this.state = 39;
+				this.state = 43;
 				this.match(MotorMusicParser.CARROT);
-				this.state = 40;
+				this.state = 44;
 				(localctx as EndTowardsMotionSpecContext)._rest = this.raised_gesture_list();
 				}
 				break;
@@ -259,14 +273,14 @@ export default class MotorMusicParser extends Parser {
 		let localctx: GestureContext = new GestureContext(this, this._ctx, this.state);
 		this.enterRule(localctx, 6, MotorMusicParser.RULE_gesture);
 		try {
-			this.state = 54;
+			this.state = 58;
 			this._errHandler.sync(this);
 			switch ( this._interp.adaptivePredict(this._input, 3, this._ctx) ) {
 			case 1:
 				localctx = new EmptyContext(this, localctx);
 				this.enterOuterAlt(localctx, 1);
 				{
-				this.state = 44;
+				this.state = 48;
 				this.match(MotorMusicParser.UNDERSCORE);
 				}
 				break;
@@ -274,9 +288,9 @@ export default class MotorMusicParser extends Parser {
 				localctx = new TimeTaggedEmptyContext(this, localctx);
 				this.enterOuterAlt(localctx, 2);
 				{
-				this.state = 45;
+				this.state = 49;
 				(localctx as TimeTaggedEmptyContext)._number_ = this.match(MotorMusicParser.NUMBER);
-				this.state = 46;
+				this.state = 50;
 				this.match(MotorMusicParser.UNDERSCORE);
 				}
 				break;
@@ -284,7 +298,7 @@ export default class MotorMusicParser extends Parser {
 				localctx = new SyllableContext(this, localctx);
 				this.enterOuterAlt(localctx, 3);
 				{
-				this.state = 47;
+				this.state = 51;
 				(localctx as SyllableContext)._syllable = this.match(MotorMusicParser.SYLLABLE);
 				}
 				break;
@@ -292,9 +306,9 @@ export default class MotorMusicParser extends Parser {
 				localctx = new TimeTaggedSyllableContext(this, localctx);
 				this.enterOuterAlt(localctx, 4);
 				{
-				this.state = 48;
+				this.state = 52;
 				(localctx as TimeTaggedSyllableContext)._number_ = this.match(MotorMusicParser.NUMBER);
-				this.state = 49;
+				this.state = 53;
 				(localctx as TimeTaggedSyllableContext)._syllable = this.match(MotorMusicParser.SYLLABLE);
 				}
 				break;
@@ -302,11 +316,11 @@ export default class MotorMusicParser extends Parser {
 				localctx = new DirectionSpecContext(this, localctx);
 				this.enterOuterAlt(localctx, 5);
 				{
-				this.state = 50;
+				this.state = 54;
 				this.match(MotorMusicParser.LPAREN);
-				this.state = 51;
+				this.state = 55;
 				(localctx as DirectionSpecContext)._motion_spec = this.motion_spec_list();
-				this.state = 52;
+				this.state = 56;
 				this.match(MotorMusicParser.RPAREN);
 				}
 				break;
@@ -327,23 +341,25 @@ export default class MotorMusicParser extends Parser {
 		return localctx;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,15,57,2,0,7,0,2,
-	1,7,1,2,2,7,2,2,3,7,3,1,0,1,0,1,0,1,0,3,0,13,8,0,1,1,1,1,1,1,1,1,3,1,19,
-	8,1,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,
-	1,2,1,2,1,2,1,2,1,2,3,2,43,8,2,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,
-	3,3,55,8,3,1,3,0,0,4,0,2,4,6,0,0,63,0,12,1,0,0,0,2,18,1,0,0,0,4,42,1,0,
-	0,0,6,54,1,0,0,0,8,13,5,0,0,1,9,10,3,6,3,0,10,11,5,0,0,1,11,13,1,0,0,0,
-	12,8,1,0,0,0,12,9,1,0,0,0,13,1,1,0,0,0,14,19,3,6,3,0,15,16,3,6,3,0,16,17,
-	3,2,1,0,17,19,1,0,0,0,18,14,1,0,0,0,18,15,1,0,0,0,19,3,1,0,0,0,20,21,3,
-	2,1,0,21,22,5,13,0,0,22,43,1,0,0,0,23,24,3,2,1,0,24,25,5,14,0,0,25,43,1,
-	0,0,0,26,27,3,2,1,0,27,28,5,13,0,0,28,29,3,4,2,0,29,43,1,0,0,0,30,31,3,
-	2,1,0,31,32,5,14,0,0,32,33,3,4,2,0,33,43,1,0,0,0,34,35,3,2,1,0,35,36,5,
-	13,0,0,36,37,3,2,1,0,37,43,1,0,0,0,38,39,3,2,1,0,39,40,5,14,0,0,40,41,3,
-	2,1,0,41,43,1,0,0,0,42,20,1,0,0,0,42,23,1,0,0,0,42,26,1,0,0,0,42,30,1,0,
-	0,0,42,34,1,0,0,0,42,38,1,0,0,0,43,5,1,0,0,0,44,55,5,12,0,0,45,46,5,3,0,
-	0,46,55,5,12,0,0,47,55,5,2,0,0,48,49,5,3,0,0,49,55,5,2,0,0,50,51,5,6,0,
-	0,51,52,3,4,2,0,52,53,5,7,0,0,53,55,1,0,0,0,54,44,1,0,0,0,54,45,1,0,0,0,
-	54,47,1,0,0,0,54,48,1,0,0,0,54,50,1,0,0,0,55,7,1,0,0,0,4,12,18,42,54];
+	public static readonly _serializedATN: number[] = [4,1,16,61,2,0,7,0,2,
+	1,7,1,2,2,7,2,2,3,7,3,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,3,0,17,8,0,1,1,1,
+	1,1,1,1,1,3,1,23,8,1,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,
+	2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,3,2,47,8,2,1,3,1,3,1,3,1,3,1,3,1,
+	3,1,3,1,3,1,3,1,3,3,3,59,8,3,1,3,0,0,4,0,2,4,6,0,0,68,0,16,1,0,0,0,2,22,
+	1,0,0,0,4,46,1,0,0,0,6,58,1,0,0,0,8,17,5,0,0,1,9,10,3,6,3,0,10,11,5,0,0,
+	1,11,17,1,0,0,0,12,13,5,16,0,0,13,14,3,6,3,0,14,15,5,0,0,1,15,17,1,0,0,
+	0,16,8,1,0,0,0,16,9,1,0,0,0,16,12,1,0,0,0,17,1,1,0,0,0,18,23,3,6,3,0,19,
+	20,3,6,3,0,20,21,3,2,1,0,21,23,1,0,0,0,22,18,1,0,0,0,22,19,1,0,0,0,23,3,
+	1,0,0,0,24,25,3,2,1,0,25,26,5,13,0,0,26,47,1,0,0,0,27,28,3,2,1,0,28,29,
+	5,14,0,0,29,47,1,0,0,0,30,31,3,2,1,0,31,32,5,13,0,0,32,33,3,4,2,0,33,47,
+	1,0,0,0,34,35,3,2,1,0,35,36,5,14,0,0,36,37,3,4,2,0,37,47,1,0,0,0,38,39,
+	3,2,1,0,39,40,5,13,0,0,40,41,3,2,1,0,41,47,1,0,0,0,42,43,3,2,1,0,43,44,
+	5,14,0,0,44,45,3,2,1,0,45,47,1,0,0,0,46,24,1,0,0,0,46,27,1,0,0,0,46,30,
+	1,0,0,0,46,34,1,0,0,0,46,38,1,0,0,0,46,42,1,0,0,0,47,5,1,0,0,0,48,59,5,
+	12,0,0,49,50,5,3,0,0,50,59,5,12,0,0,51,59,5,2,0,0,52,53,5,3,0,0,53,59,5,
+	2,0,0,54,55,5,6,0,0,55,56,3,4,2,0,56,57,5,7,0,0,57,59,1,0,0,0,58,48,1,0,
+	0,0,58,49,1,0,0,0,58,51,1,0,0,0,58,52,1,0,0,0,58,54,1,0,0,0,59,7,1,0,0,
+	0,4,16,22,46,58];
 
 	private static __ATN: ATN;
 	public static get _ATN(): ATN {
@@ -371,7 +387,34 @@ export class CompilationUnitContext extends ParserRuleContext {
 		super.copyFrom(ctx);
 	}
 }
-export class NonEmptyProgramContext extends CompilationUnitContext {
+export class NonEmptyProgramWithPitchSpecificationContext extends CompilationUnitContext {
+	public _p!: Token;
+	public _e!: GestureContext;
+	constructor(parser: MotorMusicParser, ctx: CompilationUnitContext) {
+		super(parser, ctx.parentCtx, ctx.invokingState);
+		super.copyFrom(ctx);
+	}
+	public EOF(): TerminalNode {
+		return this.getToken(MotorMusicParser.EOF, 0);
+	}
+	public PITCH_SPECIFICATION(): TerminalNode {
+		return this.getToken(MotorMusicParser.PITCH_SPECIFICATION, 0);
+	}
+	public gesture(): GestureContext {
+		return this.getTypedRuleContext(GestureContext, 0) as GestureContext;
+	}
+	public enterRule(listener: MotorMusicParserListener): void {
+	    if(listener.enterNonEmptyProgramWithPitchSpecification) {
+	 		listener.enterNonEmptyProgramWithPitchSpecification(this);
+		}
+	}
+	public exitRule(listener: MotorMusicParserListener): void {
+	    if(listener.exitNonEmptyProgramWithPitchSpecification) {
+	 		listener.exitNonEmptyProgramWithPitchSpecification(this);
+		}
+	}
+}
+export class NonEmptyProgramWithDefaultPitchSpecificationContext extends CompilationUnitContext {
 	public _e!: GestureContext;
 	constructor(parser: MotorMusicParser, ctx: CompilationUnitContext) {
 		super(parser, ctx.parentCtx, ctx.invokingState);
@@ -384,13 +427,13 @@ export class NonEmptyProgramContext extends CompilationUnitContext {
 		return this.getTypedRuleContext(GestureContext, 0) as GestureContext;
 	}
 	public enterRule(listener: MotorMusicParserListener): void {
-	    if(listener.enterNonEmptyProgram) {
-	 		listener.enterNonEmptyProgram(this);
+	    if(listener.enterNonEmptyProgramWithDefaultPitchSpecification) {
+	 		listener.enterNonEmptyProgramWithDefaultPitchSpecification(this);
 		}
 	}
 	public exitRule(listener: MotorMusicParserListener): void {
-	    if(listener.exitNonEmptyProgram) {
-	 		listener.exitNonEmptyProgram(this);
+	    if(listener.exitNonEmptyProgramWithDefaultPitchSpecification) {
+	 		listener.exitNonEmptyProgramWithDefaultPitchSpecification(this);
 		}
 	}
 }
