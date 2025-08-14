@@ -1,6 +1,6 @@
 
 import {Error} from "../Compile";
-import {ParserRuleContext} from "antlr4";
+import {ParserRuleContext, TerminalNode} from "antlr4";
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 import { NonEmptyProgramWithDefaultPitchSpecificationContext, NonEmptyProgramWithPitchSpecificationContext, SyllableContext, TimeTaggedSyllableContext } from "../../../../antlr/generated/MotorMusicParser";
 
@@ -27,6 +27,13 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 
 	private addError(message : string, ctx : ParserRuleContext) {
 		let error = new Error(ctx.start.line, ctx.stop.line, ctx.start.column + 1, ctx.stop.column + 1, message);
+		if (!(this.errors.includes(error))) {
+			this.errors.push(error);
+		}
+	}
+
+	private addErrorForTerminalnode(message : string, terminalNode : TerminalNode) {
+		let error = new Error(terminalNode.symbol.line, terminalNode.symbol..line, terminalNode.symbol.column + 1, terminalNode.symbol.column + 1 + terminalNode.symbol.text.length, message);
 		if (!(this.errors.includes(error))) {
 			this.errors.push(error);
 		}
@@ -64,7 +71,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 		try {
 			this.pitchSpecification = resolvePitchSpecificationString(ctx.PITCH_SPECIFICATION().getText());
 		} catch (e) {
-			this.addError("Failed to resolve pitch specification: " + e.message, ctx);
+			this.addErrorForToken("Failed to resolve pitch specification: " + e.message, ctx.PITCH_SPECIFICATION());
 		}
 	}
 	
