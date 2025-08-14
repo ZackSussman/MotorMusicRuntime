@@ -81,11 +81,7 @@ export class TwelveTET extends PitchSpecification {
 
 
 export function resolvePitchSpecificationString(pitchSpecificationString : string) : PitchSpecification {
-    // Remove the prefix and trim whitespace
-    const prefix = "PITCH_SPECIFICATION:";
-    let tsCode = pitchSpecificationString.startsWith(prefix)
-        ? pitchSpecificationString.slice(prefix.length).trim()
-        : pitchSpecificationString.trim();
+    let tsCode = pitchSpecificationString.trim();
 
     // Restrict to only allowed class instantiations
     const allowedClasses = [
