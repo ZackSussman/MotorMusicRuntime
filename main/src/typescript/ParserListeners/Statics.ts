@@ -32,8 +32,8 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 		}
 	}
 
-	private addErrorForTerminalnode(message : string, terminalNode : TerminalNode) {
-		let error = new Error(terminalNode.symbol.line, terminalNode.symbol..line, terminalNode.symbol.column + 1, terminalNode.symbol.column + 1 + terminalNode.symbol.text.length, message);
+	private addErrorForTerminalNode(message : string, terminalNode : TerminalNode) {
+		let error = new Error(terminalNode.symbol.line, terminalNode.symbol.line, terminalNode.symbol.column + 1, terminalNode.symbol.column + 1 + terminalNode.symbol.text.length, message);
 		if (!(this.errors.includes(error))) {
 			this.errors.push(error);
 		}
@@ -71,7 +71,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 		try {
 			this.pitchSpecification = resolvePitchSpecificationString(ctx.PITCH_SPECIFICATION().getText());
 		} catch (e) {
-			this.addErrorForToken("Failed to resolve pitch specification: " + e.message, ctx.PITCH_SPECIFICATION());
+			this.addErrorForTerminalNode("Failed to resolve pitch specification: " + e.message, ctx.PITCH_SPECIFICATION());
 		}
 	}
 	
