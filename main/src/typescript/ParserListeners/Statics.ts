@@ -33,6 +33,9 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	}
 
 	enterTimeTaggedSyllable = (ctx: TimeTaggedSyllableContext) => {
+		if (!this.pitchSpecification) {
+			return;
+		}
 		let time = Number(ctx.NUMBER().getText());
 		if (time == 0) {
 			this.addError("Time scales must be non-zero", ctx);
@@ -44,6 +47,9 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	}
 
 	enterSyllable = (ctx: SyllableContext) => {
+		if (!this.pitchSpecification) {
+			return; //this means the pitch specification was invalid and we already have an error for that 
+		}
 		if (!this.pitchSpecification.validateSyllable(ctx.SYLLABLE().getText())) {
 			this.addError("Invalid syllable for pitch specification: " + ctx.SYLLABLE().getText(), ctx);
 		}
