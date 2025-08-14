@@ -51,10 +51,15 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 
 	enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
 		this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: new DefaultPitchSpecification()");
+		
 	}
 
 	enterNonEmptyProgramWithPitchSpecification = (ctx: NonEmptyProgramWithPitchSpecificationContext) => {
-		this.pitchSpecification = resolvePitchSpecificationString(ctx.PITCH_SPECIFICATION().getText());
+		try {
+			this.pitchSpecification = resolvePitchSpecificationString(ctx.PITCH_SPECIFICATION().getText());
+		} catch (e) {
+			this.addError("Failed to resolve pitch specification: " + e.message, ctx);
+		}
 	}
 	
 }
