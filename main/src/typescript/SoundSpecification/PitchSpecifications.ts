@@ -16,7 +16,7 @@ export class Default extends PitchSpecification {
     //already validated by the parser
     validateSyllable(syllable : string) : boolean {
         // Regex: [qtplkjgfdszxcvbnmhrw]+[aeiuyo]*[qtplkjgfdszxcvbnmhrw]* | [aeiuyo]+[qtplkjgfdszxcvbnmhrw]*
-        const regex = /^([qtplkjgfdszxcvbnmhrw]+[aeiuyo]*[qtplkjgfdszxcvbnmhrw]*|[aeiuyo]+[qtplkjgfdszxcvbnmhrw]*)$/;
+        const regex = /^([qtplkjgfdszxcvbnmhrw]+[aeiuyo]*[qtplkjgfdszxcvbnmhrw]*|[aeiuyo]+[qtplkjgfdszxcvbnmhrw]*)$/; //no number here
         return regex.test(syllable);
     }
     
