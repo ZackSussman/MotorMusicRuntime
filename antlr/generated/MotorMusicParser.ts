@@ -31,9 +31,10 @@ export default class MotorMusicParser extends Parser {
 	public static readonly UNDERSCORE = 12;
 	public static readonly DOT = 13;
 	public static readonly CARROT = 14;
-	public static readonly UNRECOGNIZED = 15;
-	public static readonly PITCH_SPECIFICATION = 16;
+	public static readonly PITCH_SPECIFICATION = 15;
+	public static readonly PITCH_SPEC_WS = 16;
 	public static readonly PITCH_SPECIFICATION_VALUE = 17;
+	public static readonly PITCH_SPEC_NEWLINE = 18;
 	public static override readonly EOF = Token.EOF;
 	public static readonly RULE_compilationUnit = 0;
 	public static readonly RULE_pitch_specification_statement = 1;
@@ -47,8 +48,7 @@ export default class MotorMusicParser extends Parser {
                                                             "'<'", "'>'", 
                                                             "'['", "']'", 
                                                             "'_'", "'.'", 
-                                                            "'^'", null, 
-                                                            "'PITCH_SPECIFICATION:'" ];
+                                                            "'^'", "'PITCH_SPECIFICATION:'" ];
 	public static readonly symbolicNames: (string | null)[] = [ null, "WS", 
                                                              "SYLLABLE", 
                                                              "NUMBER", "LCURLY", 
@@ -58,9 +58,10 @@ export default class MotorMusicParser extends Parser {
                                                              "RSQBRACKET", 
                                                              "UNDERSCORE", 
                                                              "DOT", "CARROT", 
-                                                             "UNRECOGNIZED", 
                                                              "PITCH_SPECIFICATION", 
-                                                             "PITCH_SPECIFICATION_VALUE" ];
+                                                             "PITCH_SPEC_WS", 
+                                                             "PITCH_SPECIFICATION_VALUE", 
+                                                             "PITCH_SPEC_NEWLINE" ];
 	// tslint:disable:no-trailing-whitespace
 	public static readonly ruleNames: string[] = [
 		"compilationUnit", "pitch_specification_statement", "raised_gesture_list", 
@@ -109,7 +110,7 @@ export default class MotorMusicParser extends Parser {
 				this.match(MotorMusicParser.EOF);
 				}
 				break;
-			case 16:
+			case 15:
 				localctx = new NonEmptyProgramWithPitchSpecificationContext(this, localctx);
 				this.enterOuterAlt(localctx, 3);
 				{
@@ -374,7 +375,7 @@ export default class MotorMusicParser extends Parser {
 		return localctx;
 	}
 
-	public static readonly _serializedATN: number[] = [4,1,17,66,2,0,7,0,2,
+	public static readonly _serializedATN: number[] = [4,1,18,66,2,0,7,0,2,
 	1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,3,0,19,8,
 	0,1,1,1,1,1,1,1,2,1,2,1,2,1,2,3,2,28,8,2,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,
 	3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,3,52,8,3,1,
@@ -382,7 +383,7 @@ export default class MotorMusicParser extends Parser {
 	0,72,0,18,1,0,0,0,2,20,1,0,0,0,4,27,1,0,0,0,6,51,1,0,0,0,8,63,1,0,0,0,10,
 	19,5,0,0,1,11,12,3,8,4,0,12,13,5,0,0,1,13,19,1,0,0,0,14,15,3,2,1,0,15,16,
 	3,8,4,0,16,17,5,0,0,1,17,19,1,0,0,0,18,10,1,0,0,0,18,11,1,0,0,0,18,14,1,
-	0,0,0,19,1,1,0,0,0,20,21,5,16,0,0,21,22,5,17,0,0,22,3,1,0,0,0,23,28,3,8,
+	0,0,0,19,1,1,0,0,0,20,21,5,15,0,0,21,22,5,17,0,0,22,3,1,0,0,0,23,28,3,8,
 	4,0,24,25,3,8,4,0,25,26,3,4,2,0,26,28,1,0,0,0,27,23,1,0,0,0,27,24,1,0,0,
 	0,28,5,1,0,0,0,29,30,3,4,2,0,30,31,5,13,0,0,31,52,1,0,0,0,32,33,3,4,2,0,
 	33,34,5,14,0,0,34,52,1,0,0,0,35,36,3,4,2,0,36,37,5,13,0,0,37,38,3,6,3,0,
