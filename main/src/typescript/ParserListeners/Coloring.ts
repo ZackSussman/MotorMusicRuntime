@@ -208,12 +208,11 @@ private hslToHex(h: number, s: number, l: number): string {
             }
                                                                            
         }
-        //this can only happen when there is no paren, in other words we should be gauranteed to have a single object data present
-        if (res.size == 0) {
-            for (let range of this.singleObjectData.ranges) {
-                res.set(serializeRange(range), this.getDistinctColor(0, 1));
-            }
+      
+        for (let range of this.singleObjectData.ranges) {
+            res.set(serializeRange(range), this.getDistinctColor(0, 1));
         }
+        
         
         return res;
     }
