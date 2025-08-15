@@ -91,7 +91,7 @@ export function resolvePitchSpecificationString(pitchSpecificationString : strin
     // Regex: must start with allowed class name and end with parentheses
     const instantiationRegex = new RegExp(`^(${allowedClasses.join("|")})\\s*\(.*\)$`);
     if (!instantiationRegex.test(tsCode)) {
-        throw new Error("Pitch specification string must start with an allowed class name and end with parentheses.");
+        throw new Error("Pitch specification string must start with an allowed class name and end with parentheses. We were given " + tsCode);
     }
     // If 'new' is missing, add it
     if (!tsCode.startsWith("new")) {
