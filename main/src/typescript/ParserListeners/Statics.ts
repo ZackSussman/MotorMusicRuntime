@@ -65,7 +65,6 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 
 	enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
 		this.pitchSpecification = resolvePitchSpecificationString("Default()");
-		
 	}
 
 	enterNonEmptyProgramWithPitchSpecification = (ctx: NonEmptyProgramWithPitchSpecificationContext) => {

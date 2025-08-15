@@ -190,11 +190,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
 
     enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
-        this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: Default()");
+        this.pitchSpecification = resolvePitchSpecificationString("Default()");
     }
 
     enterNonEmptyProgarmWithPitchSpecification = (ctx : NonEmptyProgramWithPitchSpecificationContext) => {
-        this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: " + (ctx.pitch_specification_statement() as PitchSpecificationStatementContext).PITCH_SPECIFICATION_VALUE().getText());
+        this.pitchSpecification = resolvePitchSpecificationString((ctx.pitch_specification_statement() as PitchSpecificationStatementContext).PITCH_SPECIFICATION_VALUE().getText());
     }
 
     //when finished, convert our built up audio to the audio stream
