@@ -5,6 +5,7 @@ import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicPars
 import { NonEmptyProgramWithDefaultPitchSpecificationContext, NonEmptyProgramWithPitchSpecificationContext, SyllableContext, TimeTaggedSyllableContext, PitchSpecificationStatementContext } from "../../../../antlr/generated/MotorMusicParser";
 
 import { resolvePitchSpecificationString, PitchSpecification, } from "../SoundSpecification/PitchSpecifications";
+import { resolve } from "path";
 
 //we have to check that the parse tree actually encompasses the entire code
 export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserListener {
@@ -16,7 +17,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	programText : string
 
 
-	pitchSpecification : PitchSpecification
+	pitchSpecification : PitchSpecification = resolvePitchSpecificationString("Default()");
 
     constructor(programText) {
         super();
