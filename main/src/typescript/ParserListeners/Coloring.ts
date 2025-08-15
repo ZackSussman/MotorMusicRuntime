@@ -209,10 +209,12 @@ private hslToHex(h: number, s: number, l: number): string {
                                                                            
         }
       
-        for (let range of this.singleObjectData.ranges) {
-            res.set(serializeRange(range), this.getDistinctColor(0, 1));
+        if (this.singleObjectData != undefined) {
+            for (let range of this.singleObjectData.ranges) {
+                    res.set(serializeRange(range), this.getDistinctColor(0, 1));
+            }
         }
-        
+      
         
         return res;
     }
