@@ -6,6 +6,7 @@ import {ParseTreeListener} from "antlr4";
 import { EmptyProgramContext } from "./MotorMusicParser.js";
 import { NonEmptyProgramWithDefaultPitchSpecificationContext } from "./MotorMusicParser.js";
 import { NonEmptyProgramWithPitchSpecificationContext } from "./MotorMusicParser.js";
+import { PitchSpecificationStatementContext } from "./MotorMusicParser.js";
 import { RaisedSingleContext } from "./MotorMusicParser.js";
 import { RaisedMultiContext } from "./MotorMusicParser.js";
 import { SingleMotionSpecDownContext } from "./MotorMusicParser.js";
@@ -62,6 +63,18 @@ export default class MotorMusicParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitNonEmptyProgramWithPitchSpecification?: (ctx: NonEmptyProgramWithPitchSpecificationContext) => void;
+	/**
+	 * Enter a parse tree produced by the `PitchSpecificationStatement`
+	 * labeled alternative in `MotorMusicParser.pitch_specification_statement`.
+	 * @param ctx the parse tree
+	 */
+	enterPitchSpecificationStatement?: (ctx: PitchSpecificationStatementContext) => void;
+	/**
+	 * Exit a parse tree produced by the `PitchSpecificationStatement`
+	 * labeled alternative in `MotorMusicParser.pitch_specification_statement`.
+	 * @param ctx the parse tree
+	 */
+	exitPitchSpecificationStatement?: (ctx: PitchSpecificationStatementContext) => void;
 	/**
 	 * Enter a parse tree produced by the `RaisedSingle`
 	 * labeled alternative in `MotorMusicParser.raised_gesture_list`.

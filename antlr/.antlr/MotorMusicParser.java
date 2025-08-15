@@ -20,11 +20,12 @@ public class MotorMusicParser extends Parser {
 		RANGLE=9, LSQBRACKET=10, RSQBRACKET=11, UNDERSCORE=12, DOT=13, CARROT=14, 
 		UNRECOGNIZED=15, PITCH_SPECIFICATION=16, PITCH_SPECIFICATION_VALUE=17;
 	public static final int
-		RULE_compilationUnit = 0, RULE_raised_gesture_list = 1, RULE_motion_spec_list = 2, 
-		RULE_gesture = 3;
+		RULE_compilationUnit = 0, RULE_pitch_specification_statement = 1, RULE_raised_gesture_list = 2, 
+		RULE_motion_spec_list = 3, RULE_gesture = 4;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"compilationUnit", "raised_gesture_list", "motion_spec_list", "gesture"
+			"compilationUnit", "pitch_specification_statement", "raised_gesture_list", 
+			"motion_spec_list", "gesture"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -108,11 +109,12 @@ public class MotorMusicParser extends Parser {
 	}
 	@SuppressWarnings("CheckReturnValue")
 	public static class NonEmptyProgramWithPitchSpecificationContext extends CompilationUnitContext {
-		public Token p;
+		public Pitch_specification_statementContext s;
 		public GestureContext e;
-		public TerminalNode PITCH_SPECIFICATION() { return getToken(MotorMusicParser.PITCH_SPECIFICATION, 0); }
 		public TerminalNode EOF() { return getToken(MotorMusicParser.EOF, 0); }
-		public TerminalNode PITCH_SPECIFICATION_VALUE() { return getToken(MotorMusicParser.PITCH_SPECIFICATION_VALUE, 0); }
+		public Pitch_specification_statementContext pitch_specification_statement() {
+			return getRuleContext(Pitch_specification_statementContext.class,0);
+		}
 		public GestureContext gesture() {
 			return getRuleContext(GestureContext.class,0);
 		}
@@ -138,14 +140,14 @@ public class MotorMusicParser extends Parser {
 		CompilationUnitContext _localctx = new CompilationUnitContext(_ctx, getState());
 		enterRule(_localctx, 0, RULE_compilationUnit);
 		try {
-			setState(17);
+			setState(18);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case EOF:
 				_localctx = new EmptyProgramContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(8);
+				setState(10);
 				((EmptyProgramContext)_localctx).e = match(EOF);
 				}
 				break;
@@ -156,9 +158,9 @@ public class MotorMusicParser extends Parser {
 				_localctx = new NonEmptyProgramWithDefaultPitchSpecificationContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(9);
+				setState(11);
 				((NonEmptyProgramWithDefaultPitchSpecificationContext)_localctx).e = gesture();
-				setState(10);
+				setState(12);
 				match(EOF);
 				}
 				break;
@@ -166,18 +168,60 @@ public class MotorMusicParser extends Parser {
 				_localctx = new NonEmptyProgramWithPitchSpecificationContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(12);
-				match(PITCH_SPECIFICATION);
-				setState(13);
-				((NonEmptyProgramWithPitchSpecificationContext)_localctx).p = match(PITCH_SPECIFICATION_VALUE);
 				setState(14);
-				((NonEmptyProgramWithPitchSpecificationContext)_localctx).e = gesture();
+				((NonEmptyProgramWithPitchSpecificationContext)_localctx).s = pitch_specification_statement();
 				setState(15);
+				((NonEmptyProgramWithPitchSpecificationContext)_localctx).e = gesture();
+				setState(16);
 				match(EOF);
 				}
 				break;
 			default:
 				throw new NoViableAltException(this);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class Pitch_specification_statementContext extends ParserRuleContext {
+		public Pitch_specification_statementContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_pitch_specification_statement; }
+	 
+		public Pitch_specification_statementContext() { }
+		public void copyFrom(Pitch_specification_statementContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class PitchSpecificationStatementContext extends Pitch_specification_statementContext {
+		public Token p;
+		public TerminalNode PITCH_SPECIFICATION() { return getToken(MotorMusicParser.PITCH_SPECIFICATION, 0); }
+		public TerminalNode PITCH_SPECIFICATION_VALUE() { return getToken(MotorMusicParser.PITCH_SPECIFICATION_VALUE, 0); }
+		public PitchSpecificationStatementContext(Pitch_specification_statementContext ctx) { copyFrom(ctx); }
+	}
+
+	public final Pitch_specification_statementContext pitch_specification_statement() throws RecognitionException {
+		Pitch_specification_statementContext _localctx = new Pitch_specification_statementContext(_ctx, getState());
+		enterRule(_localctx, 2, RULE_pitch_specification_statement);
+		try {
+			_localctx = new PitchSpecificationStatementContext(_localctx);
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(20);
+			match(PITCH_SPECIFICATION);
+			setState(21);
+			((PitchSpecificationStatementContext)_localctx).p = match(PITCH_SPECIFICATION_VALUE);
 			}
 		}
 		catch (RecognitionException re) {
@@ -226,16 +270,16 @@ public class MotorMusicParser extends Parser {
 
 	public final Raised_gesture_listContext raised_gesture_list() throws RecognitionException {
 		Raised_gesture_listContext _localctx = new Raised_gesture_listContext(_ctx, getState());
-		enterRule(_localctx, 2, RULE_raised_gesture_list);
+		enterRule(_localctx, 4, RULE_raised_gesture_list);
 		try {
-			setState(23);
+			setState(27);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
 			case 1:
 				_localctx = new RaisedSingleContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(19);
+				setState(23);
 				((RaisedSingleContext)_localctx).top = gesture();
 				}
 				break;
@@ -243,9 +287,9 @@ public class MotorMusicParser extends Parser {
 				_localctx = new RaisedMultiContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(20);
+				setState(24);
 				((RaisedMultiContext)_localctx).top = gesture();
-				setState(21);
+				setState(25);
 				((RaisedMultiContext)_localctx).rest = raised_gesture_list();
 				}
 				break;
@@ -347,18 +391,18 @@ public class MotorMusicParser extends Parser {
 
 	public final Motion_spec_listContext motion_spec_list() throws RecognitionException {
 		Motion_spec_listContext _localctx = new Motion_spec_listContext(_ctx, getState());
-		enterRule(_localctx, 4, RULE_motion_spec_list);
+		enterRule(_localctx, 6, RULE_motion_spec_list);
 		try {
-			setState(47);
+			setState(51);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
 			case 1:
 				_localctx = new SingleMotionSpecDownContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(25);
+				setState(29);
 				((SingleMotionSpecDownContext)_localctx).top = raised_gesture_list();
-				setState(26);
+				setState(30);
 				match(DOT);
 				}
 				break;
@@ -366,9 +410,9 @@ public class MotorMusicParser extends Parser {
 				_localctx = new SingleMotionSpecUpContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(28);
+				setState(32);
 				((SingleMotionSpecUpContext)_localctx).top = raised_gesture_list();
-				setState(29);
+				setState(33);
 				match(CARROT);
 				}
 				break;
@@ -376,11 +420,11 @@ public class MotorMusicParser extends Parser {
 				_localctx = new TowardsPrefixMotionSpecContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(31);
+				setState(35);
 				((TowardsPrefixMotionSpecContext)_localctx).top = raised_gesture_list();
-				setState(32);
+				setState(36);
 				match(DOT);
-				setState(33);
+				setState(37);
 				((TowardsPrefixMotionSpecContext)_localctx).rest = motion_spec_list();
 				}
 				break;
@@ -388,11 +432,11 @@ public class MotorMusicParser extends Parser {
 				_localctx = new AwayPrefixMotionSpecContext(_localctx);
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(35);
+				setState(39);
 				((AwayPrefixMotionSpecContext)_localctx).top = raised_gesture_list();
-				setState(36);
+				setState(40);
 				match(CARROT);
-				setState(37);
+				setState(41);
 				((AwayPrefixMotionSpecContext)_localctx).rest = motion_spec_list();
 				}
 				break;
@@ -400,11 +444,11 @@ public class MotorMusicParser extends Parser {
 				_localctx = new EndAwayFromMotionSpecContext(_localctx);
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(39);
+				setState(43);
 				((EndAwayFromMotionSpecContext)_localctx).top = raised_gesture_list();
-				setState(40);
+				setState(44);
 				match(DOT);
-				setState(41);
+				setState(45);
 				((EndAwayFromMotionSpecContext)_localctx).rest = raised_gesture_list();
 				}
 				break;
@@ -412,11 +456,11 @@ public class MotorMusicParser extends Parser {
 				_localctx = new EndTowardsMotionSpecContext(_localctx);
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(43);
+				setState(47);
 				((EndTowardsMotionSpecContext)_localctx).top = raised_gesture_list();
-				setState(44);
+				setState(48);
 				match(CARROT);
-				setState(45);
+				setState(49);
 				((EndTowardsMotionSpecContext)_localctx).rest = raised_gesture_list();
 				}
 				break;
@@ -484,16 +528,16 @@ public class MotorMusicParser extends Parser {
 
 	public final GestureContext gesture() throws RecognitionException {
 		GestureContext _localctx = new GestureContext(_ctx, getState());
-		enterRule(_localctx, 6, RULE_gesture);
+		enterRule(_localctx, 8, RULE_gesture);
 		try {
-			setState(59);
+			setState(63);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,3,_ctx) ) {
 			case 1:
 				_localctx = new EmptyContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(49);
+				setState(53);
 				match(UNDERSCORE);
 				}
 				break;
@@ -501,9 +545,9 @@ public class MotorMusicParser extends Parser {
 				_localctx = new TimeTaggedEmptyContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(50);
+				setState(54);
 				((TimeTaggedEmptyContext)_localctx).number = match(NUMBER);
-				setState(51);
+				setState(55);
 				match(UNDERSCORE);
 				}
 				break;
@@ -511,7 +555,7 @@ public class MotorMusicParser extends Parser {
 				_localctx = new SyllableContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(52);
+				setState(56);
 				((SyllableContext)_localctx).syllable = match(SYLLABLE);
 				}
 				break;
@@ -519,9 +563,9 @@ public class MotorMusicParser extends Parser {
 				_localctx = new TimeTaggedSyllableContext(_localctx);
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(53);
+				setState(57);
 				((TimeTaggedSyllableContext)_localctx).number = match(NUMBER);
-				setState(54);
+				setState(58);
 				((TimeTaggedSyllableContext)_localctx).syllable = match(SYLLABLE);
 				}
 				break;
@@ -529,11 +573,11 @@ public class MotorMusicParser extends Parser {
 				_localctx = new DirectionSpecContext(_localctx);
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(55);
+				setState(59);
 				match(LPAREN);
-				setState(56);
+				setState(60);
 				((DirectionSpecContext)_localctx).motion_spec = motion_spec_list();
-				setState(57);
+				setState(61);
 				match(RPAREN);
 				}
 				break;
@@ -551,47 +595,48 @@ public class MotorMusicParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u0011>\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
-		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0001\u0000\u0001\u0000\u0001"+
+		"\u0004\u0001\u0011B\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0001"+
 		"\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0001"+
-		"\u0000\u0003\u0000\u0012\b\u0000\u0001\u0001\u0001\u0001\u0001\u0001\u0001"+
-		"\u0001\u0003\u0001\u0018\b\u0001\u0001\u0002\u0001\u0002\u0001\u0002\u0001"+
-		"\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001"+
-		"\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001"+
-		"\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0001"+
-		"\u0002\u0003\u00020\b\u0002\u0001\u0003\u0001\u0003\u0001\u0003\u0001"+
+		"\u0000\u0001\u0000\u0003\u0000\u0013\b\u0000\u0001\u0001\u0001\u0001\u0001"+
+		"\u0001\u0001\u0002\u0001\u0002\u0001\u0002\u0001\u0002\u0003\u0002\u001c"+
+		"\b\u0002\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001"+
 		"\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001"+
-		"\u0003\u0003\u0003<\b\u0003\u0001\u0003\u0000\u0000\u0004\u0000\u0002"+
-		"\u0004\u0006\u0000\u0000E\u0000\u0011\u0001\u0000\u0000\u0000\u0002\u0017"+
-		"\u0001\u0000\u0000\u0000\u0004/\u0001\u0000\u0000\u0000\u0006;\u0001\u0000"+
-		"\u0000\u0000\b\u0012\u0005\u0000\u0000\u0001\t\n\u0003\u0006\u0003\u0000"+
-		"\n\u000b\u0005\u0000\u0000\u0001\u000b\u0012\u0001\u0000\u0000\u0000\f"+
-		"\r\u0005\u0010\u0000\u0000\r\u000e\u0005\u0011\u0000\u0000\u000e\u000f"+
-		"\u0003\u0006\u0003\u0000\u000f\u0010\u0005\u0000\u0000\u0001\u0010\u0012"+
-		"\u0001\u0000\u0000\u0000\u0011\b\u0001\u0000\u0000\u0000\u0011\t\u0001"+
-		"\u0000\u0000\u0000\u0011\f\u0001\u0000\u0000\u0000\u0012\u0001\u0001\u0000"+
-		"\u0000\u0000\u0013\u0018\u0003\u0006\u0003\u0000\u0014\u0015\u0003\u0006"+
-		"\u0003\u0000\u0015\u0016\u0003\u0002\u0001\u0000\u0016\u0018\u0001\u0000"+
-		"\u0000\u0000\u0017\u0013\u0001\u0000\u0000\u0000\u0017\u0014\u0001\u0000"+
-		"\u0000\u0000\u0018\u0003\u0001\u0000\u0000\u0000\u0019\u001a\u0003\u0002"+
-		"\u0001\u0000\u001a\u001b\u0005\r\u0000\u0000\u001b0\u0001\u0000\u0000"+
-		"\u0000\u001c\u001d\u0003\u0002\u0001\u0000\u001d\u001e\u0005\u000e\u0000"+
-		"\u0000\u001e0\u0001\u0000\u0000\u0000\u001f \u0003\u0002\u0001\u0000 "+
-		"!\u0005\r\u0000\u0000!\"\u0003\u0004\u0002\u0000\"0\u0001\u0000\u0000"+
-		"\u0000#$\u0003\u0002\u0001\u0000$%\u0005\u000e\u0000\u0000%&\u0003\u0004"+
-		"\u0002\u0000&0\u0001\u0000\u0000\u0000\'(\u0003\u0002\u0001\u0000()\u0005"+
-		"\r\u0000\u0000)*\u0003\u0002\u0001\u0000*0\u0001\u0000\u0000\u0000+,\u0003"+
-		"\u0002\u0001\u0000,-\u0005\u000e\u0000\u0000-.\u0003\u0002\u0001\u0000"+
-		".0\u0001\u0000\u0000\u0000/\u0019\u0001\u0000\u0000\u0000/\u001c\u0001"+
-		"\u0000\u0000\u0000/\u001f\u0001\u0000\u0000\u0000/#\u0001\u0000\u0000"+
-		"\u0000/\'\u0001\u0000\u0000\u0000/+\u0001\u0000\u0000\u00000\u0005\u0001"+
-		"\u0000\u0000\u00001<\u0005\f\u0000\u000023\u0005\u0003\u0000\u00003<\u0005"+
-		"\f\u0000\u00004<\u0005\u0002\u0000\u000056\u0005\u0003\u0000\u00006<\u0005"+
-		"\u0002\u0000\u000078\u0005\u0006\u0000\u000089\u0003\u0004\u0002\u0000"+
-		"9:\u0005\u0007\u0000\u0000:<\u0001\u0000\u0000\u0000;1\u0001\u0000\u0000"+
-		"\u0000;2\u0001\u0000\u0000\u0000;4\u0001\u0000\u0000\u0000;5\u0001\u0000"+
-		"\u0000\u0000;7\u0001\u0000\u0000\u0000<\u0007\u0001\u0000\u0000\u0000"+
-		"\u0004\u0011\u0017/;";
+		"\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001"+
+		"\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0003\u00034\b"+
+		"\u0003\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001"+
+		"\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0003\u0004@\b"+
+		"\u0004\u0001\u0004\u0000\u0000\u0005\u0000\u0002\u0004\u0006\b\u0000\u0000"+
+		"H\u0000\u0012\u0001\u0000\u0000\u0000\u0002\u0014\u0001\u0000\u0000\u0000"+
+		"\u0004\u001b\u0001\u0000\u0000\u0000\u00063\u0001\u0000\u0000\u0000\b"+
+		"?\u0001\u0000\u0000\u0000\n\u0013\u0005\u0000\u0000\u0001\u000b\f\u0003"+
+		"\b\u0004\u0000\f\r\u0005\u0000\u0000\u0001\r\u0013\u0001\u0000\u0000\u0000"+
+		"\u000e\u000f\u0003\u0002\u0001\u0000\u000f\u0010\u0003\b\u0004\u0000\u0010"+
+		"\u0011\u0005\u0000\u0000\u0001\u0011\u0013\u0001\u0000\u0000\u0000\u0012"+
+		"\n\u0001\u0000\u0000\u0000\u0012\u000b\u0001\u0000\u0000\u0000\u0012\u000e"+
+		"\u0001\u0000\u0000\u0000\u0013\u0001\u0001\u0000\u0000\u0000\u0014\u0015"+
+		"\u0005\u0010\u0000\u0000\u0015\u0016\u0005\u0011\u0000\u0000\u0016\u0003"+
+		"\u0001\u0000\u0000\u0000\u0017\u001c\u0003\b\u0004\u0000\u0018\u0019\u0003"+
+		"\b\u0004\u0000\u0019\u001a\u0003\u0004\u0002\u0000\u001a\u001c\u0001\u0000"+
+		"\u0000\u0000\u001b\u0017\u0001\u0000\u0000\u0000\u001b\u0018\u0001\u0000"+
+		"\u0000\u0000\u001c\u0005\u0001\u0000\u0000\u0000\u001d\u001e\u0003\u0004"+
+		"\u0002\u0000\u001e\u001f\u0005\r\u0000\u0000\u001f4\u0001\u0000\u0000"+
+		"\u0000 !\u0003\u0004\u0002\u0000!\"\u0005\u000e\u0000\u0000\"4\u0001\u0000"+
+		"\u0000\u0000#$\u0003\u0004\u0002\u0000$%\u0005\r\u0000\u0000%&\u0003\u0006"+
+		"\u0003\u0000&4\u0001\u0000\u0000\u0000\'(\u0003\u0004\u0002\u0000()\u0005"+
+		"\u000e\u0000\u0000)*\u0003\u0006\u0003\u0000*4\u0001\u0000\u0000\u0000"+
+		"+,\u0003\u0004\u0002\u0000,-\u0005\r\u0000\u0000-.\u0003\u0004\u0002\u0000"+
+		".4\u0001\u0000\u0000\u0000/0\u0003\u0004\u0002\u000001\u0005\u000e\u0000"+
+		"\u000012\u0003\u0004\u0002\u000024\u0001\u0000\u0000\u00003\u001d\u0001"+
+		"\u0000\u0000\u00003 \u0001\u0000\u0000\u00003#\u0001\u0000\u0000\u0000"+
+		"3\'\u0001\u0000\u0000\u00003+\u0001\u0000\u0000\u00003/\u0001\u0000\u0000"+
+		"\u00004\u0007\u0001\u0000\u0000\u00005@\u0005\f\u0000\u000067\u0005\u0003"+
+		"\u0000\u00007@\u0005\f\u0000\u00008@\u0005\u0002\u0000\u00009:\u0005\u0003"+
+		"\u0000\u0000:@\u0005\u0002\u0000\u0000;<\u0005\u0006\u0000\u0000<=\u0003"+
+		"\u0006\u0003\u0000=>\u0005\u0007\u0000\u0000>@\u0001\u0000\u0000\u0000"+
+		"?5\u0001\u0000\u0000\u0000?6\u0001\u0000\u0000\u0000?8\u0001\u0000\u0000"+
+		"\u0000?9\u0001\u0000\u0000\u0000?;\u0001\u0000\u0000\u0000@\t\u0001\u0000"+
+		"\u0000\u0000\u0004\u0012\u001b3?";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

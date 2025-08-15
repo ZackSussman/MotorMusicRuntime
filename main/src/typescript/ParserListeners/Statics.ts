@@ -2,7 +2,7 @@
 import {Error} from "../Compile";
 import {ParserRuleContext, TerminalNode} from "antlr4";
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
-import { NonEmptyProgramWithDefaultPitchSpecificationContext, NonEmptyProgramWithPitchSpecificationContext, SyllableContext, TimeTaggedSyllableContext } from "../../../../antlr/generated/MotorMusicParser";
+import { NonEmptyProgramWithDefaultPitchSpecificationContext, NonEmptyProgramWithPitchSpecificationContext, SyllableContext, TimeTaggedSyllableContext, PitchSpecificationStatementContext } from "../../../../antlr/generated/MotorMusicParser";
 
 import { resolvePitchSpecificationString, PitchSpecification, } from "../SoundSpecification/PitchSpecifications";
 
@@ -63,15 +63,17 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	}
 
 	enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
-		this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: Default()");
+		this.pitchSpecification = resolvePitchSpecificationString("Default()");
 		
 	}
 
 	enterNonEmptyProgramWithPitchSpecification = (ctx: NonEmptyProgramWithPitchSpecificationContext) => {
+		let pitchSpecificationContext = (ctx.pitch_specification_statement() as PitchSpecificationStatementContext).PITCH_SPECIFICATION_VALUE()
+		let pitchSpecificationText = pitchSpecificationContext.getText();
 		try {
-			this.pitchSpecification = resolvePitchSpecificationString(ctx.PITCH_SPECIFICATION().getText());
+			this.pitchSpecification = resolvePitchSpecificationString(pitchSpecificationText);
 		} catch (e) {
-			this.addErrorForTerminalNode("Failed to resolve pitch specification: " + e.message, ctx.PITCH_SPECIFICATION());
+			this.addErrorForTerminalNode("Failed to resolve pitch specification: " + e.message, pitchSpecificationContext);
 		}
 	}
 	

@@ -5,9 +5,13 @@ options {tokenVocab = MotorMusicLexer;}
 compilationUnit:
       e = EOF #EmptyProgram
     | e = gesture EOF #NonEmptyProgramWithDefaultPitchSpecification
-    | PITCH_SPECIFICATION p = PITCH_SPECIFICATION_VALUE e = gesture EOF #NonEmptyProgramWithPitchSpecification
+    | s = pitch_specification_statement e = gesture EOF #NonEmptyProgramWithPitchSpecification
 ;
 
+
+pitch_specification_statement:
+  PITCH_SPECIFICATION p = PITCH_SPECIFICATION_VALUE #PitchSpecificationStatement
+;
 
 raised_gesture_list:
     top = gesture #RaisedSingle

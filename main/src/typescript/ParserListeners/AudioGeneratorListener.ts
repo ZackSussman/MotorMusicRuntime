@@ -3,7 +3,7 @@
 /// <reference path="../../../../node_modules/monaco-editor/monaco.d.ts" />
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 
-import {EmptyProgramContext, NonEmptyProgramWithPitchSpecificationContext, SyllableContext, TimeTaggedEmptyContext, TimeTaggedSyllableContext, EmptyContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext} from "../../../../antlr/generated/MotorMusicParser";
+import {EmptyProgramContext, NonEmptyProgramWithPitchSpecificationContext, SyllableContext, TimeTaggedEmptyContext, TimeTaggedSyllableContext, EmptyContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, PitchSpecificationStatementContext} from "../../../../antlr/generated/MotorMusicParser";
 import { durationToSamples } from "../audio/Audio";
  import {DELAY_BEFORE_PLAYBACK_START} from "../../runtime-business/RuntimeConstants";
 import {audio, audioStream, audioToAudioStream, silence, seconds, sampleMap} from "../audio/Audio";
@@ -194,7 +194,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
     enterNonEmptyProgarmWithPitchSpecification = (ctx : NonEmptyProgramWithPitchSpecificationContext) => {
-        this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: " + ctx.PITCH_SPECIFICATION().getText());
+        this.pitchSpecification = resolvePitchSpecificationString("PITCH_SPECIFICATION: " + (ctx.pitch_specification_statement() as PitchSpecificationStatementContext).PITCH_SPECIFICATION_VALUE().getText());
     }
 
     //when finished, convert our built up audio to the audio stream
