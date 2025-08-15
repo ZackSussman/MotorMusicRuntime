@@ -196,7 +196,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         }
     }
 
-    enterNonEmptyProgarmWithPitchSpecification = (ctx : NonEmptyProgramWithPitchSpecificationContext) => {
+    enterNonEmptyProgramWithPitchSpecification = (ctx : NonEmptyProgramWithPitchSpecificationContext) => {
         this.pitchSpecification = resolvePitchSpecificationString((ctx.pitch_specification_statement() as PitchSpecificationStatementContext).PITCH_SPECIFICATION_VALUE().getText());
         if (this.pitchSpecification === undefined) {
             throw new Error("Pitch Specification Initialization Failure");
