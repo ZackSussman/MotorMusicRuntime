@@ -81,6 +81,7 @@ export class TwelveTET extends PitchSpecification {
 
 
 export function resolvePitchSpecificationString(pitchSpecificationString : string) : PitchSpecification {
+    console.log("pitch specification string is " + pitchSpecificationString);
     let tsCode = pitchSpecificationString.trim();
 
     // Restrict to only allowed class instantiations
