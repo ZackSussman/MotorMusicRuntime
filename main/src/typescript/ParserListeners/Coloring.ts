@@ -3,7 +3,7 @@
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 
 import {range, serializeRange, terminalNodeToRange, getAllDirectionSpecifierRangesFromMotionSpecListContext} from "./ParserListenerUtils";
-import {DirectionSpecContext, EmptyContext, SyllableContext, TimeTaggedEmptyContext, TimeTaggedSyllableContext} from "../../../../antlr/generated/MotorMusicParser";
+import {DirectionSpecContext, EmptyContext, SyllableContext, TimeTaggedEmptyContext, TimeTaggedSyllableContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext} from "../../../../antlr/generated/MotorMusicParser";
 
 
 //Here is where we dynamically decide the actual colors for all the tokens
@@ -44,6 +44,8 @@ export class ParenColoringListener extends MotorMusicParserListener {
     //the maximum depth obtained through the entire program
     maxDepth : number;
 
+    pitchSpecificationRanges : range[] = [];
+
 
     constructor() {
         super();
@@ -58,6 +60,13 @@ export class ParenColoringListener extends MotorMusicParserListener {
         res.push(terminalNodeToRange(ctx.RPAREN()));
         return res.concat(getAllDirectionSpecifierRangesFromMotionSpecListContext(ctx._motion_spec));
     }
+
+    enterPitchSpecificationStatement =  (ctx: PitchSpecificationStatementContext) => {
+        this.pitchSpecificationRanges.push(terminalNodeToRange(ctx.PITCH_SPECIFICATION_VALUE()));
+        this.pitchSpecificationRanges.push(terminalNodeToRange(ctx.PITCH_SPECIFICATION()));
+    }
+    
+   
 
     enterDirectionSpec = (ctx : DirectionSpecContext) => {
         let currentDepth = this.currentParensInScope.length;
@@ -180,6 +189,12 @@ private hslToHex(h: number, s: number, l: number): string {
     //call this after walking the parse tree to generate the colors 
     public buildColorMap() : Map<range, string>{
         let res = new Map();
+
+        for (let range of this.pitchSpecificationRanges) {
+            //set it to white for these
+            res.set(serializeRange(range), "#FFFFFF"); //pitch specification is always at depth 0
+        }
+
         for (let parenData of this.finalizedData) { 
             //maxDepth starts at 0 
             //console.log("p depth is " + parenData.depth);
