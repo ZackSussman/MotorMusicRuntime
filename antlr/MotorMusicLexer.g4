@@ -4,7 +4,10 @@ channels { WS_CHANNEL }
 
 WS: ('\r\n'+ | '\r'+ | '\n'+ | [ \t]+) -> channel(WS_CHANNEL);
 
-SYLLABLE : ([qtplkjgfdszxcvbnmhrw]+[aeiuyo]*[qtplkjgfdszxcvbnmhrw]* | [aeiuyo]+[qtplkjgfdszxcvbnmhrw]*) [0-8]?;
+SYLLABLE : DEFAULT_SYLLABLE | TWELVE_TET_SYLLABLE;
+
+fragment DEFAULT_SYLLABLE : [qtplkjgfdszxcvbnmhrw]+[aeiuyo]*[qtplkjgfdszxcvbnmhrw]* | [aeiuyo]+[qtplkjgfdszxcvbnmhrw]*;
+fragment TWELVE_TET_SYLLABLE : [A-G] [#b]? [0-8]?;
 
 NUMBER : [0-9]+ | [0-9]+.[0-9]+ | '.'[0-9]+;
 
