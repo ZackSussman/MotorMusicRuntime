@@ -38,6 +38,9 @@ export class TwelveTET extends PitchSpecification {
     frequencyOfA4 : number;
     constructor(frequencyOfA4 : number) {
         super();
+        if (frequencyOfA4 === undefined) {
+            throw new Error("Frequency value must be passed in");
+        }
         this.frequencyOfA4 = frequencyOfA4;
     }
 
