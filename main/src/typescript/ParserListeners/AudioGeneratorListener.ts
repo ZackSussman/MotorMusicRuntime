@@ -191,10 +191,16 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
         this.pitchSpecification = resolvePitchSpecificationString("Default()");
+        if (this.pitchSpecification === undefined) {
+            throw new Error("Pitch Specification Initialization Failure");
+        }
     }
 
     enterNonEmptyProgarmWithPitchSpecification = (ctx : NonEmptyProgramWithPitchSpecificationContext) => {
         this.pitchSpecification = resolvePitchSpecificationString((ctx.pitch_specification_statement() as PitchSpecificationStatementContext).PITCH_SPECIFICATION_VALUE().getText());
+        if (this.pitchSpecification === undefined) {
+            throw new Error("Pitch Specification Initialization Failure");
+        }
     }
 
     //when finished, convert our built up audio to the audio stream
