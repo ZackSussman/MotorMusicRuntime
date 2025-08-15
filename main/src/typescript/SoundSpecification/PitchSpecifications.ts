@@ -87,20 +87,30 @@ export function resolvePitchSpecificationString(pitchSpecificationString : strin
     console.log("pitch specification string is " + pitchSpecificationString);
     let tsCode = pitchSpecificationString.trim();
     console.log("ts code is " + tsCode);
-    // Restrict to only allowed class instantiations
-    const allowedClasses = [
-        "Default",
-        "TwelveTET"
-    ];
-    // Regex: must start with allowed class name and end with parentheses
-    const instantiationRegex = new RegExp(`^(${allowedClasses.join("|")})\\s*\(.*\)$`);
-    if (!instantiationRegex.test(tsCode)) {
-        throw new Error("Pitch specification string must start with an allowed class name and end with parentheses. We were given " + tsCode);
+    
+    // Parse the class name and arguments
+    const match = tsCode.match(/^(\w+)\s*\((.*)\)$/);
+    if (!match) {
+        throw new Error("Pitch specification string must be in format 'ClassName(args)'. We were given " + tsCode);
     }
-    // If 'new' is missing, add it
-    if (!tsCode.startsWith("new")) {
-        tsCode = "new " + tsCode;
+    
+    const className = match[1];
+    const argsString = match[2].trim();
+    
+    // Directly instantiate classes instead of using eval
+    switch (className) {
+        case "Default":
+            return new Default();
+        case "TwelveTET":
+            if (!argsString) {
+                throw new Error("TwelveTET requires a frequency argument");
+            }
+            const frequency = Number(argsString);
+            if (isNaN(frequency)) {
+                throw new Error("TwelveTET frequency must be a number");
+            }
+            return new TwelveTET(frequency);
+        default:
+            throw new Error(`Unknown pitch specification class: ${className}`);
     }
-    // eslint-disable-next-line no-eval
-    return eval(tsCode) as PitchSpecification;
 }
