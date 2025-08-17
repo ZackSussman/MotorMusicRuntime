@@ -28,10 +28,15 @@ motion_spec_list:
   | top = raised_gesture_list CARROT rest = raised_gesture_list #EndTowardsMotionSpec
 ;
 
+syllable_group:
+    syllable = SYLLABLE #SyllableGroupSingle
+  | top = SYLLABLE AMPERSAND rest = syllable_group #SyllableGroupMulti
+;
+
 gesture:
     UNDERSCORE #Empty
   | number = NUMBER UNDERSCORE #TimeTaggedEmpty
-  | syllable = SYLLABLE #Syllable
-  | number = NUMBER syllable = SYLLABLE #TimeTaggedSyllable
+  | syllables = syllable_group #SyllableGroup
+  | number = NUMBER syllables = syllable_group #TimeTaggedSyllableGroup
   | LPAREN motion_spec = motion_spec_list RPAREN #DirectionSpec
 ;

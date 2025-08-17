@@ -3,7 +3,7 @@
 /// <reference path="../../../../node_modules/monaco-editor/monaco.d.ts" />
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 
-import {EmptyProgramContext, NonEmptyProgramWithPitchSpecificationContext, SyllableContext, TimeTaggedEmptyContext, TimeTaggedSyllableContext, EmptyContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, PitchSpecificationStatementContext} from "../../../../antlr/generated/MotorMusicParser";
+import {EmptyProgramContext, NonEmptyProgramWithPitchSpecificationContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, EmptyContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, PitchSpecificationStatementContext} from "../../../../antlr/generated/MotorMusicParser";
 import { durationToSamples } from "../audio/Audio";
  import {DELAY_BEFORE_PLAYBACK_START} from "../../runtime-business/RuntimeConstants";
 import {audio, audioStream, audioToAudioStream, silence, seconds, sampleMap} from "../audio/Audio";
@@ -23,6 +23,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     //this is where we will write the final audio to
     audioStream : audioStream;
 
+    accumulatedSyllableGroupSize : number = 0; //this is the size of the syllable group we are currently processing, we must store it so we can normalize the audio at the end 
+    accumulatedSyllableGroupAudio : audio = []; //this is the audio for the syllable group we are currently processing, it will be added to the audioStream at the end of the syllable group
 
     //we build this up as we process the code and at the end we convert it to the stream
     audio : audio;
@@ -36,7 +38,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     currentParensInScope : DirectionSpecContext[]
 
 
-    currentSyllableIndex : number //store the (global) index of the current syllable
+    currentSyllableGroupIndex : number //store the (global) index of the current syllable
+    currentSyllableGroupTimeTag : number //the amount of time specified in front of the syllable group...if not present, default to 1
 
     constructor(syllableLength : number, 
                 parensAccumData : Map<DirectionSpecContext, BraceAccumData>) {
@@ -45,7 +48,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.parensAccumData = parensAccumData;
         this.currentParensInScope = [];
         this.audio = new Array(durationToSamples(DELAY_BEFORE_PLAYBACK_START / 1000)).fill([0, 0]); //this is to fix the initial click of starting the audio context and then throwing sound out, it just forces the audio to start peacefully for about .1 seconds first
-        this.currentSyllableIndex = 0;
+        this.currentSyllableGroupIndex = 0;
+        this.currentSyllableGroupTimeTag = 1; //keep this at 1 unless changed by a time tagged syllable group
     }
 
 
@@ -77,12 +81,12 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             //parenInfo.sectionStartIndices is the sorted array of start indices of each section for this brace. Thus, 
             //the last one which is less than or equal to our start index is the first one we belong to. Note we may
             //not always obtain equality due to nesting of direction specs
-            let currentSectionIndex = parenInfo.sectionStartIndices.findLastIndex(n => n <= this.currentSyllableIndex);
+            let currentSectionIndex = parenInfo.sectionStartIndices.findLastIndex(n => n <= this.currentSyllableGroupIndex);
             let currentSectionFirstSyllableIndex = parenInfo.sectionStartIndices[currentSectionIndex];
             //pretty sure we can show that currentSectionIndex is never the last one due to how the tacked on one will never be the current syllable as the brace would be out of scope at that point
             let firstIndexAfterThisChunk = parenInfo.sectionStartIndices[currentSectionIndex + 1];
             let areWeGoingTowards = (parenInfo.startsWithTowards) == (currentSectionIndex % 2 == 0);
-            let percentThroughChunk = (this.currentSyllableIndex - currentSectionFirstSyllableIndex) / (firstIndexAfterThisChunk - currentSectionFirstSyllableIndex);
+            let percentThroughChunk = (this.currentSyllableGroupIndex - currentSectionFirstSyllableIndex) / (firstIndexAfterThisChunk - currentSectionFirstSyllableIndex);
             if (areWeGoingTowards) {          
                 tension *= percentThroughChunk + MIN_TENSION * (1 - percentThroughChunk);
             }
@@ -96,6 +100,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     //use this, which is O(|a|) for linear audio generation
     addToAudio(a : audio) {
+
         for (let sample of a) {
             this.audio.push(sample);
         }
@@ -109,48 +114,9 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.currentParensInScope.pop();
     }
     
-
-    //construct the audio for a syllable and add to our built up audio
-    enterSyllable =  (ctx : SyllableContext) => {
+    getAudioForSyllable(syllable : string ) : audio {
         let tension = this.getCurrentSyllableTension();
-        let tensionLowerBound = this.computeTensionLowerBound();
-        let tensionRampedFromZeroToOne = 1; //this is the value if tensionLowerBound == 1
-        if (tensionLowerBound < 1)
-            tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
-        let sinWave : audio = makeSin(this.pitchSpecification.syllableAndTensionToPitch(ctx.SYLLABLE().getText(), tensionRampedFromZeroToOne), this.syllableLength);
-        let attackTime = this.syllableLength / 10;
-        let decay =  (this.syllableLength - attackTime) * Math.pow(tensionRampedFromZeroToOne, 0.5);
-        if (decay < attackTime) {
-            decay = attackTime;
-        }
-        let enveloped : audio = applyAdsr(sinWave, 
-            attackTime,
-            decay,
-            0,
-            0,
-            .5 + 2*(1 - tensionRampedFromZeroToOne) //exponent
-        )
-        this.addToAudio(
-           enveloped.map((sample) => sampleMap(sample, (sample) => sample * Math.sqrt(tension)))
-        );
-    };
-
-    exitSyllable = (_: SyllableContext) => {
-        this.currentSyllableIndex += 1;
-    }
-    exitTimeTaggedSyllable = (_ : TimeTaggedSyllableContext) => {
-        this.currentSyllableIndex += 1;
-    }
-    exitEmpty = ( _ : EmptyContext) => {
-        this.currentSyllableIndex += 1;
-    }
-    exitTimeTaggedEmpty = (_: TimeTaggedEmptyContext) => {
-        this.currentSyllableIndex += 1;
-    }
-
-    enterTimeTaggedSyllable = (ctx : TimeTaggedSyllableContext) => {
-        let tension = this.getCurrentSyllableTension();
-        let syllableLengthMultiplier = Number(ctx.NUMBER().getText());
+        let syllableLengthMultiplier = this.currentSyllableGroupTimeTag;
         let thisSyllableLength = this.syllableLength * syllableLengthMultiplier;
         let attackTime = thisSyllableLength / 10;
         let tensionLowerBound = this.computeTensionLowerBound();
@@ -162,18 +128,74 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         if (decay < attackTime) {
             decay = attackTime;
         }
-        this.addToAudio(
-            applyAdsr
+        return applyAdsr
                 (
-                    makeSin(this.pitchSpecification.syllableAndTensionToPitch(ctx.SYLLABLE().getText(), tensionRampedFromZeroToOne), thisSyllableLength),
+                    makeSin(this.pitchSpecification.syllableAndTensionToPitch(syllable, tensionRampedFromZeroToOne), thisSyllableLength),
                     attackTime,
                     decay,
                     0,
                     0,
                     .5 + 2*(1 - tensionRampedFromZeroToOne) //exponent
-                ).map((sample) => sampleMap(sample, (sample) => sample * Math.sqrt(tension)))
-        );
+                ).map((sample) => sampleMap(sample, (sample) => sample * Math.sqrt(tension)));
     }
+  
+    //construct the audio for a syllable and add to our built up audio
+    enterSyllableGroupSingle =  (ctx : SyllableGroupSingleContext) => {
+        let audio = this.getAudioForSyllable(ctx.SYLLABLE().getText());
+        if (this.accumulatedSyllableGroupAudio.length == 0) {
+            this.addToAudio(audio);
+        }
+        else {
+            //this audio must be the same length as the accumulated data. 
+            if (this.accumulatedSyllableGroupAudio.length != audio.length) {
+                throw new Error("Internal Error: audio lengths for syllable group do not match");
+            }
+            this.addToAudio(this.accumulatedSyllableGroupAudio.map((sample, index) => {
+                return [(sample[0] + audio[index][0]) / (this.accumulatedSyllableGroupSize + 1), (sample[1] + audio[index][1]) / (this.accumulatedSyllableGroupSize + 1)];
+            }));
+        }
+     
+    };
+    //called at the end of every syllable group
+    exitSyllableGroupSingle = (_: SyllableGroupSingleContext) => {
+        this.currentSyllableGroupIndex += 1;
+        this.accumulatedSyllableGroupAudio = []; 
+        this.accumulatedSyllableGroupSize = 0;
+    }
+
+
+    enterSyllableGroupMulti = (ctx : SyllableGroupMultiContext) => {
+        let audio = this.getAudioForSyllable(ctx.SYLLABLE().getText());
+        this.accumulatedSyllableGroupSize += 1;
+        //need to add this audio signal together with the current accumulated audio for this syllable group
+        if (this.accumulatedSyllableGroupAudio.length == 0) {
+            this.accumulatedSyllableGroupAudio = audio;
+        }
+        //this audio must be the same length as the accumulated data. 
+        else if (this.accumulatedSyllableGroupAudio.length != audio.length) {
+            throw new Error("Internal Error: audio lengths for syllable group do not match");
+        }
+        else {
+            this.accumulatedSyllableGroupAudio = this.accumulatedSyllableGroupAudio.map((sample, index) => {
+                return [sample[0] + audio[index][0], sample[1] + audio[index][1]];
+            });
+        }
+    }
+
+    enterTimeTaggedSyllableGroup = (ctx : TimeTaggedSyllableGroupContext) => {
+        this.currentSyllableGroupTimeTag = Number(ctx.NUMBER().getText());
+    }
+    exitTimeTaggedSyllableGroup = (_ : TimeTaggedSyllableGroupContext) => {
+        this.currentSyllableGroupTimeTag = 1;
+    }
+
+    exitEmpty = ( _ : EmptyContext) => {
+        this.currentSyllableGroupIndex += 1;
+    }
+    exitTimeTaggedEmpty = (_: TimeTaggedEmptyContext) => {
+        this.currentSyllableGroupIndex += 1;
+    }
+    
 
     enterEmpty = (_ : EmptyContext) => {
         this.addToAudio(
