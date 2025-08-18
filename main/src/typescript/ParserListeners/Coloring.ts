@@ -274,14 +274,20 @@ private hslToHex(h: number, s: number, l: number): string {
                 }
             }
             for (let ampersandRange of parenData.ampersandRanges) {
+                console.log("darkening color for not single object data");
                 res.set(serializeRange(ampersandRange), this.darkenColor(thisParenColor));
             }
                                                                            
         }
       
         if (this.singleObjectData != undefined) {
+            let colorToUse = this.getDistinctColor(0, 1);
             for (let range of this.singleObjectData.syllableRanges) {
-                res.set(serializeRange(range), this.getDistinctColor(0, 1));
+                res.set(serializeRange(range), this.brightenColor(colorToUse));
+            }
+            for (let range of this.singleObjectData.ampersandRanges) {
+                console.log("darkening color for ampersand single object data");
+                res.set(serializeRange(range), this.darkenColor(colorToUse));
             }
         }
       
