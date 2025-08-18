@@ -132,15 +132,20 @@ export class ParenColoringListener extends MotorMusicParserListener {
         this.processAmpersand(ctx.AMPERSAND());
     }
 
-    enterSyllableGroup =  (ctx: SyllableGroupContext) => {
-        //prepare for the upcoming syllable group
-        this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
+    enterSyllableGroup =  (_: SyllableGroupContext) => {
+         //prepare for the upcoming syllable group
+        if (this.currentParensInScope.length > 0) {
+            this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
+        }
+      
     }
 
     enterTimeTaggedSyllableGroup =  (ctx: TimeTaggedSyllableGroupContext) => {
-        //prepare for the upcoming syllable group
-        this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
-        //start it off by treating the timetag as a syllable
+        if (this.currentParensInScope.length > 0 ) {
+            //prepare for the upcoming syllable group
+            this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
+            //start it off by treating the timetag as a syllable
+        }
         this.processSyllable(ctx.NUMBER());
     }
 
