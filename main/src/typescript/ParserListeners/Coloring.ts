@@ -24,6 +24,7 @@ class ParenData {
         this.ParenBasedRanges = r;
         this.depth = d;
         this.immediateSyllableBasedRanges = [];
+        this.ampersandRanges = [];
     } 
 }
 
