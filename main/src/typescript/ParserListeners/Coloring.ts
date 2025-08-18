@@ -211,7 +211,7 @@ private hslToHex(h: number, s: number, l: number): string {
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-    private brightenColor(hex: string, amount: number = -30): string {
+    private brightenColor(hex: string, amount: number = 30): string {
         // Remove the '#' if it exists
         hex = hex.replace(/^#/, "");
     
