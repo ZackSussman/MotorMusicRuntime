@@ -2,7 +2,8 @@
 /// <reference path="../../../../node_modules/monaco-editor/monaco.d.ts" />
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 //                                      context for {|}  context for (|)
-import { SyllableContext, EmptyContext, DirectionSpecContext, TimeTaggedEmptyContext, TimeTaggedSyllableContext, SingleMotionSpecUpContext, 
+import { EmptyContext, DirectionSpecContext, TimeTaggedEmptyContext, SingleMotionSpecUpContext,
+         SyllableGroupContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedSyllableGroupContext, 
         SingleMotionSpecDownContext, TowardsPrefixMotionSpecContext, AwayPrefixMotionSpecContext, Motion_spec_listContext, EndAwayFromMotionSpecContext, EndTowardsMotionSpecContext
 } from "../../../../antlr/generated/MotorMusicParser";
 import { TerminalNode } from "antlr4";
@@ -46,14 +47,16 @@ export class DirectionSpecAnimationInfo {
 
 //the object stores the info that is needed by the JS to perform its animation
 export class AnimationInfo {
-    currentSyllableRanges : range[]; //array of ranges to light up for the current syllable 
+    currentSyllableGroupSyllableRanges : range[]; //array of ranges for the syllables to light up for the current syllable group 
+    currentSyllableGroupAmpersandRanges : range[]; //ranges for the ampersands in the current syllable group
     //note we need it to be an array so we can potentially have information for a syllable as well as a number in front of it 
     currentSyllableLocation : number; //from 0 to 1, tells us how far along the syllable we are 
     //all sets of braces that the current scope lies within are stored between the following field
     parensInfo : DirectionSpecAnimationInfo[];
-    constructor(syllableRanges : range[], csLoc : number, p : DirectionSpecAnimationInfo[]) {
-        this.currentSyllableRanges = syllableRanges;
-        this.currentSyllableLocation = csLoc;
+    constructor(syllableGroupSyllableRanges : range[], syllableGroupAmpersandRanges : range[], syllableLocation : number, p : DirectionSpecAnimationInfo[]) {
+        this.currentSyllableGroupSyllableRanges = syllableGroupSyllableRanges;
+        this.currentSyllableGroupAmpersandRanges = syllableGroupAmpersandRanges;
+        this.currentSyllableLocation = syllableLocation;
         this.parensInfo = p;
     }
 }
@@ -82,14 +85,18 @@ export class BraceAccumData {
 }
 
 //data for each syllable that we will accumulate in their order as we parse
-class SyllableData {
+//note that this can also represent the data for a syllable group where that syllable group is just an underscore
+//in this case, the syllableRanges array will contain just the range for that underscore
+class SyllableGroupData {
     duration : number; //units of this are in pulses (so it's the number of pulses)
-    syllable_range : range //where is the syllable in the code 
-    number_range : range //range for the corresponding number, may be undefined if the syllable does not have a number 
-    constructor(d : number, r : range, nr : range) {
-        this.duration = d;
-        this.syllable_range = r;
-        this.number_range = nr;
+    syllableRanges : range[] //where are the syllables in the code 
+    numberRange : range //range for the corresponding number, may be undefined if the syllable does not have a number 
+    ampersandRanges : range[] //ranges for the ampersands in the syllable group, may be empty
+    constructor(duration : number, syllableRanges : range[], numberRange : range, ampersandRanges : range[]) {
+        this.duration = duration;
+        this.syllableRanges = syllableRanges;
+        this.numberRange = numberRange;
+        this.ampersandRanges = ampersandRanges;
     }
 };
 
@@ -104,7 +111,7 @@ export enum BraceType {
 export class AnimationListener extends MotorMusicParserListener {
 
     timePerPulse : number;
-    orderedSyllableData : SyllableData[] //respects the order of syllables in the code - for each syllable, we store its range 
+    orderedSyllableGroupData : SyllableGroupData[] //respects the order of syllables in the code - for each syllable, we store its range 
    
     //map a syllable range to the set of direction specifications that it lies within
     parensInfo : Map <range, DirectionSpecAnimationInfo[]>;
@@ -120,7 +127,7 @@ export class AnimationListener extends MotorMusicParserListener {
     constructor(syllableLength : number) {
         super();
         this.timePerPulse = syllableLength;
-        this.orderedSyllableData = [];
+        this.orderedSyllableGroupData = [];
         this.parensInfo = new Map();
         this.parensInfo = new Map();
         this.parensAccumData = new Map();
@@ -185,32 +192,39 @@ export class AnimationListener extends MotorMusicParserListener {
         return res;
     }
 
-    exitSyllable = (ctx : SyllableContext) => {
-        const thisSyllableRange : range = this.terminalNodeToRange(ctx.SYLLABLE());
-        //update list of syllables
-		this.orderedSyllableData.push(new SyllableData(1, thisSyllableRange, undefined)); //undefined because there is no time tag
+
+    enterSyllableGroup = (_ : SyllableGroupContext) => {
+        //prepare for the next syllable group
+        this.orderedSyllableGroupData.push(new SyllableGroupData(1, [], undefined, [])); //undefined because there is no time tag
+    }
+    enterTimeTaggedSyllableGroup = (ctx: TimeTaggedSyllableGroupContext) => {
+        //prepare for the next syllable group
+        this.orderedSyllableGroupData.push(new SyllableGroupData(this.numberTokenToNumber(ctx.NUMBER()), [], this.terminalNodeToRange(ctx.NUMBER()), []));
+    }
+    enterEmpty = (ctx : EmptyContext) => {
+        let underscoreRange = this.terminalNodeToRange(ctx.UNDERSCORE());
+        this.orderedSyllableGroupData.push(new SyllableGroupData(1, [underscoreRange], undefined, [])); //duration is 1 because it is an empty syllable
+        this.updateBracesInfosForSyllableRange(underscoreRange);
+    }
+    enterTimeTaggedEmpty = (ctx: TimeTaggedEmptyContext) => {
+        let underscoreRange = this.terminalNodeToRange(ctx.UNDERSCORE());
+        this.orderedSyllableGroupData.push(new SyllableGroupData(this.numberTokenToNumber(ctx.NUMBER()), [underscoreRange], this.terminalNodeToRange(ctx.NUMBER()), []));
+        this.updateBracesInfosForSyllableRange(underscoreRange);
+    }
+    private processSyllable(syllable : TerminalNode) {
+        let thisSyllableRange : range = this.terminalNodeToRange(syllable);
+        this.orderedSyllableGroupData.at(-1).syllableRanges.push(thisSyllableRange);
         this.updateBracesInfosForSyllableRange(thisSyllableRange);
     }
-
-    exitTimeTaggedSyllable = (ctx : TimeTaggedSyllableContext) => {
-        const thisSyllableRange : range = this.terminalNodeToRange(ctx.SYLLABLE());
-        const thisNumberRange : range = this.terminalNodeToRange(ctx.NUMBER());
-        this.orderedSyllableData.push(new SyllableData(this.numberTokenToNumber(ctx.NUMBER()), thisSyllableRange, thisNumberRange));
-        this.updateBracesInfosForSyllableRange(thisSyllableRange);
+    private processAmpersand(ampersand : TerminalNode) {
+        this.orderedSyllableGroupData.at(-1).ampersandRanges.push(this.terminalNodeToRange(ampersand));
     }
-
-    //treat an underscore as a syllable (it is just an empty syllable)
-    exitEmpty = (ctx : EmptyContext) => {
-        let range = this.terminalNodeToRange(ctx.UNDERSCORE());
-        this.orderedSyllableData.push(new SyllableData(1, range, undefined));
-        this.updateBracesInfosForSyllableRange(range);
+    enterSyllableGroupSingle = (ctx: SyllableGroupSingleContext) => {
+        this.processSyllable(ctx.SYLLABLE());
     }
-
-    exitTimeTaggedEmpty = (ctx : TimeTaggedEmptyContext) => {
-        let range = this.terminalNodeToRange(ctx.UNDERSCORE());
-        let numberRange = this.terminalNodeToRange(ctx.NUMBER());
-        this.orderedSyllableData.push(new SyllableData(this.numberTokenToNumber(ctx.NUMBER()), range, numberRange));
-        this.updateBracesInfosForSyllableRange(range);
+    enterSyllableGroupMulti = (ctx: SyllableGroupMultiContext) => {
+        this.processSyllable(ctx.SYLLABLE());
+        this.processAmpersand(ctx.AMPERSAND());
     }
 
     enterDirectionSpec = (ctx : DirectionSpecContext) => {
@@ -223,46 +237,46 @@ export class AnimationListener extends MotorMusicParserListener {
 
         this.currentParensInScope.push(ctx);
         this.parensAccumData.set(ctx, new BraceAccumData(this.currentParensInScope.length - 1, startsWithTowards));
-        this.parensAccumData.get(ctx).sectionStartIndices.push(this.orderedSyllableData.length);   
+        this.parensAccumData.get(ctx).sectionStartIndices.push(this.orderedSyllableGroupData.length);   
     }
 
     exitDirectionSpec = (ctx : DirectionSpecContext) => {
         let dataToUpdate = this.parensAccumData.get(ctx);
-        dataToUpdate.sectionStartIndices.push(this.orderedSyllableData.length);
+        dataToUpdate.sectionStartIndices.push(this.orderedSyllableGroupData.length);
         this.currentParensInScope.pop();
     }
 
     visitTerminal = (t : TerminalNode) => {
         if (t.getText() == "." || t.getText() == "^") {
             //find the most recent brace context and update the appropriate BraceAccumData
-            this.parensAccumData.get(this.currentParensInScope.at(-1)).sectionStartIndices.push(this.orderedSyllableData.length );        
+            this.parensAccumData.get(this.currentParensInScope.at(-1)).sectionStartIndices.push(this.orderedSyllableGroupData.length);        
         }
     }
 
 
     //find the syllable we would be within during this elapsed time
-    private elapsedTimeToSyllableIndex(elapsedTime : number) {
-        let simulatedTimeToStartOfThisSyllable = 0;
-        let currentSyllableIndex = 0;
-        let timeForSyllable = (i : number) => this.timePerPulse * this.orderedSyllableData[i].duration;
-        while (simulatedTimeToStartOfThisSyllable + timeForSyllable(currentSyllableIndex) < elapsedTime) {
-            simulatedTimeToStartOfThisSyllable += timeForSyllable(currentSyllableIndex);
-            currentSyllableIndex += 1;
-            if (currentSyllableIndex >= this.orderedSyllableData.length) {
-                return currentSyllableIndex;
+    private elapsedTimeToSyllableGroupIndex(elapsedTime : number) {
+        let simulatedTimeToStartOfThisSyllableGroup = 0;
+        let currentSyllableGroupIndex = 0;
+        let timeForSyllableGroup = (i : number) => this.timePerPulse * this.orderedSyllableGroupData[i].duration;
+        while (simulatedTimeToStartOfThisSyllableGroup + timeForSyllableGroup(currentSyllableGroupIndex) < elapsedTime) {
+            simulatedTimeToStartOfThisSyllableGroup += timeForSyllableGroup(currentSyllableGroupIndex);
+            currentSyllableGroupIndex += 1;
+            if (currentSyllableGroupIndex >= this.orderedSyllableGroupData.length) {
+                return currentSyllableGroupIndex;
             }
         }
-        return currentSyllableIndex;
+        return currentSyllableGroupIndex;
     }
 
 
     //find the total duration that a range of syllables will take up 
     //if we need to make this function more efficient, we can save a lot of work by storing an accumulated time array
     //and just taking the difference between entries, but for now this should be fine
-    private syllableRangeToTimeLength(startSyllableIndex : number, numSyllablesInRange : number) {
+    private syllableGroupRangeToTimeLength(startSyllableGroupIndex : number, numSyllableGroupsInRange : number) {
         let timeLength = 0;
-        for (let i = 0; i < numSyllablesInRange; i++) {
-            let change = this.orderedSyllableData[i + startSyllableIndex].duration * this.timePerPulse;
+        for (let i = 0; i < numSyllableGroupsInRange; i++) {
+            let change = this.orderedSyllableGroupData[i + startSyllableGroupIndex].duration * this.timePerPulse;
             timeLength += change
         }
         return timeLength;
@@ -271,43 +285,43 @@ export class AnimationListener extends MotorMusicParserListener {
 
     public getAnimationInfoForTime(elapsedTime : number) : AnimationInfo {
 
-        let thisSyllableIndex = this.elapsedTimeToSyllableIndex(elapsedTime);
-        if  (thisSyllableIndex >= this.orderedSyllableData.length) {
+        let thisSyllableGroupIndex = this.elapsedTimeToSyllableGroupIndex(elapsedTime);
+        if  (thisSyllableGroupIndex >= this.orderedSyllableGroupData.length) {
             return undefined;
         }
-        let currentSyllable = this.orderedSyllableData[thisSyllableIndex];
-
-        let currentTimeWithinThisSyllable = (elapsedTime - this.syllableRangeToTimeLength(0, thisSyllableIndex));
-        let totalTimeForThisSyllable = (currentSyllable.duration * this.timePerPulse);
-        let syllableLocation = currentTimeWithinThisSyllable / totalTimeForThisSyllable;
+        let currentSyllableGroup = this.orderedSyllableGroupData[thisSyllableGroupIndex];
+        
+        let currentTimeWithinThisSyllableGroup = (elapsedTime - this.syllableGroupRangeToTimeLength(0, thisSyllableGroupIndex));
+        let totalTimeForThisSyllableGroup = (currentSyllableGroup.duration * this.timePerPulse);
+        let syllableLocation = currentTimeWithinThisSyllableGroup / totalTimeForThisSyllableGroup;
 
          //given the acc data, determine the location within the gesture of the brace
         function locationFromAccData(accData : BraceAccumData, this_ : AnimationListener ) {
             //section is the index of which section of the brace we are in 
-            let sectionIndex = accData.sectionStartIndices.findLastIndex((n : number) => n <= thisSyllableIndex);
+            let sectionIndex = accData.sectionStartIndices.findLastIndex((n : number) => n <= thisSyllableGroupIndex);
             if (sectionIndex < 0) {
-                throw new Error("Invariant broken: syllable index does not lie within syllable start indices. Index is " + thisSyllableIndex + ", indices are " + accData.sectionStartIndices);
+                throw new Error("Invariant broken: syllable group index does not lie within syllable group start indices. Index is " + thisSyllableGroupIndex + ", indices are " + accData.sectionStartIndices);
             }
             //now we must compute the amount through that section that we are 
-            let totalTimeWithinThisSection = this_.syllableRangeToTimeLength(accData.sectionStartIndices[sectionIndex], accData.sectionStartIndices[sectionIndex + 1] - accData.sectionStartIndices[sectionIndex]);
-            let totalTimeSoFarWithinThisSection = elapsedTime - this_.syllableRangeToTimeLength(0, accData.sectionStartIndices[sectionIndex]);
-            
+            let totalTimeWithinThisSection = this_.syllableGroupRangeToTimeLength(accData.sectionStartIndices[sectionIndex], accData.sectionStartIndices[sectionIndex + 1] - accData.sectionStartIndices[sectionIndex]);
+            let totalTimeSoFarWithinThisSection = elapsedTime - this_.syllableGroupRangeToTimeLength(0, accData.sectionStartIndices[sectionIndex]);
+
             return new DirectionSpecLocation(sectionIndex, totalTimeSoFarWithinThisSection/totalTimeWithinThisSection);
             
         }
     
-        let parensAnimationInfos = this.parensInfo.get(currentSyllable.syllable_range);
+        //guarntee: there is at least one syllable in the syllable group and all the syllables in the group point to the same set of parenAnimationInfos
+        let parensAnimationInfos = this.parensInfo.get(currentSyllableGroup.syllableRanges[0]);
 
         parensAnimationInfos.forEach(i => {
             i.currentLocation = locationFromAccData(this.parensAccumData.get(i.ctx), this);
-
         })
 
-        let currentSyllableRanges = [currentSyllable.syllable_range];
-        if (currentSyllable.number_range != undefined) {
-            currentSyllableRanges.push(currentSyllable.number_range);
+        let currentSyllableGroupRanges = currentSyllableGroup.syllableRanges;
+        if (currentSyllableGroup.numberRange != undefined) {
+            currentSyllableGroupRanges.push(currentSyllableGroup.numberRange);
         }
-        return new AnimationInfo(currentSyllableRanges, syllableLocation, parensAnimationInfos);
+        return new AnimationInfo(currentSyllableGroupRanges, currentSyllableGroup.ampersandRanges, syllableLocation, parensAnimationInfos);
     }
 	
 }

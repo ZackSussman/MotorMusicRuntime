@@ -96,9 +96,9 @@ export class ParenColoringListener extends MotorMusicParserListener {
     processSyllable(syllable : TerminalNode) {
         let syllableRange = terminalNodeToRange(syllable);
         if (this.currentParensInScope.length > 0) {
-            let currentParen = this.currentParensInScope[this.currentParensInScope.length - 1];
+            let currentParen = this.currentParensInScope.at(-1);
             let immediateSyllableBasedRangesToWorkWith =  currentParen.immediateSyllableBasedRanges;
-            immediateSyllableBasedRangesToWorkWith[immediateSyllableBasedRangesToWorkWith.length - 1].push(syllableRange);
+            immediateSyllableBasedRangesToWorkWith.at(-1).push(syllableRange);
         }
         else {
             if (this.singleObjectData === undefined) {
@@ -113,7 +113,7 @@ export class ParenColoringListener extends MotorMusicParserListener {
     processAmpersand(ampersand : TerminalNode) {
         let ampersandRange = terminalNodeToRange(ampersand);
         if (this.currentParensInScope.length > 0) {
-            let currentParen = this.currentParensInScope[this.currentParensInScope.length - 1];
+            let currentParen = this.currentParensInScope.at(-1);
             currentParen.ampersandRanges.push(ampersandRange);
         }
         else {
@@ -133,12 +133,12 @@ export class ParenColoringListener extends MotorMusicParserListener {
 
     enterSyllableGroup =  (ctx: SyllableGroupContext) => {
         //prepare for the upcoming syllable group
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push([]);
+        this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
     }
 
     enterTimeTaggedSyllableGroup =  (ctx: TimeTaggedSyllableGroupContext) => {
         //prepare for the upcoming syllable group
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push([]);
+        this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
         //start it off by treating the timetag as a syllable
         this.processSyllable(ctx.NUMBER());
     }
@@ -148,11 +148,11 @@ export class ParenColoringListener extends MotorMusicParserListener {
     //treat empty as a syllable group with a single syllable of _
 
     enterEmpty = (ctx: EmptyContext) => {
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push([]);
+        this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
         this.processSyllable(ctx.UNDERSCORE());
     }
     enterTimeTaggedEmpty = (ctx: TimeTaggedEmptyContext) => {
-        this.currentParensInScope[this.currentParensInScope.length - 1].immediateSyllableBasedRanges.push([]);
+        this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
         this.processSyllable(ctx.NUMBER());
         this.processSyllable(ctx.UNDERSCORE());
     }
