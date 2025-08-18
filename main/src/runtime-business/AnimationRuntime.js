@@ -234,21 +234,25 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
             
                 
                 //1--------------------- syllable ranges
-                let syllableBaselineColor = initialColorStateMap.get(serializeRange(syllableRangeValues[0])); //there is always at least one and they are the same color
+                let amountThroughSyllableGroup = animationInfo.currentSyllableLocation;
+              
                 let ampersandBaselineColor;
+                let ampersandColorToUse;
                 if (ampersandRangeValues.length > 0) {
                     ampersandBaselineColor = initialColorStateMap.get(serializeRange(ampersandRangeValues[0])); //ampersands baseline to the same color
-                }
-
-                let amountThroughSyllableGroup = animationInfo.currentSyllableLocation;
-                let syllableColorToUse = morphToWhite(syllableBaselineColor, Math.pow(Math.sin(Math.PI * amountThroughSyllableGroup), .66) ); //square for a tighter animation
-                let ampersandColorToUse = morphToWhite(ampersandBaselineColor, Math.pow(Math.sin(Math.PI * amountThroughSyllableGroup), .66));
-                for (let syllableRange of syllableRangeValues) {
-                    colorsToSet.set(serializeRange(syllableRange), syllableColorToUse);
+                    ampersandColorToUse = morphToWhite(ampersandBaselineColor, Math.pow(Math.sin(Math.PI * amountThroughSyllableGroup), .66));
                 }
                 for (let ampersandRange of ampersandRangeValues) {
                     colorsToSet.set(serializeRange(ampersandRange), ampersandColorToUse);
                 }
+
+
+                let syllableBaselineColor = initialColorStateMap.get(serializeRange(syllableRangeValues[0])); //there is always at least one and they are the same color
+                let syllableColorToUse = morphToWhite(syllableBaselineColor, Math.pow(Math.sin(Math.PI * amountThroughSyllableGroup), .66) ); //square for a tighter animation   
+                for (let syllableRange of syllableRangeValues) {
+                    colorsToSet.set(serializeRange(syllableRange), syllableColorToUse);
+                }
+              
                 //-----------------------
 
                 //2---------------------- paren ranges
