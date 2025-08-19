@@ -73,17 +73,17 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 
 	visitTerminal(node: TerminalNode): void {
 
-		function checkChar(symbol : string) {
-			if (this.mostRecentDirectionPerDirectionSpec.at(-1) === symbol) {
-				this.addErrorForTerminalNode("Duplicate direction specifier", node);
+		function checkChar(this_ : MotorMusicParserStaticAnalysisListener, symbol : string) {
+			if (this_.mostRecentDirectionPerDirectionSpec.at(-1) === symbol) {
+				this_.addErrorForTerminalNode("Duplicate direction specifier", node);
 			}
 			else {
-				this.mostRecentDirectionPerDirectionSpec[this.mostRecentDirectionPerDirectionSpec.length - 1] = symbol;
+				this_.mostRecentDirectionPerDirectionSpec[this_.mostRecentDirectionPerDirectionSpec.length - 1] = symbol;
 			}
 		}
 		let text = node.getText();
 		if (text === "^" || text === ".") 
-			checkChar(text);
+			checkChar(this, text);
 
 	}
 
