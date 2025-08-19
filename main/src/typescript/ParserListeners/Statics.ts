@@ -2,7 +2,7 @@
 import {Error} from "../Compile";
 import {ParserRuleContext, TerminalNode} from "antlr4";
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
-import { NonEmptyProgramWithDefaultPitchSpecificationContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext, SyllableGroupMultiContext, SyllableGroupSingleContext, TimeTaggedSyllableGroupContext} from "../../../../antlr/generated/MotorMusicParser";
+import { DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext, SyllableGroupMultiContext, SyllableGroupSingleContext, TimeTaggedSyllableGroupContext} from "../../../../antlr/generated/MotorMusicParser";
 
 import { resolvePitchSpecificationString, PitchSpecification, } from "../SoundSpecification/PitchSpecifications";
 import { resolve } from "path";
@@ -15,6 +15,8 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	parsedText : string
 
 	programText : string
+
+	mostRecentDirectionPerDirectionSpec = [];
 
 
 	pitchSpecification : PitchSpecification = resolvePitchSpecificationString("Default()");
@@ -68,10 +70,36 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 		}
 	}
 
+
+	visitTerminal(node: TerminalNode): void {
+
+		function checkChar(symbol : string) {
+			if (this.mostRecentDirectionPerDirectionSpec.at(-1) === symbol) {
+				this.addErrorForTerminalNode("Duplicate direction specifier", node);
+			}
+			else {
+				this.mostRecentDirectionPerDirectionSpec[this.mostRecentDirectionPerDirectionSpec.length - 1] = symbol;
+			}
+		}
+		let text = node.getText();
+		if (text === "^" || text === ".") 
+			checkChar(text);
+
+	}
+
+	enterDirectionSpec = (_: DirectionSpecContext) => {
+		this.mostRecentDirectionPerDirectionSpec.push("unknown");
+	}
+
+	exitDirectionSpec = (_ : DirectionSpecContext) => {
+		this.mostRecentDirectionPerDirectionSpec.pop();
+	}
+
 	enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
 		this.pitchSpecification = resolvePitchSpecificationString("Default()");
 	}
 
+	
 	enterNonEmptyProgramWithPitchSpecification = (ctx: NonEmptyProgramWithPitchSpecificationContext) => {
 		let pitchSpecificationContext = (ctx.pitch_specification_statement() as PitchSpecificationStatementContext).PITCH_SPECIFICATION_VALUE()
 		let pitchSpecificationText = pitchSpecificationContext.getText();
