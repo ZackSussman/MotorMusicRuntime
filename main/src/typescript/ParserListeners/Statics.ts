@@ -16,8 +16,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 
 	programText : string
 
-	mostRecentDirectionPerDirectionSpec = [];
-
+	mostRecentDirectionPerDirectionSpec : string[]
 
 	pitchSpecification : PitchSpecification = resolvePitchSpecificationString("Default()");
 
@@ -26,6 +25,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
         this.errors = [];
 		this.parsedText = "";
 		this.programText = programText
+		this.mostRecentDirectionPerDirectionSpec = [];
     }
 
 	private addError(message : string, ctx : ParserRuleContext) {
