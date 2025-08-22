@@ -117,7 +117,7 @@ export class ShashavicSpecification extends PitchSpecification {
 
     // Async factory that loads the CSV via fetch
     static async create(baseFrequency: number, spreadsheetName: string): Promise<ShashavicSpecification> {
-        const url = `/ShashavicPitchSpecificationSpreadsheets/${spreadsheetName}.csv`;
+        const url = `/shashavic_pitch_specification_spreadsheets/${spreadsheetName}.csv`;
         const res = await fetch(url);
         if (!res.ok) {
             throw new Error(`Could not load pitch specification spreadsheet: ${url} (status ${res.status})`);
