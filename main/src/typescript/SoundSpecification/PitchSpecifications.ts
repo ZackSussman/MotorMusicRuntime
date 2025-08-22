@@ -1,4 +1,3 @@
-
 let major_scale_scan = [0, 2, 4, 5, 7, 9, 11, 12];
 
 
@@ -88,37 +87,51 @@ export class ShashavicSpecification extends PitchSpecification {
     baseFrequency : number;
     spreadsheetName : string;
     syllableToRatioMap : Map<string, number>;
+
+    // Keep constructor synchronous and lightweight; use the async factory `create` to load CSVs
     constructor(baseFrequency : number, spreadsheetName : string) {
-        console.log("enter shashavic constructor");
         super();
         if (baseFrequency === undefined || spreadsheetName === undefined) {
             throw new Error("Base frequency and spreadsheet name must be provided");
         }
         this.baseFrequency = baseFrequency;
         this.spreadsheetName = spreadsheetName;
-
-        //load the spreadsheet and construct the map 
         this.syllableToRatioMap = new Map<string, number>();
-        let url = "ShashavicPitchSpecificationSpreadsheets/" + this.spreadsheetName + ".csv";
-        let request = new XMLHttpRequest();
-        request.open("GET", url, false); 
-        request.send(null);
-        console.log("sent request to open csv");
-        if (request.status === 200) {
-            let csvText = request.responseText;
-            console.log("csv text is " + csvText);
-            let lines = csvText.split("\n");
-            for (let line of lines) {
-                let [syllable, ratioString] = line.split("|");
-                let ratio = Number(ratioString);
-                if (syllable && !isNaN(ratio)) {
-                    console.log("processing syllable " + syllable + " with ratio " + ratio);
-                    this.syllableToRatioMap.set(syllable.trim().toLowerCase(), ratio);
-                }
+    }
+
+    // Internal initializer from CSV text
+    private initFromCsvText(csvText: string) {
+        const lines = csvText.split(/\r?\n/);
+        for (let line of lines) {
+            if (!line) continue;
+            const parts = line.split("|");
+            if (parts.length < 2) continue;
+            const syllable = parts[0];
+            const ratioString = parts[1];
+            const ratio = Number(ratioString);
+            if (syllable && !isNaN(ratio)) {
+                this.syllableToRatioMap.set(syllable.trim().toLowerCase(), ratio);
             }
-        } else {
-            throw new Error("Could not load pitch specification spreadsheet: " + url);
         }
+    }
+
+    // Async factory that loads the CSV via fetch
+    static async create(baseFrequency: number, spreadsheetName: string): Promise<ShashavicSpecification> {
+        const url = `/ShashavicPitchSpecificationSpreadsheets/${spreadsheetName}.csv`;
+        const res = await fetch(url);
+        if (!res.ok) {
+            throw new Error(`Could not load pitch specification spreadsheet: ${url} (status ${res.status})`);
+        }
+        const contentType = (res.headers.get("content-type") || "").toLowerCase();
+        const bodyText = await res.text();
+        // Guard against SPA dev servers returning HTML (index.html)
+        if (contentType.includes("text/html") || bodyText.trim().startsWith("<")) {
+            throw new Error(`Expected CSV but received HTML from ${url}`);
+        }
+
+        const instance = new ShashavicSpecification(baseFrequency, spreadsheetName);
+        instance.initFromCsvText(bodyText);
+        return instance;
     }
 
     validateSyllable(syllable : string) : boolean {
@@ -131,7 +144,7 @@ export class ShashavicSpecification extends PitchSpecification {
 
 }
 
-export function resolvePitchSpecificationString(pitchSpecificationString : string) : PitchSpecification {
+export async function resolvePitchSpecificationString(pitchSpecificationString : string) : Promise<PitchSpecification> {
     let tsCode = pitchSpecificationString.trim();
     
     // Parse the class name and arguments
@@ -143,7 +156,7 @@ export function resolvePitchSpecificationString(pitchSpecificationString : strin
     const className = match[1];
     const argsString = match[2].trim();
     
-    // Directly instantiate classes instead of using eval
+    // Directly instantiate classes; return Promise for async cases
     switch (className) {
         case "Default":
             return new Default();
@@ -157,18 +170,22 @@ export function resolvePitchSpecificationString(pitchSpecificationString : strin
             }
             return new TwelveTET(frequency);
         default:
-            try {
-                if (className.startsWith("Shashavic")) {
-                    if (!argsString) {
-                        throw new Error("Shashavic pitch specifications require a base frequency argument");
-                    }
-                    let name = className.replace("Shashavic", "").trim();
-                    let baseFrequency = Number(argsString);
-                    return new ShashavicSpecification(baseFrequency, name);
+            if (className.startsWith("Shashavic")) {
+                if (!argsString) {
+                    throw new Error("Shashavic pitch specifications require a base frequency argument");
                 }
-            } catch (error) {
-                throw new Error(`Unknown pitch specification class: ${className}: ` + error.message);
+                // className like 'ShashavicName' => spreadsheet name is the remainder after 'Shashavic'
+                const name = className.replace("Shashavic", "").trim();
+                const baseFrequency = Number(argsString);
+                if (isNaN(baseFrequency)) {
+                    throw new Error("Shashavic base frequency must be a number");
+                }
+                try {
+                    return await ShashavicSpecification.create(baseFrequency, name);
+                } catch (error) {
+                    throw new Error(`ShashavicSpecification: ${name} is not in the library or could not be loaded: ${error.message}`);
+                }
             }
-           
+            throw new Error(`Unknown pitch specification class: ${className}`);
     }
 }
