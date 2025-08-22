@@ -130,7 +130,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         }
         return applyAdsr
                 (
-                    makeSin(this.pitchSpecification.syllableAndTensionToPitch(syllable, tensionRampedFromZeroToOne), thisSyllableLength),
+                    makeSin(this.pitchSpecification.syllableAndTensionToFrequency(syllable, tensionRampedFromZeroToOne), thisSyllableLength),
                     attackTime,
                     decay,
                     0,
