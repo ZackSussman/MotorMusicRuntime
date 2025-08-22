@@ -1,4 +1,3 @@
-let major_scale_scan = [0, 2, 4, 5, 7, 9, 11, 12];
 
 
 
@@ -22,7 +21,8 @@ export class Default extends PitchSpecification {
     //map the unit range that is used for tension values to the frequency value of a note from the major scale
     //this is the default method used to select pitch if the user did not want to use a pitch specification
     syllableAndTensionToFrequency(_ : string, tension : number) : number {
-         let note = undefined
+        let major_scale_scan = [0, 2, 4, 5, 7, 9, 11, 12];
+        let note = undefined
         //round for normal notes but not at the final transition
         if (tension < 6/7) 
             note = Math.round(tension * 7);
@@ -122,11 +122,23 @@ export class ShashavicSpecification extends PitchSpecification {
             if (parts.length < 2) continue;
             const syllable = parts[0];
             const ratioString = parts[1];
-            const ratio = Number(ratioString);
+            const ratio = this.parseRatioString(ratioString);
             if (syllable && !isNaN(ratio)) {
                 this.syllableToRatioMap.set(syllable.trim().toLowerCase(), ratio);
             }
         }
+    }
+
+    // Private helper to parse ratio strings like "5/4", "1.25", or "5"
+    private parseRatioString(ratioString: string): number {
+        const s = ratioString.trim();
+        if (s.includes('/')) {
+            const parts = s.split('/').map(p => p.trim());
+            const top = parseFloat(parts[0]);
+            const bottom = parseFloat(parts[1]);
+            return top / bottom;
+        }
+        return parseFloat(s);
     }
 
     validateSyllable(syllable : string) : boolean {
