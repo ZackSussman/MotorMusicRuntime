@@ -156,7 +156,11 @@ export function resolvePitchSpecificationString(pitchSpecificationString : strin
             return new TwelveTET(frequency);
         default:
             try {
-                return new ShashavicSpecification(440, className); // Assuming className is the spreadsheet name
+                if (className.startsWith("Shashavic")) {
+                    let name = className.replace("Shashavic", "").trim();
+                    let baseFrequency = Number(argsString);
+                    return new ShashavicSpecification(baseFrequency, name);
+                }
             } catch (error) {
                 throw new Error(`Unknown pitch specification class: ${className}: ` + error.message);
             }
