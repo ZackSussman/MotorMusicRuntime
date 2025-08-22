@@ -4,7 +4,9 @@ import {ParseTreeListener} from "antlr4";
 
 
 import { EmptyProgramContext } from "./MotorMusicParser.js";
-import { NonEmptyProgramContext } from "./MotorMusicParser.js";
+import { NonEmptyProgramWithDefaultPitchSpecificationContext } from "./MotorMusicParser.js";
+import { NonEmptyProgramWithPitchSpecificationContext } from "./MotorMusicParser.js";
+import { PitchSpecificationStatementContext } from "./MotorMusicParser.js";
 import { RaisedSingleContext } from "./MotorMusicParser.js";
 import { RaisedMultiContext } from "./MotorMusicParser.js";
 import { SingleMotionSpecDownContext } from "./MotorMusicParser.js";
@@ -13,10 +15,12 @@ import { TowardsPrefixMotionSpecContext } from "./MotorMusicParser.js";
 import { AwayPrefixMotionSpecContext } from "./MotorMusicParser.js";
 import { EndAwayFromMotionSpecContext } from "./MotorMusicParser.js";
 import { EndTowardsMotionSpecContext } from "./MotorMusicParser.js";
+import { SyllableGroupSingleContext } from "./MotorMusicParser.js";
+import { SyllableGroupMultiContext } from "./MotorMusicParser.js";
 import { EmptyContext } from "./MotorMusicParser.js";
 import { TimeTaggedEmptyContext } from "./MotorMusicParser.js";
-import { SyllableContext } from "./MotorMusicParser.js";
-import { TimeTaggedSyllableContext } from "./MotorMusicParser.js";
+import { SyllableGroupContext } from "./MotorMusicParser.js";
+import { TimeTaggedSyllableGroupContext } from "./MotorMusicParser.js";
 import { DirectionSpecContext } from "./MotorMusicParser.js";
 
 
@@ -38,17 +42,41 @@ export default class MotorMusicParserListener extends ParseTreeListener {
 	 */
 	exitEmptyProgram?: (ctx: EmptyProgramContext) => void;
 	/**
-	 * Enter a parse tree produced by the `NonEmptyProgram`
+	 * Enter a parse tree produced by the `NonEmptyProgramWithDefaultPitchSpecification`
 	 * labeled alternative in `MotorMusicParser.compilationUnit`.
 	 * @param ctx the parse tree
 	 */
-	enterNonEmptyProgram?: (ctx: NonEmptyProgramContext) => void;
+	enterNonEmptyProgramWithDefaultPitchSpecification?: (ctx: NonEmptyProgramWithDefaultPitchSpecificationContext) => void;
 	/**
-	 * Exit a parse tree produced by the `NonEmptyProgram`
+	 * Exit a parse tree produced by the `NonEmptyProgramWithDefaultPitchSpecification`
 	 * labeled alternative in `MotorMusicParser.compilationUnit`.
 	 * @param ctx the parse tree
 	 */
-	exitNonEmptyProgram?: (ctx: NonEmptyProgramContext) => void;
+	exitNonEmptyProgramWithDefaultPitchSpecification?: (ctx: NonEmptyProgramWithDefaultPitchSpecificationContext) => void;
+	/**
+	 * Enter a parse tree produced by the `NonEmptyProgramWithPitchSpecification`
+	 * labeled alternative in `MotorMusicParser.compilationUnit`.
+	 * @param ctx the parse tree
+	 */
+	enterNonEmptyProgramWithPitchSpecification?: (ctx: NonEmptyProgramWithPitchSpecificationContext) => void;
+	/**
+	 * Exit a parse tree produced by the `NonEmptyProgramWithPitchSpecification`
+	 * labeled alternative in `MotorMusicParser.compilationUnit`.
+	 * @param ctx the parse tree
+	 */
+	exitNonEmptyProgramWithPitchSpecification?: (ctx: NonEmptyProgramWithPitchSpecificationContext) => void;
+	/**
+	 * Enter a parse tree produced by the `PitchSpecificationStatement`
+	 * labeled alternative in `MotorMusicParser.pitch_specification_statement`.
+	 * @param ctx the parse tree
+	 */
+	enterPitchSpecificationStatement?: (ctx: PitchSpecificationStatementContext) => void;
+	/**
+	 * Exit a parse tree produced by the `PitchSpecificationStatement`
+	 * labeled alternative in `MotorMusicParser.pitch_specification_statement`.
+	 * @param ctx the parse tree
+	 */
+	exitPitchSpecificationStatement?: (ctx: PitchSpecificationStatementContext) => void;
 	/**
 	 * Enter a parse tree produced by the `RaisedSingle`
 	 * labeled alternative in `MotorMusicParser.raised_gesture_list`.
@@ -146,6 +174,30 @@ export default class MotorMusicParserListener extends ParseTreeListener {
 	 */
 	exitEndTowardsMotionSpec?: (ctx: EndTowardsMotionSpecContext) => void;
 	/**
+	 * Enter a parse tree produced by the `SyllableGroupSingle`
+	 * labeled alternative in `MotorMusicParser.syllable_group`.
+	 * @param ctx the parse tree
+	 */
+	enterSyllableGroupSingle?: (ctx: SyllableGroupSingleContext) => void;
+	/**
+	 * Exit a parse tree produced by the `SyllableGroupSingle`
+	 * labeled alternative in `MotorMusicParser.syllable_group`.
+	 * @param ctx the parse tree
+	 */
+	exitSyllableGroupSingle?: (ctx: SyllableGroupSingleContext) => void;
+	/**
+	 * Enter a parse tree produced by the `SyllableGroupMulti`
+	 * labeled alternative in `MotorMusicParser.syllable_group`.
+	 * @param ctx the parse tree
+	 */
+	enterSyllableGroupMulti?: (ctx: SyllableGroupMultiContext) => void;
+	/**
+	 * Exit a parse tree produced by the `SyllableGroupMulti`
+	 * labeled alternative in `MotorMusicParser.syllable_group`.
+	 * @param ctx the parse tree
+	 */
+	exitSyllableGroupMulti?: (ctx: SyllableGroupMultiContext) => void;
+	/**
 	 * Enter a parse tree produced by the `Empty`
 	 * labeled alternative in `MotorMusicParser.gesture`.
 	 * @param ctx the parse tree
@@ -170,29 +222,29 @@ export default class MotorMusicParserListener extends ParseTreeListener {
 	 */
 	exitTimeTaggedEmpty?: (ctx: TimeTaggedEmptyContext) => void;
 	/**
-	 * Enter a parse tree produced by the `Syllable`
+	 * Enter a parse tree produced by the `SyllableGroup`
 	 * labeled alternative in `MotorMusicParser.gesture`.
 	 * @param ctx the parse tree
 	 */
-	enterSyllable?: (ctx: SyllableContext) => void;
+	enterSyllableGroup?: (ctx: SyllableGroupContext) => void;
 	/**
-	 * Exit a parse tree produced by the `Syllable`
+	 * Exit a parse tree produced by the `SyllableGroup`
 	 * labeled alternative in `MotorMusicParser.gesture`.
 	 * @param ctx the parse tree
 	 */
-	exitSyllable?: (ctx: SyllableContext) => void;
+	exitSyllableGroup?: (ctx: SyllableGroupContext) => void;
 	/**
-	 * Enter a parse tree produced by the `TimeTaggedSyllable`
+	 * Enter a parse tree produced by the `TimeTaggedSyllableGroup`
 	 * labeled alternative in `MotorMusicParser.gesture`.
 	 * @param ctx the parse tree
 	 */
-	enterTimeTaggedSyllable?: (ctx: TimeTaggedSyllableContext) => void;
+	enterTimeTaggedSyllableGroup?: (ctx: TimeTaggedSyllableGroupContext) => void;
 	/**
-	 * Exit a parse tree produced by the `TimeTaggedSyllable`
+	 * Exit a parse tree produced by the `TimeTaggedSyllableGroup`
 	 * labeled alternative in `MotorMusicParser.gesture`.
 	 * @param ctx the parse tree
 	 */
-	exitTimeTaggedSyllable?: (ctx: TimeTaggedSyllableContext) => void;
+	exitTimeTaggedSyllableGroup?: (ctx: TimeTaggedSyllableGroupContext) => void;
 	/**
 	 * Enter a parse tree produced by the `DirectionSpec`
 	 * labeled alternative in `MotorMusicParser.gesture`.

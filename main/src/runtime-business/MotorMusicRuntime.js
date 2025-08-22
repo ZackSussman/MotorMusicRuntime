@@ -25,7 +25,7 @@ export function initializeMotorMusicRuntime(onPlaybackStart = () => {}, onPlayba
     let audioRuntimeData = new AudioRuntimeData(null, null, null, undefined);
     let audioRuntime = initializeAudioRuntime(audioRuntimeData);
     let animationRuntimeData = new AnimationRuntimeData(undefined, undefined, false, undefined, new Map(), new Map());
-    let animationRuntime = initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, animationRuntimeData, onPlaybackStart, onPlaybackStop);
+    let animationRuntime = initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, audioRuntime, animationRuntimeData, onPlaybackStart, onPlaybackStop);
     
     let globalRuntime = initializeGlobalRuntime(globalRuntimeData);
 
