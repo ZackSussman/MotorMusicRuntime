@@ -17,6 +17,7 @@ export class AudioRuntimeData {
 
 export function initializeAudioRuntime(audioRuntimeData) {
 
+
   function initializeAudioContext() {
       if (!audioRuntimeData.audioContext || audioRuntimeData.audioContext.state === 'closed') {
         audioRuntimeData.audioContext = new AudioContext({ latencyHint: "interactive", sampleRate: PLAYBACK_SAMPLE_RATE});

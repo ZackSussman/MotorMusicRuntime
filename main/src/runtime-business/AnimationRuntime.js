@@ -78,7 +78,7 @@ export class AnimationRuntimeData {
     }
 }
 
-export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, animationRuntimeData, onPlaybackStart, onPlaybackStop) {
+export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, audioRuntime, animationRuntimeData, onPlaybackStart, onPlaybackStop) {
 
     function ensureCssHasAClassForThisColorAndReturnClassName(document, color) {
         // If already added, return the existing class name
@@ -200,6 +200,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     repaintColors(editor, document, initialColorStateMap);
                     animationRuntimeData.areWeCurrentlyPlayingBack = false;
                     onPlaybackStop();
+                    audioRuntime.fadeOutAudio();
                     return;
                 }
 
