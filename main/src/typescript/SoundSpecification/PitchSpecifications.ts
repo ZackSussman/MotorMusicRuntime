@@ -98,7 +98,7 @@ export class ShashavicSpecification extends PitchSpecification {
 
         //load the spreadsheet and construct the map 
         this.syllableToRatioMap = new Map<string, number>();
-        let url = "ShashavicPitchSpecificationsSpreadsheets/" + this.spreadsheetName + ".csv";
+        let url = "ShashavicPitchSpecificationSpreadsheets/" + this.spreadsheetName + ".csv";
         let request = new XMLHttpRequest();
         request.open("GET", url, false); 
         request.send(null);
@@ -128,9 +128,7 @@ export class ShashavicSpecification extends PitchSpecification {
 }
 
 export function resolvePitchSpecificationString(pitchSpecificationString : string) : PitchSpecification {
-    console.log("pitch specification string is " + pitchSpecificationString);
     let tsCode = pitchSpecificationString.trim();
-    console.log("ts code is " + tsCode);
     
     // Parse the class name and arguments
     const match = tsCode.match(/^(\w+)\s*\((.*)\)$/);
@@ -157,6 +155,9 @@ export function resolvePitchSpecificationString(pitchSpecificationString : strin
         default:
             try {
                 if (className.startsWith("Shashavic")) {
+                    if (!argsString) {
+                        throw new Error("Shashavic pitch specifications require a base frequency argument");
+                    }
                     let name = className.replace("Shashavic", "").trim();
                     let baseFrequency = Number(argsString);
                     return new ShashavicSpecification(baseFrequency, name);
