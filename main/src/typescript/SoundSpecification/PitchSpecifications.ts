@@ -5,7 +5,7 @@ let major_scale_scan = [0, 2, 4, 5, 7, 9, 11, 12];
 
 export abstract class PitchSpecification {
     //converts the syllable and tension at a point in the program to the pitch that should be perceived for that syllable 
-    abstract syllableAndTensionToPitch(syllable : string, tension : number) : number; //hz
+    abstract syllableAndTensionToFrequency(syllable : string, tension : number) : number; //hz
     //determines whether or not the syllable is valid for this particular way of specifying pitches
     abstract validateSyllable(syllable : string) : boolean;
 }
@@ -22,7 +22,7 @@ export class Default extends PitchSpecification {
     
     //map the unit range that is used for tension values to the frequency value of a note from the major scale
     //this is the default method used to select pitch if the user did not want to use a pitch specification
-    syllableAndTensionToPitch(_ : string, tension : number) : number {
+    syllableAndTensionToFrequency(_ : string, tension : number) : number {
          let note = undefined
         //round for normal notes but not at the final transition
         if (tension < 6/7) 
@@ -51,7 +51,7 @@ export class TwelveTET extends PitchSpecification {
         return regex.test(syllable);
     }
 
-    syllableAndTensionToPitch(syllable: string, _: number) : number {
+    syllableAndTensionToFrequency(syllable: string, _: number) : number {
         // Parse note and octave
         const match = syllable.match(/^(A|B|C|D|E|F|G)(#|b)?([0-8])?$/);
         if (!match) return NaN;
@@ -82,6 +82,50 @@ export class TwelveTET extends PitchSpecification {
     }
 }
 
+
+//based on a csv file which maps syllables to pitches 
+export class ShashavicSpecification extends PitchSpecification {
+    baseFrequency : number;
+    spreadsheetName : string;
+    syllableToRatioMap : Map<string, number>;
+    constructor(baseFrequency : number, spreadsheetName : string) {
+        super();
+        if (baseFrequency === undefined || spreadsheetName === undefined) {
+            throw new Error("Base frequency and spreadsheet name must be provided");
+        }
+        this.baseFrequency = baseFrequency;
+        this.spreadsheetName = spreadsheetName;
+
+        //load the spreadsheet and construct the map 
+        this.syllableToRatioMap = new Map<string, number>();
+        let url = "ShashavicPitchSpecificationsSpreadsheets/" + this.spreadsheetName + ".csv";
+        let request = new XMLHttpRequest();
+        request.open("GET", url, false); 
+        request.send(null);
+        if (request.status === 200) {
+            let csvText = request.responseText;
+            let lines = csvText.split("\n");
+            for (let line of lines) {
+                let [syllable, ratioString] = line.split("|");
+                let ratio = Number(ratioString);
+                if (syllable && !isNaN(ratio)) {
+                    this.syllableToRatioMap.set(syllable.trim().toLowerCase(), ratio);
+                }
+            }
+        } else {
+            throw new Error("Could not load pitch specification spreadsheet: " + url);
+        }
+    }
+
+    validateSyllable(syllable : string) : boolean {
+        return this.syllableToRatioMap.has(syllable);
+    }
+
+    syllableAndTensionToFrequency(syllable: string, _: number) : number {
+        return this.baseFrequency * this.syllableToRatioMap.get(syllable);
+    }
+
+}
 
 export function resolvePitchSpecificationString(pitchSpecificationString : string) : PitchSpecification {
     console.log("pitch specification string is " + pitchSpecificationString);
