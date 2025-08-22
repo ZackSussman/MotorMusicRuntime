@@ -89,6 +89,7 @@ export class ShashavicSpecification extends PitchSpecification {
     spreadsheetName : string;
     syllableToRatioMap : Map<string, number>;
     constructor(baseFrequency : number, spreadsheetName : string) {
+        console.log("enter shashavic constructor");
         super();
         if (baseFrequency === undefined || spreadsheetName === undefined) {
             throw new Error("Base frequency and spreadsheet name must be provided");
@@ -102,13 +103,16 @@ export class ShashavicSpecification extends PitchSpecification {
         let request = new XMLHttpRequest();
         request.open("GET", url, false); 
         request.send(null);
+        console.log("sent request to open csv");
         if (request.status === 200) {
             let csvText = request.responseText;
+            console.log("csv text is " + csvText);
             let lines = csvText.split("\n");
             for (let line of lines) {
                 let [syllable, ratioString] = line.split("|");
                 let ratio = Number(ratioString);
                 if (syllable && !isNaN(ratio)) {
+                    console.log("processing syllable " + syllable + " with ratio " + ratio);
                     this.syllableToRatioMap.set(syllable.trim().toLowerCase(), ratio);
                 }
             }
