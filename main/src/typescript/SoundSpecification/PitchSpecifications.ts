@@ -88,7 +88,7 @@ export class ShashavicSpecification extends PitchSpecification {
     spreadsheetName : string;
     syllableToRatioMap : Map<string, number>;
 
-    // Keep constructor synchronous and lightweight; use the async factory `create` to load CSVs
+    // Synchronous constructor: performs a guarded synchronous XHR to load the CSV
     constructor(baseFrequency : number, spreadsheetName : string) {
         super();
         if (baseFrequency === undefined || spreadsheetName === undefined) {
@@ -97,11 +97,25 @@ export class ShashavicSpecification extends PitchSpecification {
         this.baseFrequency = baseFrequency;
         this.spreadsheetName = spreadsheetName;
         this.syllableToRatioMap = new Map<string, number>();
-    }
 
-    // Internal initializer from CSV text
-    private initFromCsvText(csvText: string) {
-        const lines = csvText.split(/\r?\n/);
+        // synchronous XHR to load CSV from absolute path under public/
+        const url = `/shashavic_pitch_specification_spreadsheets/${this.spreadsheetName}.csv`;
+        const request = new XMLHttpRequest();
+        try {
+            request.open("GET", url, false);
+            request.send(null);
+        } catch (err) {
+            throw new Error(`Could not load pitch specification spreadsheet: ${url} (${err})`);
+        }
+
+        // If server returned HTML (SPA fallback) some dev servers respond with 200 and index.html
+        const contentType = request.getResponseHeader ? (request.getResponseHeader("Content-Type") || "") : "";
+        const body = request.responseText || "";
+        if (request.status !== 200 || contentType.toLowerCase().includes("text/html") || body.trim().startsWith("<")) {
+            throw new Error(`Could not load pitch specification spreadsheet: ${url} (status ${request.status})`);
+        }
+
+        const lines = body.split(/\r?\n/);
         for (let line of lines) {
             if (!line) continue;
             const parts = line.split("|");
@@ -115,25 +129,6 @@ export class ShashavicSpecification extends PitchSpecification {
         }
     }
 
-    // Async factory that loads the CSV via fetch
-    static async create(baseFrequency: number, spreadsheetName: string): Promise<ShashavicSpecification> {
-        const url = `/shashavic_pitch_specification_spreadsheets/${spreadsheetName}.csv`;
-        const res = await fetch(url);
-        if (!res.ok) {
-            throw new Error(`Could not load pitch specification spreadsheet: ${url} (status ${res.status})`);
-        }
-        const contentType = (res.headers.get("content-type") || "").toLowerCase();
-        const bodyText = await res.text();
-        // Guard against SPA dev servers returning HTML (index.html)
-        if (contentType.includes("text/html") || bodyText.trim().startsWith("<")) {
-            throw new Error(`Expected CSV but received HTML from ${url}`);
-        }
-
-        const instance = new ShashavicSpecification(baseFrequency, spreadsheetName);
-        instance.initFromCsvText(bodyText);
-        return instance;
-    }
-
     validateSyllable(syllable : string) : boolean {
         return this.syllableToRatioMap.has(syllable);
     }
@@ -144,19 +139,17 @@ export class ShashavicSpecification extends PitchSpecification {
 
 }
 
-export async function resolvePitchSpecificationString(pitchSpecificationString : string) : Promise<PitchSpecification> {
-    let tsCode = pitchSpecificationString.trim();
-    
+export function resolvePitchSpecificationString(pitchSpecificationString : string) : PitchSpecification {
     // Parse the class name and arguments
-    const match = tsCode.match(/^(\w+)\s*\((.*)\)$/);
+    const match = pitchSpecificationString.match(/^(\w+)\s*\((.*)\)$/);
     if (!match) {
-        throw new Error("Pitch specification string must be in format 'ClassName(args)'. We were given " + tsCode);
+        throw new Error("Pitch specification string must be in format 'ClassName(args)'. We were given " + pitchSpecificationString);
     }
     
     const className = match[1];
     const argsString = match[2].trim();
     
-    // Directly instantiate classes; return Promise for async cases
+    // Directly instantiate classes
     switch (className) {
         case "Default":
             return new Default();
@@ -181,7 +174,7 @@ export async function resolvePitchSpecificationString(pitchSpecificationString :
                     throw new Error("Shashavic base frequency must be a number");
                 }
                 try {
-                    return await ShashavicSpecification.create(baseFrequency, name);
+                    return new ShashavicSpecification(baseFrequency, name);
                 } catch (error) {
                     throw new Error(`ShashavicSpecification: ${name} is not in the library or could not be loaded: ${error.message}`);
                 }
