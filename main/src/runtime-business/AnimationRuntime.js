@@ -214,13 +214,15 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 for each of the colors above, we must find all the ranges and add them into our color map 
                 */
                 let colorsToSet = new Map();
-                let syllableRangeValues = animationInfo.currentSyllableGroupSyllableRanges;
-                let ampersandRangeValues = animationInfo.currentSyllableGroupAmpersandRanges;
+                let syllableRangeValues = animationInfo.leafSyllableGroup.syllableRanges;
+                let ampersandRangeValues = animationInfo.leafSyllableGroup.ampersandRanges;
                 let bracesInfos = animationInfo.bracesInfo;
 
                 let rangesWeAreGoingToColorNow = (bracesInfos.map(i => [i.openBraceRange, i.closeBraceRange].concat(i.directionIndicatorRanges))).flat().concat(syllableRangeValues).concat(ampersandRangeValues);
                 for (let bracesInfo in bracesInfos) {
                     if (bracesInfo.containerSyllableGroup != undefined) {
+                        console.log("adding syllable ranges: " + bracesInfo.containerSyllableGroup.syllableRanges);
+                        console.log("adding ampersand ranges: " + bracesInfo.containerSyllableGroup.ampersandRanges);
                         rangesWeAreGoingToColorNow = rangesWeAreGoingToColorNow.concat(bracesInfo.containerSyllableGroup.syllableRanges);
                         rangesWeAreGoingToColorNow = rangesWeAreGoingToColorNow.concat(bracesInfo.containerSyllableGroup.ampersandRanges);
                     }
@@ -242,7 +244,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
             
                 
                 //1--------------------- syllable ranges
-                let amountThroughSyllableGroup = animationInfo.currentSyllableLocation;
+                let amountThroughSyllableGroup = animationInfo.leafSyllableGroup.currentLocation;
               
                 let ampersandBaselineColor;
                 let ampersandColorToUse;
