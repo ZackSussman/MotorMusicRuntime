@@ -184,6 +184,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
         //initialColorStateMap is the map of initial colors of the program state before animation begins, mapping ranges to their baseline colors
         initiateAnimation: function initiateAnimation(editor, document, initialColorStateMap, audioStartTime) {
             animationRuntimeData.areWeCurrentlyPlayingBack = true;
+            console.log("initiate animation called");
             onPlaybackStart();
             animationRuntimeData.startTime = audioStartTime;
             //console.log("start time is " + startTime);
@@ -191,7 +192,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
             //update the colors based on the computed animation function 
             function animationRuntime() {
                 const elapsedTime = (audioRuntimeData.audioContext.currentTime - animationRuntimeData.startTime) * 1000;  // Time elapsed in ms
-                console.log("elapside time is " + elapsedTime);
+                console.log("elapsed time is " + elapsedTime);
                 
                 let animationInfo = animationRuntimeData.getAnimationInfoFunction(Math.max(elapsedTime - DELAY_BEFORE_PLAYBACK_START + CORRECTION_FACTOR, 0)); //apply a .1 second shift to align with the delay the audio is forced to have
                 //it gives back undefined once elapside time has gone above what there is actual animation for 
@@ -358,7 +359,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 alterColors(editor, document, colorsToSet);
 
             }
-
+            console.log("set interval");
             animationRuntimeData.intervalId = setInterval(animationRuntime, actualFrameDuration);
         }
 
