@@ -3,7 +3,7 @@
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 import { TerminalNode } from "antlr4";
 import {range, serializeRange, terminalNodeToRange, getAllDirectionSpecifierRangesFromMotionSpecListContext} from "./ParserListenerUtils";
-import {DirectionSpecContext, EmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext, SyllableGroupContext} from "../../../../antlr/generated/MotorMusicParser";
+import {DirectionSpecContext, EmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext, SyllableGroupContext, ContainmentContext} from "../../../../antlr/generated/MotorMusicParser";
 
 
 //Here is where we dynamically decide the actual colors for all the tokens
@@ -17,18 +17,18 @@ class ParenData {
     //the ranges of all the syllables which live at the IMMEDIATE enclosed level of this Paren
     //organized by groups
     //[[group one ranges], [group two ranges], ...]
-    immediateSyllableBasedRanges : range[][] 
+    immediateSyllableGroupBasedRanges : range[][] 
+    immediateAmpersandRanges : range[] //the ranges of all the ampersands binding syllables (or containments) together in the Paren
 
-    ampersandRanges : range[] //the ranges of all the ampersands binding syllables toegther in the Paren
     constructor(r : range[], d : number) {
         this.ParenBasedRanges = r;
         this.depth = d;
-        this.immediateSyllableBasedRanges = [];
-        this.ampersandRanges = [];
+        this.immediateSyllableGroupBasedRanges = [];
+        this.immediateAmpersandRanges = [];
     } 
 }
 
-class SingleObjectData {
+class ParenFreeSyllableGroupData {
     syllableRanges : range[]; //the _ or syllables as well as any time tag 
     ampersandRanges : range[];
 
@@ -42,10 +42,11 @@ class SingleObjectData {
 //for that range 
 export class ParenColoringListener extends MotorMusicParserListener {
 
-    finalizedData : ParenData[]; 
+    parenData : ParenData[]; 
 
-    //in the case that the program consists of just one syllable (no parens), we store the relevant data herer
-    singleObjectData : SingleObjectData;
+    //in the case that the program consists of just one syllable (no parens), or a single containment, we store the 
+    //syllable group data outside of any parens here
+    parenFreeSyllableGroupData : ParenFreeSyllableGroupData;
 
     //the current stack of Parens - when Parens leave and enter, we make the necessary updates
     //only on exit of a Paren can we transfer some of the finalized data to the finalizedData as they are finalized
@@ -54,14 +55,14 @@ export class ParenColoringListener extends MotorMusicParserListener {
     //the maximum depth obtained through the entire program
     maxDepth : number;
 
-    pitchSpecificationRanges : range[] = [];
-
+    pitchSpecificationRanges : range[];
 
     constructor() {
         super();
         this.currentParensInScope = [];
-        this.finalizedData = [];
+        this.parenData = [];
         this.maxDepth = -1;
+        this.pitchSpecificationRanges = [];
     }
 
     private getRangesFromCtx(ctx : DirectionSpecContext) {
@@ -91,22 +92,22 @@ export class ParenColoringListener extends MotorMusicParserListener {
     }
     
     exitDirectionSpec = (_ : DirectionSpecContext) => {
-        this.finalizedData.push(this.currentParensInScope.pop());
+        this.parenData.push(this.currentParensInScope.pop());
     }
 
     processSyllable(syllable : TerminalNode) {
         let syllableRange = terminalNodeToRange(syllable);
         if (this.currentParensInScope.length > 0) {
             let currentParen = this.currentParensInScope.at(-1);
-            let immediateSyllableBasedRangesToWorkWith =  currentParen.immediateSyllableBasedRanges;
+            let immediateSyllableBasedRangesToWorkWith =  currentParen.immediateSyllableGroupBasedRanges;
             immediateSyllableBasedRangesToWorkWith.at(-1).push(syllableRange);
         }
         else {
-            if (this.singleObjectData === undefined) {
-                this.singleObjectData = new SingleObjectData([syllableRange], []);
+            if (this.parenFreeSyllableGroupData === undefined) {
+                this.parenFreeSyllableGroupData = new ParenFreeSyllableGroupData([syllableRange], []);
             }
             else {
-                this.singleObjectData.syllableRanges.push(syllableRange);
+                this.parenFreeSyllableGroupData.syllableRanges.push(syllableRange);
             }
         }
     }
@@ -115,11 +116,11 @@ export class ParenColoringListener extends MotorMusicParserListener {
         let ampersandRange = terminalNodeToRange(ampersand);
         if (this.currentParensInScope.length > 0) {
             let currentParen = this.currentParensInScope.at(-1);
-            currentParen.ampersandRanges.push(ampersandRange);
+            currentParen.immediateAmpersandRanges.push(ampersandRange);
         }
         else {
             //we must already have single object data at this point due to the parsing
-            this.singleObjectData.ampersandRanges.push(ampersandRange);
+            this.parenFreeSyllableGroupData.ampersandRanges.push(ampersandRange);
         }
     }
 
@@ -135,7 +136,7 @@ export class ParenColoringListener extends MotorMusicParserListener {
     enterSyllableGroup =  (_: SyllableGroupContext) => {
          //prepare for the upcoming syllable group
         if (this.currentParensInScope.length > 0) {
-            this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
+            this.currentParensInScope.at(-1).immediateSyllableGroupBasedRanges.push([]);
         }
       
     }
@@ -143,22 +144,34 @@ export class ParenColoringListener extends MotorMusicParserListener {
     enterTimeTaggedSyllableGroup =  (ctx: TimeTaggedSyllableGroupContext) => {
         if (this.currentParensInScope.length > 0 ) {
             //prepare for the upcoming syllable group
-            this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
+            this.currentParensInScope.at(-1).immediateSyllableGroupBasedRanges.push([]);
             //start it off by treating the timetag as a syllable
         }
         this.processSyllable(ctx.NUMBER());
     }
 
-
+    enterContainment =  (ctx: ContainmentContext) => {
+        if (this.currentParensInScope.length > 0) {
+            this.currentParensInScope.at(-1).immediateAmpersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
+        }
+        else {
+            if (this.parenFreeSyllableGroupData === undefined) {
+                this.parenFreeSyllableGroupData = new ParenFreeSyllableGroupData([], [terminalNodeToRange(ctx.AMPERSAND())]);
+            }
+            else {
+                this.parenFreeSyllableGroupData.ampersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
+            }
+        }
+    }
 
     //treat empty as a syllable group with a single syllable of _
 
     enterEmpty = (ctx: EmptyContext) => {
-        this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
+        this.currentParensInScope.at(-1).immediateSyllableGroupBasedRanges.push([]);
         this.processSyllable(ctx.UNDERSCORE());
     }
     enterTimeTaggedEmpty = (ctx: TimeTaggedEmptyContext) => {
-        this.currentParensInScope.at(-1).immediateSyllableBasedRanges.push([]);
+        this.currentParensInScope.at(-1).immediateSyllableGroupBasedRanges.push([]);
         this.processSyllable(ctx.NUMBER());
         this.processSyllable(ctx.UNDERSCORE());
     }
@@ -260,7 +273,7 @@ private hslToHex(h: number, s: number, l: number): string {
             res.set(serializeRange(range), "#FFFFFF"); //pitch specification is always at depth 0
         }
 
-        for (let parenData of this.finalizedData) { 
+        for (let parenData of this.parenData) { 
             //maxDepth starts at 0 
             //console.log("p depth is " + parenData.depth);
             //console.log("max depth is " + this.maxDepth + 1);
@@ -268,24 +281,23 @@ private hslToHex(h: number, s: number, l: number): string {
             for (let range of parenData.ParenBasedRanges) {                                             
                 res.set(serializeRange(range), thisParenColor);
             }
-            for (let group of parenData.immediateSyllableBasedRanges) {
+            for (let group of parenData.immediateSyllableGroupBasedRanges) {
                 for (let range of group) {
                     res.set(serializeRange(range), this.brightenColor(thisParenColor));
                 }
             }
-            for (let ampersandRange of parenData.ampersandRanges) {
-                console.log("darkening color for not single object data");
+            for (let ampersandRange of parenData.immediateAmpersandRanges) {
                 res.set(serializeRange(ampersandRange), this.darkenColor(thisParenColor));
             }
                                                                            
         }
       
-        if (this.singleObjectData != undefined) {
+        if (this.parenFreeSyllableGroupData != undefined) {
             let colorToUse = this.getDistinctColor(0, 1);
-            for (let range of this.singleObjectData.syllableRanges) {
+            for (let range of this.parenFreeSyllableGroupData.syllableRanges) {
                 res.set(serializeRange(range), this.brightenColor(colorToUse));
             }
-            for (let range of this.singleObjectData.ampersandRanges) {
+            for (let range of this.parenFreeSyllableGroupData.ampersandRanges) {
                 console.log("darkening color for ampersand single object data");
                 res.set(serializeRange(range), this.darkenColor(colorToUse));
             }
