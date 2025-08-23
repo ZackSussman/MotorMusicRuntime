@@ -235,6 +235,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     }
                 }
                 for (let range of rangesWeAreGoingToColorNow) {
+                    console.log("checking range " + range);
                     if (!(currentRangesBeingAnimated.has(serializeRange(range)))) 
                         currentRangesBeingAnimated.add(serializeRange(range));
                 }
