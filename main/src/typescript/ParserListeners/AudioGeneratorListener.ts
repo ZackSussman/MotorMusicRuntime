@@ -3,7 +3,7 @@
 /// <reference path="../../../../node_modules/monaco-editor/monaco.d.ts" />
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 
-import {EmptyProgramContext, NonEmptyProgramWithPitchSpecificationContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, EmptyContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, PitchSpecificationStatementContext} from "../../../../antlr/generated/MotorMusicParser";
+import {EmptyProgramContext, NonEmptyProgramWithPitchSpecificationContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, EmptyContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, PitchSpecificationStatementContext, ContainmentContext} from "../../../../antlr/generated/MotorMusicParser";
 import { durationToSamples } from "../audio/Audio";
  import {DELAY_BEFORE_PLAYBACK_START} from "../../runtime-business/RuntimeConstants";
 import {audio, audioStream, audioToAudioStream, silence, seconds, sampleMap} from "../audio/Audio";
@@ -32,21 +32,21 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     //bracketsAccumData and parensAccumData are passed in from the animation parsing, they
     //store valuable info that allow ur to compute amplitudes for our signals
     //bracketsAccumData : Map<ConcatContext, BraceAccumData>
-    parensAccumData : Map<DirectionSpecContext, BraceAccumData>
+    bracesAccumData : Map<DirectionSpecContext | ContainmentContext, BraceAccumData>
 
     //store the set of current braces that are in scope
-    currentParensInScope : DirectionSpecContext[]
+    currentBracesInScope : (DirectionSpecContext | ContainmentContext)[]
 
 
     currentSyllableGroupIndex : number //store the (global) index of the current syllable
     currentSyllableGroupTimeTag : number //the amount of time specified in front of the syllable group...if not present, default to 1
 
     constructor(syllableLength : number, 
-                parensAccumData : Map<DirectionSpecContext, BraceAccumData>) {
+                parensAccumData : Map<DirectionSpecContext | ContainmentContext, BraceAccumData>) {
         super();
         this.syllableLength = syllableLength / 1000; //syllableLength on input is in milliseconds 
-        this.parensAccumData = parensAccumData;
-        this.currentParensInScope = [];
+        this.bracesAccumData = parensAccumData;
+        this.currentBracesInScope = [];
         this.audio = new Array(durationToSamples(DELAY_BEFORE_PLAYBACK_START / 1000)).fill([0, 0]); //this is to fix the initial click of starting the audio context and then throwing sound out, it just forces the audio to start peacefully for about .1 seconds first
         this.currentSyllableGroupIndex = 0;
         this.currentSyllableGroupTimeTag = 1; //keep this at 1 unless changed by a time tagged syllable group
@@ -56,7 +56,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     //.5 is the lower bound for each level, and we have this.currentParensInScope.length levels,
     //where we are always taking a product of the tension from each level
     private computeTensionLowerBound() {
-        return Math.pow(0.5, this.currentParensInScope.length);
+        return Math.pow(0.5, this.currentBracesInScope.length);
     }
 
 
@@ -74,8 +74,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     private getCurrentSyllableTension() {
         const MIN_TENSION = 0.5
         let tension = 1;
-        for (let directionSpecCtx of this.currentParensInScope) {
-            let parenInfo = this.parensAccumData.get(directionSpecCtx);
+        for (let directionSpecCtx of this.currentBracesInScope) {
+            let parenInfo = this.bracesAccumData.get(directionSpecCtx);
             //need to determine for this particular level of motion, whether we are currently headed towards or away from, 
             //and where we are within that chunk             
             //parenInfo.sectionStartIndices is the sorted array of start indices of each section for this brace. Thus, 
@@ -107,11 +107,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
     enterDirectionSpec = (ctx: DirectionSpecContext) => {
-        this.currentParensInScope.push(ctx);
+        this.currentBracesInScope.push(ctx);
     }
 
     exitDirectionSpec = (_: DirectionSpecContext) => {
-        this.currentParensInScope.pop();
+        this.currentBracesInScope.pop();
     }
     
     getAudioForSyllable(syllable : string ) : audio {

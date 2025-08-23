@@ -40,4 +40,5 @@ gesture:
   | number = NUMBER syllables = syllable_group #TimeTaggedSyllableGroup
   | LPAREN motion_spec = motion_spec_list RPAREN #DirectionSpec
   | syllables = syllable_group LCURLY motion_spec = motion_spec_list RCURLY #Containment
+  | number = NUMBER syllables = syllable_group LCURLY motion_spec = motion_spec_list RCURLY #TimeTaggedContainment
 ;

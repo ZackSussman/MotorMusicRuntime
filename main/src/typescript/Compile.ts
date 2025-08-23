@@ -1,7 +1,7 @@
 /// <reference path="../../../node_modules/monaco-editor/monaco.d.ts" />
 import {CharStream, Token} from "antlr4"
 import MotorMusicLexer from "../../../antlr/generated/MotorMusicLexer"
-import { ProcessedSyllableGroupData, ContainingSyllableGroupData } from "./ParserListeners/SyllableGroupProcess";
+import { PreColoringProcessedSyllableGroupData, ContainingSyllableGroupData } from "./ParserListeners/SyllableGroupProcess";
 export function createLexer(input: string) {
     const chars = new CharStream(input);
     const lexer = new MotorMusicLexer(chars);
@@ -102,18 +102,20 @@ function makeProcessForSyllableTime(globalRuntimeData) {
             let prepareProcessedSyllableGroupDataListener = new PrepareProcessedSyllableGroupDataListener();
             ParseTreeWalker.DEFAULT.walk(prepareProcessedSyllableGroupDataListener, tree);
 
-            let animationListener = new AnimationListener(globalRuntimeData.syllableTime);
+            let colorMapBuilder = new ProgramColoringListener(prepareProcessedSyllableGroupDataListener.syllableGroupMap, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
+            ParseTreeWalker.DEFAULT.walk(colorMapBuilder, tree);
+
+            let animationListener = new AnimationListener(globalRuntimeData.syllableTime, prepareProcessedSyllableGroupDataListener.syllableGroupMap, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
             ParseTreeWalker.DEFAULT.walk(animationListener, tree);
             function packageGetAnimationInfo(x : number) {
                 return animationListener.getAnimationInfoForTime(x);
             }
     
-            let audioGeneratorListener = new AudioGeneratorListener(globalRuntimeData.syllableTime, animationListener.parensAccumData);
+            let audioGeneratorListener = new AudioGeneratorListener(globalRuntimeData.syllableTime, animationListener.bracesAccumData);
             ParseTreeWalker.DEFAULT.walk(audioGeneratorListener, tree);
 
 
-            let colorMapBuilder = new ProgramColoringListener(prepareProcessedSyllableGroupDataListener.syllableGroupMap, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
-            ParseTreeWalker.DEFAULT.walk(colorMapBuilder, tree);
+       
 
             return [colorMapBuilder.buildColorMap(), packageGetAnimationInfo, audioGeneratorListener.audioStream, errors];
         }

@@ -4,7 +4,7 @@ import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicPars
 import { TerminalNode } from "antlr4";
 import {range, serializeRange, terminalNodeToRange, getAllDirectionSpecifierRangesFromMotionSpecListContext} from "./ParserListenerUtils";
 import {DirectionSpecContext, EmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext, SyllableGroupContext, ContainmentContext} from "../../../../antlr/generated/MotorMusicParser";
-import { ProcessedSyllableGroupData, ContainingSyllableGroupData } from "./SyllableGroupProcess";
+import { PreColoringProcessedSyllableGroupData, ContainingSyllableGroupData } from "./SyllableGroupProcess";
 
 //Here is where we dynamically decide the actual colors for all the tokens
 
@@ -63,11 +63,11 @@ export class ProgramColoringListener extends MotorMusicParserListener {
 
     //data we are given------------------------------------------------
     //computed by a previous pass through the parse tree by the PrepareProcessedSyllableGroupDataListener
-    syllableGroupData : Map<SyllableGroupContext, ProcessedSyllableGroupData>;
+    syllableGroupData : Map<SyllableGroupContext, PreColoringProcessedSyllableGroupData>;
     containingSyllableGroupData : Map<ContainmentContext, ContainingSyllableGroupData>;
     //--------------------------------------------------------------
 
-    constructor(syllableGroupData : Map<SyllableGroupContext, ProcessedSyllableGroupData>, containmentGroupData : Map<ContainmentContext, ContainingSyllableGroupData>) {
+    constructor(syllableGroupData : Map<SyllableGroupContext, PreColoringProcessedSyllableGroupData>, containmentGroupData : Map<ContainmentContext, ContainingSyllableGroupData>) {
         super();
         this.currentBracesInScope = [];
         this.finalizedData = [];
@@ -117,7 +117,7 @@ export class ProgramColoringListener extends MotorMusicParserListener {
     }
 
 
-    private processSyllableGroupData (data : ProcessedSyllableGroupData) {
+    private processSyllableGroupData (data : PreColoringProcessedSyllableGroupData) {
         if (this.currentBracesInScope.length === 0) {
             //we are not in any braces, so this syllable group is the entire program 
             this.braceFreeSyllableGroupData = new BraceFreeSyllableGroupData(data.syllableRanges, data.ampersandRanges);
