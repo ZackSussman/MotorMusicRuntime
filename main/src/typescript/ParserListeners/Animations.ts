@@ -138,7 +138,8 @@ export class AnimationListener extends MotorMusicParserListener {
     //---------------------------------------------------------------
     syllableGroupData : Map<SyllableGroupContext, PreColoringProcessedSyllableGroupData>;
     containmentGroupData : Map<ContainmentContext, ContainingSyllableGroupData>;
-
+    
+    isCurrentSyllableFromAContainmentGroup : boolean;
 
     //syllableLength is the amount of time in seconds per syllable
     constructor(syllableLength : number, syllableGroupData : Map<SyllableGroupContext, PreColoringProcessedSyllableGroupData>, containmentGroupData : Map<ContainmentContext, ContainingSyllableGroupData>) {
@@ -151,6 +152,7 @@ export class AnimationListener extends MotorMusicParserListener {
         this.currentBracesInScope = []; 
         this.syllableGroupData = syllableGroupData;
         this.containmentGroupData = containmentGroupData;
+        this.isCurrentSyllableFromAContainmentGroup = false;
     }
 
     terminalNodeToRange(n : TerminalNode) : range {
@@ -237,6 +239,8 @@ export class AnimationListener extends MotorMusicParserListener {
         this.orderedLeafSyllableGroupData.push(new AnimationSyllableGroupData(this.numberTokenToNumber(ctx.NUMBER()), [underscoreRange], this.terminalNodeToRange(ctx.NUMBER()), []));
         this.updateBracesInfosForSyllableRange(underscoreRange);
     }
+
+    
     private processSyllable(syllable : TerminalNode) {
         let thisSyllableRange : range = this.terminalNodeToRange(syllable);
         this.orderedLeafSyllableGroupData.at(-1).syllableRanges.push(thisSyllableRange);
@@ -246,11 +250,19 @@ export class AnimationListener extends MotorMusicParserListener {
         this.orderedLeafSyllableGroupData.at(-1).ampersandRanges.push(this.terminalNodeToRange(ampersand));
     }
     enterSyllableGroupSingle = (ctx: SyllableGroupSingleContext) => {
-        this.processSyllable(ctx.SYLLABLE());
+        if (!this.isCurrentSyllableFromAContainmentGroup) {
+            this.processSyllable(ctx.SYLLABLE());
+        }
+        else {
+            this.isCurrentSyllableFromAContainmentGroup = false; //end of containment group
+        }
+   
     }
     enterSyllableGroupMulti = (ctx: SyllableGroupMultiContext) => {
-        this.processSyllable(ctx.SYLLABLE());
-        this.processAmpersand(ctx.AMPERSAND());
+        if (!this.isCurrentSyllableFromAContainmentGroup) {
+            this.processSyllable(ctx.SYLLABLE());
+            this.processAmpersand(ctx.AMPERSAND());
+        }
     }
 
     enterDirectionSpec = (ctx : DirectionSpecContext) => {
@@ -276,6 +288,7 @@ export class AnimationListener extends MotorMusicParserListener {
         this.currentBracesInScope.push(ctx);
         this.bracesAccumData.set(ctx, new BraceAccumData(this.currentBracesInScope.length -1, startsWithTowards, this.containmentGroupData.get(ctx)));
         this.bracesAccumData.get(ctx).sectionStartIndices.push(this.orderedLeafSyllableGroupData.length);
+        this.isCurrentSyllableFromAContainmentGroup = true;
     }
  
     exitDirectionSpec = (ctx : DirectionSpecContext) => {
