@@ -39,5 +39,5 @@ gesture:
   | syllables = syllable_group #SyllableGroup
   | number = NUMBER syllables = syllable_group #TimeTaggedSyllableGroup
   | LPAREN motion_spec = motion_spec_list RPAREN #DirectionSpec
-  | syllables = syllable_group AMPERSAND LPAREN motion_spec = motion_spec_list RPAREN #Containment
+  | syllables = syllable_group LCURLY motion_spec = motion_spec_list RCURLY #Containment
 ;
