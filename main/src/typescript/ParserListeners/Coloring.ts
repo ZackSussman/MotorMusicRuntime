@@ -143,6 +143,9 @@ export class ProgramColoringListener extends MotorMusicParserListener {
         if (this.currentBracesInScope.length === 0) {
             //we are not in any braces, so this containment is on the outside of the whole program
             this.braceFreeSyllableGroupData = new BraceFreeSyllableGroupData(containmentData.syllableRanges, containmentData.ampersandRanges);
+            this.currentBracesInScope.push(new BraceData(
+                this.getRangesFromContainmentCtx(ctx), 0)
+            );
             return;
         }
         
