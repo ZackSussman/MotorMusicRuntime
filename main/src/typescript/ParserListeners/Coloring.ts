@@ -146,6 +146,7 @@ export class ProgramColoringListener extends MotorMusicParserListener {
             this.currentBracesInScope.push(new BraceData(
                 this.getRangesFromContainmentCtx(ctx), 0)
             );
+            this.maxDepth = 1;
             return;
         }
         
