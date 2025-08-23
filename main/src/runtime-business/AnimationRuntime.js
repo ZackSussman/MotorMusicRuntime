@@ -267,7 +267,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
 
                 //2---------------------- paren ranges + containing syllable group ranges
                 for (let bracesInfo of bracesInfos) {
-                    let initialGroupingColorToUse = initialColorStateMap.get(serializeRange(bracesInfo.openParenRange));
+                    let initialGroupingColorToUse = initialColorStateMap.get(serializeRange(bracesInfo.openBraceRange));
                     let section = bracesInfo.currentLocation.section;
                     let amount = bracesInfo.currentLocation.amount;
                     let startsWithTowards = bracesInfo.startsWithTowards;
@@ -293,8 +293,8 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     color = morphToWhite(initialGroupingColorToUse, 1 - amount);
                     }
 
-                    colorsToSet.set(serializeRange(bracesInfo.openParenRange), color);
-                    colorsToSet.set(serializeRange(bracesInfo.closeParenRange), color);
+                    colorsToSet.set(serializeRange(bracesInfo.openBraceRange), color);
+                    colorsToSet.set(serializeRange(bracesInfo.closeBraceRange), color);
 
                     //console.log("the ranges are: ");
                     //for (let r of parenInfo.directionIndicatorRanges) {
