@@ -592,22 +592,6 @@ public class MotorMusicParser extends Parser {
 		public SyllableGroupContext(GestureContext ctx) { copyFrom(ctx); }
 	}
 	@SuppressWarnings("CheckReturnValue")
-	public static class TimeTaggedContainmentContext extends GestureContext {
-		public Token number;
-		public Syllable_groupContext syllables;
-		public Motion_spec_listContext motion_spec;
-		public TerminalNode LCURLY() { return getToken(MotorMusicParser.LCURLY, 0); }
-		public TerminalNode RCURLY() { return getToken(MotorMusicParser.RCURLY, 0); }
-		public TerminalNode NUMBER() { return getToken(MotorMusicParser.NUMBER, 0); }
-		public Syllable_groupContext syllable_group() {
-			return getRuleContext(Syllable_groupContext.class,0);
-		}
-		public Motion_spec_listContext motion_spec_list() {
-			return getRuleContext(Motion_spec_listContext.class,0);
-		}
-		public TimeTaggedContainmentContext(GestureContext ctx) { copyFrom(ctx); }
-	}
-	@SuppressWarnings("CheckReturnValue")
 	public static class TimeTaggedSyllableGroupContext extends GestureContext {
 		public Token number;
 		public Syllable_groupContext syllables;
@@ -636,7 +620,7 @@ public class MotorMusicParser extends Parser {
 		GestureContext _localctx = new GestureContext(_ctx, getState());
 		enterRule(_localctx, 10, RULE_gesture);
 		try {
-			setState(82);
+			setState(76);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
 			case 1:
@@ -701,22 +685,6 @@ public class MotorMusicParser extends Parser {
 				match(RCURLY);
 				}
 				break;
-			case 7:
-				_localctx = new TimeTaggedContainmentContext(_localctx);
-				enterOuterAlt(_localctx, 7);
-				{
-				setState(76);
-				((TimeTaggedContainmentContext)_localctx).number = match(NUMBER);
-				setState(77);
-				((TimeTaggedContainmentContext)_localctx).syllables = syllable_group();
-				setState(78);
-				match(LCURLY);
-				setState(79);
-				((TimeTaggedContainmentContext)_localctx).motion_spec = motion_spec_list();
-				setState(80);
-				match(RCURLY);
-				}
-				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -731,7 +699,7 @@ public class MotorMusicParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u0014U\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001\u0014O\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0001"+
 		"\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0003\u0000\u0015\b\u0000\u0001"+
@@ -743,12 +711,11 @@ public class MotorMusicParser extends Parser {
 		"\u0003\u0003\u00036\b\u0003\u0001\u0004\u0001\u0004\u0001\u0004\u0001"+
 		"\u0004\u0003\u0004<\b\u0004\u0001\u0005\u0001\u0005\u0001\u0005\u0001"+
 		"\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001"+
-		"\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001"+
 		"\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0003"+
-		"\u0005S\b\u0005\u0001\u0005\u0000\u0000\u0006\u0000\u0002\u0004\u0006"+
-		"\b\n\u0000\u0000]\u0000\u0014\u0001\u0000\u0000\u0000\u0002\u0016\u0001"+
+		"\u0005M\b\u0005\u0001\u0005\u0000\u0000\u0006\u0000\u0002\u0004\u0006"+
+		"\b\n\u0000\u0000V\u0000\u0014\u0001\u0000\u0000\u0000\u0002\u0016\u0001"+
 		"\u0000\u0000\u0000\u0004\u001d\u0001\u0000\u0000\u0000\u00065\u0001\u0000"+
-		"\u0000\u0000\b;\u0001\u0000\u0000\u0000\nR\u0001\u0000\u0000\u0000\f\u0015"+
+		"\u0000\u0000\b;\u0001\u0000\u0000\u0000\nL\u0001\u0000\u0000\u0000\f\u0015"+
 		"\u0005\u0000\u0000\u0001\r\u000e\u0003\n\u0005\u0000\u000e\u000f\u0005"+
 		"\u0000\u0000\u0001\u000f\u0015\u0001\u0000\u0000\u0000\u0010\u0011\u0003"+
 		"\u0002\u0001\u0000\u0011\u0012\u0003\n\u0005\u0000\u0012\u0013\u0005\u0000"+
@@ -772,18 +739,15 @@ public class MotorMusicParser extends Parser {
 		"5-\u0001\u0000\u0000\u000051\u0001\u0000\u0000\u00006\u0007\u0001\u0000"+
 		"\u0000\u00007<\u0005\u0002\u0000\u000089\u0005\u0002\u0000\u00009:\u0005"+
 		"\u000f\u0000\u0000:<\u0003\b\u0004\u0000;7\u0001\u0000\u0000\u0000;8\u0001"+
-		"\u0000\u0000\u0000<\t\u0001\u0000\u0000\u0000=S\u0005\f\u0000\u0000>?"+
-		"\u0005\u0003\u0000\u0000?S\u0005\f\u0000\u0000@S\u0003\b\u0004\u0000A"+
-		"B\u0005\u0003\u0000\u0000BS\u0003\b\u0004\u0000CD\u0005\u0006\u0000\u0000"+
-		"DE\u0003\u0006\u0003\u0000EF\u0005\u0007\u0000\u0000FS\u0001\u0000\u0000"+
+		"\u0000\u0000\u0000<\t\u0001\u0000\u0000\u0000=M\u0005\f\u0000\u0000>?"+
+		"\u0005\u0003\u0000\u0000?M\u0005\f\u0000\u0000@M\u0003\b\u0004\u0000A"+
+		"B\u0005\u0003\u0000\u0000BM\u0003\b\u0004\u0000CD\u0005\u0006\u0000\u0000"+
+		"DE\u0003\u0006\u0003\u0000EF\u0005\u0007\u0000\u0000FM\u0001\u0000\u0000"+
 		"\u0000GH\u0003\b\u0004\u0000HI\u0005\u0004\u0000\u0000IJ\u0003\u0006\u0003"+
-		"\u0000JK\u0005\u0005\u0000\u0000KS\u0001\u0000\u0000\u0000LM\u0005\u0003"+
-		"\u0000\u0000MN\u0003\b\u0004\u0000NO\u0005\u0004\u0000\u0000OP\u0003\u0006"+
-		"\u0003\u0000PQ\u0005\u0005\u0000\u0000QS\u0001\u0000\u0000\u0000R=\u0001"+
-		"\u0000\u0000\u0000R>\u0001\u0000\u0000\u0000R@\u0001\u0000\u0000\u0000"+
-		"RA\u0001\u0000\u0000\u0000RC\u0001\u0000\u0000\u0000RG\u0001\u0000\u0000"+
-		"\u0000RL\u0001\u0000\u0000\u0000S\u000b\u0001\u0000\u0000\u0000\u0005"+
-		"\u0014\u001d5;R";
+		"\u0000JK\u0005\u0005\u0000\u0000KM\u0001\u0000\u0000\u0000L=\u0001\u0000"+
+		"\u0000\u0000L>\u0001\u0000\u0000\u0000L@\u0001\u0000\u0000\u0000LA\u0001"+
+		"\u0000\u0000\u0000LC\u0001\u0000\u0000\u0000LG\u0001\u0000\u0000\u0000"+
+		"M\u000b\u0001\u0000\u0000\u0000\u0005\u0014\u001d5;L";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
