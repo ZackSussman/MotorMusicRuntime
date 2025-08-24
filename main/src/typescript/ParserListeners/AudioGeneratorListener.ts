@@ -187,7 +187,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         let tensionRampedFromZeroToOne = 1;
         if (tensionLowerBound < 1)
             tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
-        const MAX_AGOGIC_SHORTENING = 0.3; //seconds
+        const MAX_AGOGIC_SHORTENING = 0.15 * syllableLengthMultiplier; //seconds
         let decay = (thisSyllableLength - attackTime) - MAX_AGOGIC_SHORTENING * (1.0 - tensionRampedFromZeroToOne);
         if (decay < attackTime) {
             decay = attackTime;
