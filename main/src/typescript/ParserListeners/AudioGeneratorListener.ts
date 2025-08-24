@@ -62,7 +62,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.currentLeafSyllableGroupTimeTag = 1; //keep this at 1 unless changed by a time tagged syllable group
         this.areWeCurrentlyInAContainmentGroup = false;
         this.containmentGroupData = containmentGroupData;
-        this.currentAudioSeekPosition = 0;
+        this.currentAudioSeekPosition = this.audio.length;
     }
 
 
@@ -114,6 +114,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     //use this, which is O(|a|) for linear audio generation
     addToAudio(a : audio) {
 
+        //TODO: WHY IS IT NOT GOING INTO THIS SIMPLE CASE
         //simple case: seek position is at end of the audio and we can just append samples
         if (this.currentAudioSeekPosition == this.audio.length) {
             console.log("add to audio: simple case");
