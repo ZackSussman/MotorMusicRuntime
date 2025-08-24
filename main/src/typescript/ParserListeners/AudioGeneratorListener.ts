@@ -154,6 +154,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         let containmentLength = this.containmentGroupData.get(ctx).length;
         let audioForContainmentSyllableGroup : audio = [];
         for (let syllable of syllablesToCompute) {
+            console.log("making a containment with syllable " + syllable + " and length " + containmentLength);
             let audio = this.getAudioForSyllableWithMultiplier(syllable, containmentLength);
             if (audioForContainmentSyllableGroup.length == 0) {
                 audioForContainmentSyllableGroup = audio;
