@@ -14,6 +14,7 @@ export class PreColoringProcessedSyllableGroupData {
     constructor() {
         this.syllableRanges = [];
         this.ampersandRanges = [];
+        this.syllables = [];
     }
 }
 
