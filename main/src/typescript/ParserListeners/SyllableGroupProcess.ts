@@ -34,7 +34,7 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
 
 
     //the stack of syllable group types that we are currently processing
-    containmentGroupContexts : ContainmentContext[];
+    currentContainmentGroupContexts : ContainmentContext[];
 
     currentSyllableGroupContext : SyllableGroupContext;
 
@@ -44,7 +44,7 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
         super();
         this.syllableGroupMap = new Map();
         this.containmentGroupMap = new Map();
-        this.containmentGroupContexts = [];
+        this.currentContainmentGroupContexts = [];
         this.currentSyllableGroupContext = null;
         this.areCurrentSyllablesFromAContainmentGroup = false;
     }
@@ -53,28 +53,29 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
         if (!this.areCurrentSyllablesFromAContainmentGroup) {
             this.syllableGroupMap.set(ctx, new PreColoringProcessedSyllableGroupData());
             this.currentSyllableGroupContext = ctx;
-            if (this.containmentGroupContexts.length > 0) {
-                this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).length += 1;
+            for (let containmentGroup of this.currentContainmentGroupContexts) {
+                this.containmentGroupMap.get(containmentGroup).length += 1;
             }
-        
         }
     }
     
     enterTimeTaggedSyllableGroup = (ctx: TimeTaggedSyllableGroupContext) => {
         this.syllableGroupMap.set(ctx, new PreColoringProcessedSyllableGroupData());
         this.currentSyllableGroupContext = ctx;
-        if (this.containmentGroupContexts.length > 0) {
-            this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).length += Number(ctx.NUMBER().getText());
+        if (this.currentContainmentGroupContexts.length > 0) {
+            for (let containmentGroup of this.currentContainmentGroupContexts) {
+                this.containmentGroupMap.get(containmentGroup).length += Number(ctx.NUMBER().getText());
+            }
         }
         this.syllableGroupMap.get(ctx).syllableRanges.push(terminalNodeToRange(ctx.NUMBER()));
     }
     enterContainment = (ctx : ContainmentContext) => {
         this.containmentGroupMap.set(ctx, new ContainingSyllableGroupData());
-        this.containmentGroupContexts.push(ctx);
+        this.currentContainmentGroupContexts.push(ctx);
         this.areCurrentSyllablesFromAContainmentGroup = true;
     }
     exitContainment = (_ : ContainmentContext) => {
-        this.containmentGroupContexts.pop();
+        this.currentContainmentGroupContexts.pop();
     }
 
     enterSyllableGroupSingle =  (ctx: SyllableGroupSingleContext) => {
@@ -82,8 +83,8 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
             this.syllableGroupMap.get(this.currentSyllableGroupContext).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
         }
         else {
-            this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
-            this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
+            this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
+            this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
         }
 
         //the very last syllable in the containment group is always the 'SyllableGroupSingle', so at this point we are done processing the containment syllable group
@@ -98,9 +99,9 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
             this.syllableGroupMap.get(this.currentSyllableGroupContext).ampersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
         }
         else {
-            this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
-            this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).ampersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
-            this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
+            this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
+            this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).ampersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
+            this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
         }
     }
 
