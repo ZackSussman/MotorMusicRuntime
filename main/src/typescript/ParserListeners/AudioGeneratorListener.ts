@@ -115,7 +115,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     //use this, which is O(|a|) for linear audio generation
     addToAudio(a : audio) {
 
-        //TODO: WHY IS IT NOT GOING INTO THIS SIMPLE CASE
         //simple case: seek position is at end of the audio and we can just append samples
         if (this.currentAudioSeekPosition == this.audio.length) {
             console.log("add to audio: simple case");
@@ -127,11 +126,34 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         }
 
         //otherwise we need to take the samples that are currently there and mix them together
+        //with crossfading to avoid clicks
         let samplesToBlend = this.audio.slice(this.currentAudioSeekPosition, this.currentAudioSeekPosition + a.length);
         let blendedSamples : audio = [];
         
+        // Crossfade window: smooth transition over first and last N samples
+        const crossfadeLength = Math.min(Math.floor(a.length * 0.05), 256); // 5% of signal or 256 samples max
+        
         for (let i = 0; i < samplesToBlend.length; i++) {
-            blendedSamples.push([(samplesToBlend[i][0] + a[i][0]) / 2, (samplesToBlend[i][1] + a[i][1]) / 2]);
+            let mixRatio = 0.5; // default 50/50 mix
+            
+            // Fade in: gradually increase mix ratio from 0 to 0.5
+            if (i < crossfadeLength) {
+                mixRatio = 0.5 * (i / crossfadeLength);
+            }
+            // Fade out: gradually decrease mix ratio from 0.5 to 0
+            else if (i >= samplesToBlend.length - crossfadeLength) {
+                const fadePos = (samplesToBlend.length - 1 - i) / crossfadeLength;
+                mixRatio = 0.5 * fadePos;
+            }
+            
+            // Apply mixing with the computed ratio
+            const originalWeight = 1 - mixRatio;
+            const newWeight = mixRatio;
+            
+            blendedSamples.push([
+                samplesToBlend[i][0] * originalWeight + a[i][0] * newWeight,
+                samplesToBlend[i][1] * originalWeight + a[i][1] * newWeight
+            ]);
         }
 
         for (let i = this.currentAudioSeekPosition; i < this.currentAudioSeekPosition + blendedSamples.length; i++) {
