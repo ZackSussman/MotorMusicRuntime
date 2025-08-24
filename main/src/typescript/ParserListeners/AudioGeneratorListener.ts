@@ -126,34 +126,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         }
 
         //otherwise we need to take the samples that are currently there and mix them together
-        //with crossfading to avoid clicks
         let samplesToBlend = this.audio.slice(this.currentAudioSeekPosition, this.currentAudioSeekPosition + a.length);
         let blendedSamples : audio = [];
-        
-        // Crossfade window: smooth transition over first and last N samples
-        const crossfadeLength = Math.min(Math.floor(a.length * 0.05), 4096*4); // 5% of signal or 4096 samples max
-        console.log("blending a signal of length " + a.length + " with crossfade length " + crossfadeLength);
+
         for (let i = 0; i < samplesToBlend.length; i++) {
-            let mixRatio = 0.5; // default 50/50 mix
-            
-            // Fade in: gradually increase mix ratio from 0 to 0.5
-            if (i < crossfadeLength) {
-                mixRatio = 0.5 * (i / crossfadeLength);
-            }
-            // Fade out: gradually decrease mix ratio from 0.5 to 0
-            else if (i >= samplesToBlend.length - crossfadeLength) {
-                const fadePos = (samplesToBlend.length - 1 - i) / crossfadeLength;
-                mixRatio = 0.5 * fadePos;
-            }
-            
-            // Apply mixing with the computed ratio
-            const originalWeight = 1 - mixRatio;
-            const newWeight = mixRatio;
-            
-            blendedSamples.push([
-                samplesToBlend[i][0] * originalWeight + a[i][0] * newWeight,
-                samplesToBlend[i][1] * originalWeight + a[i][1] * newWeight
-            ]);
+            blendedSamples.push([(samplesToBlend[i][0] + a[i][0]) / 2, (samplesToBlend[i][1] + a[i][1]) / 2]);
         }
 
         for (let i = this.currentAudioSeekPosition; i < this.currentAudioSeekPosition + blendedSamples.length; i++) {
