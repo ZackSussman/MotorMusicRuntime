@@ -257,7 +257,9 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 let syllableBaselineColor = initialColorStateMap.get(serializeRange(syllableRangeValues[0])); //there is always at least one and they are the same color
                 let syllableColorToUse = morphToWhite(syllableBaselineColor, Math.pow(Math.sin(Math.PI * amountThroughSyllableGroup), .66) ); //square for a tighter animation   
                 for (let syllableRange of syllableRangeValues) {
-                    console.log("setting syllable color to " + syllableColorToUse + " for range " + serializeRange(syllableRange));
+                    if (color == undefined) {
+                        console.log("setting syllable color to " + syllableColorToUse + " for range " + serializeRange(syllableRange));
+                    }
                     colorsToSet.set(serializeRange(syllableRange), syllableColorToUse);
                 }
               
@@ -290,8 +292,9 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     //all other scenarios will morph from white to normal
                     color = morphToWhite(initialGroupingColorToUse, 1 - amount);
                     }
-
-                    console.log("setting color: " + color + " for ranges " + serializeRange(bracesInfo.openBraceRange) + " and " + serializeRange(bracesInfo.closeBraceRange));
+                    if (color == undefined) {
+                        console.log("setting color: " + color + " for ranges " + serializeRange(bracesInfo.openBraceRange) + " and " + serializeRange(bracesInfo.closeBraceRange));
+                    }
                     colorsToSet.set(serializeRange(bracesInfo.openBraceRange), color);
                     colorsToSet.set(serializeRange(bracesInfo.closeBraceRange), color);
 
