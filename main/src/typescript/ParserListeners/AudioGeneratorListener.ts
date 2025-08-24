@@ -131,7 +131,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         let blendedSamples : audio = [];
         
         // Crossfade window: smooth transition over first and last N samples
-        const crossfadeLength = Math.min(Math.floor(a.length * 0.05), 512); // 5% of signal or 512 samples max
+        const crossfadeLength = Math.min(Math.floor(a.length * 0.05), 1028); // 5% of signal or 1028 samples max
 
         for (let i = 0; i < samplesToBlend.length; i++) {
             let mixRatio = 0.5; // default 50/50 mix
