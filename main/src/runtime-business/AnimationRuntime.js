@@ -221,8 +221,6 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 let rangesWeAreGoingToColorNow = (bracesInfos.map(i => [i.openBraceRange, i.closeBraceRange].concat(i.directionIndicatorRanges))).flat().concat(syllableRangeValues).concat(ampersandRangeValues);
                 for (let bracesInfo in bracesInfos) {
                     if (bracesInfo.containerSyllableGroup != undefined) {
-                        console.log("adding syllable ranges: " + bracesInfo.containerSyllableGroup.syllableRanges);
-                        console.log("adding ampersand ranges: " + bracesInfo.containerSyllableGroup.ampersandRanges);
                         rangesWeAreGoingToColorNow = rangesWeAreGoingToColorNow.concat(bracesInfo.containerSyllableGroup.syllableRanges);
                         rangesWeAreGoingToColorNow = rangesWeAreGoingToColorNow.concat(bracesInfo.containerSyllableGroup.ampersandRanges);
                     }
@@ -237,7 +235,6 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     }
                 }
                 for (let range of rangesWeAreGoingToColorNow) {
-                    console.log("checking range " + range);
                     if (!(currentRangesBeingAnimated.has(serializeRange(range)))) 
                         currentRangesBeingAnimated.add(serializeRange(range));
                 }

@@ -125,6 +125,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             this.audio[i] = blendedSamples[i - this.currentAudioSeekPosition];
         }
         this.currentAudioSeekPosition += a.length;
+        console.log("current audio seek position: " + this.currentAudioSeekPosition);
     }
 
     enterDirectionSpec = (ctx: DirectionSpecContext) => {
