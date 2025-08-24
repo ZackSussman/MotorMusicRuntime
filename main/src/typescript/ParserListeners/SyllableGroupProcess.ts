@@ -1,5 +1,5 @@
 
-import { ContainmentContext, SyllableGroupContext, SyllableGroupMultiContext, SyllableGroupSingleContext, TimeTaggedContainmentContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext } from "../../../../antlr/generated/MotorMusicParser";
+import { ContainmentContext, EmptyContext, SyllableGroupContext, SyllableGroupMultiContext, SyllableGroupSingleContext, TimeTaggedContainmentContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext } from "../../../../antlr/generated/MotorMusicParser";
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 import {range, serializeRange, terminalNodeToRange, getAllDirectionSpecifierRangesFromMotionSpecListContext} from "./ParserListenerUtils";
 //the purpose of this parser is to run an initial phase through the code to create a map that will help 
@@ -90,6 +90,18 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
         //the very last syllable in the containment group is always the 'SyllableGroupSingle', so at this point we are done processing the containment syllable group
         if (this.areCurrentSyllablesFromAContainmentGroup) { 
             this.areCurrentSyllablesFromAContainmentGroup = false; 
+        }
+    }
+
+    enterEmpty = (_: EmptyContext) => {
+        for (let containmentGroup of this.currentContainmentGroupContexts) {
+            this.containmentGroupMap.get(containmentGroup).length += 1;
+        }
+    }
+
+    enterTimeTaggedEmpty = (ctx: TimeTaggedEmptyContext) => {
+        for (let containmentGroup of this.currentContainmentGroupContexts) {
+            this.containmentGroupMap.get(containmentGroup).length += Number(ctx.NUMBER().getText());
         }
     }
 
