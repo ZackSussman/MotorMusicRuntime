@@ -111,6 +111,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
      //dynamically sets some colors without repainting everything
     //CAUTION: this is only to be used if we are sure none of the ranges have changed (so only during animation)
     function alterColors(editor, document, colorsToSet) {
+        console.log("altering colors with colors to set: " + Array.from(colorsToSet.entries()).map(([range, color]) => `${range} -> ${color}`).join(", "));
         for (const range of colorsToSet.keys()) {
 
             /*there are two things we must take care of:
@@ -242,7 +243,6 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 
                 //1--------------------- syllable ranges
                 let amountThroughSyllableGroup = animationInfo.leafSyllableGroup.currentLocation;
-                console.log("current amount through syllable group is " + amountThroughSyllableGroup);
                 let ampersandBaselineColor;
                 let ampersandColorToUse;
                 if (ampersandRangeValues.length > 0) {
@@ -256,11 +256,11 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
 
                 let syllableBaselineColor = initialColorStateMap.get(serializeRange(syllableRangeValues[0])); //there is always at least one and they are the same color
                 let syllableColorToUse = morphToWhite(syllableBaselineColor, Math.pow(Math.sin(Math.PI * amountThroughSyllableGroup), .66) ); //square for a tighter animation   
-                console.log("computed syllable color to use is " + syllableColorToUse);
                 for (let syllableRange of syllableRangeValues) {
                     if (syllableColorToUse == undefined) {
                         console.log("setting syllable color to " + syllableColorToUse + " for range " + serializeRange(syllableRange));
                     }
+                    console.log("setting syllable color to " + syllableColorToUse + " for range " + serializeRange(syllableRange));
                     colorsToSet.set(serializeRange(syllableRange), syllableColorToUse);
                 }
               
