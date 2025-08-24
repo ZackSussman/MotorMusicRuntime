@@ -257,7 +257,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 let syllableBaselineColor = initialColorStateMap.get(serializeRange(syllableRangeValues[0])); //there is always at least one and they are the same color
                 let syllableColorToUse = morphToWhite(syllableBaselineColor, Math.pow(Math.sin(Math.PI * amountThroughSyllableGroup), .66) ); //square for a tighter animation   
                 for (let syllableRange of syllableRangeValues) {
-                    if (color == undefined) {
+                    if (syllableColorToUse == undefined) {
                         console.log("setting syllable color to " + syllableColorToUse + " for range " + serializeRange(syllableRange));
                     }
                     colorsToSet.set(serializeRange(syllableRange), syllableColorToUse);
