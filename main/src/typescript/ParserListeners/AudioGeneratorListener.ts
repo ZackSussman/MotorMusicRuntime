@@ -178,6 +178,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         if (decay < attackTime) {
             decay = attackTime;
         }
+        console.log("about to make adsr with length " + thisSyllableLength);
         return applyAdsr
                 (
                     makeSin(this.pitchSpecification.syllableAndTensionToFrequency(syllable, tensionRampedFromZeroToOne), thisSyllableLength),
@@ -197,7 +198,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
   
     //construct the audio for a syllable and add to our built up audio
     enterSyllableGroupSingle =  (ctx : SyllableGroupSingleContext) => {
+        if (this.areWeCurrentlyInAContainmentGroup) {
+            return;
+        }
         let audio = this.getAudioForSyllable(ctx.SYLLABLE().getText());
+        console.log("the length of the computed audio was " + audio.length);
         if (this.accumulatedSyllableGroupAudio.length == 0) {
             this.addToAudio(audio);
         }
