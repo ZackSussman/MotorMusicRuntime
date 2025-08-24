@@ -130,7 +130,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         let blendedSamples : audio = [];
 
         for (let i = 0; i < samplesToBlend.length; i++) {
-            blendedSamples.push([(samplesToBlend[i][0] + a[i][0]) / 2, (samplesToBlend[i][1] + a[i][1]) / 2]);
+            blendedSamples.push([(samplesToBlend[i][0] + a[i][0]), (samplesToBlend[i][1] + a[i][1])]);
         }
 
         for (let i = this.currentAudioSeekPosition; i < this.currentAudioSeekPosition + blendedSamples.length; i++) {
@@ -304,8 +304,18 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         }
     }
 
+    //prevents clipping
+    private normalizeAudio() {
+        let maxSampleValue = 0;
+        for (let sample of this.audio) {
+            maxSampleValue = Math.max(maxSampleValue, Math.abs(sample[0]), Math.abs(sample[1]));
+        }
+        this.audio = this.audio.map((sample) => [sample[0] / maxSampleValue, sample[1] / maxSampleValue]);
+    }
+
     //when finished, convert our built up audio to the audio stream
     exitNonEmptyProgramWithDefaultPitchSpecification =  (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
+        this.normalizeAudio();
         this.audioStream = audioToAudioStream(this.audio);
     }
     exitNonEmptyProgramWithPitchSpecification =  (_ : NonEmptyProgramWithPitchSpecificationContext) => {
