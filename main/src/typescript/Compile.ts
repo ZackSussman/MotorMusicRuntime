@@ -111,7 +111,7 @@ function makeProcessForSyllableTime(globalRuntimeData) {
                 return animationListener.getAnimationInfoForTime(x);
             }
     
-            let audioGeneratorListener = new AudioGeneratorListener(globalRuntimeData.syllableTime, animationListener.bracesAccumData);
+            let audioGeneratorListener = new AudioGeneratorListener(globalRuntimeData.syllableTime, animationListener.bracesAccumData, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
             ParseTreeWalker.DEFAULT.walk(audioGeneratorListener, tree);
 
 
