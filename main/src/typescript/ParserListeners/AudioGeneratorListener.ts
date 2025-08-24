@@ -88,6 +88,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         const MIN_TENSION = 0.5
         let tension = 1;
         for (let directionSpecCtx of this.currentBracesInScope) {
+            console.log("we have a direction spec in scope");
             let parenInfo = this.bracesAccumData.get(directionSpecCtx);
             //need to determine for this particular level of motion, whether we are currently headed towards or away from, 
             //and where we are within that chunk             
@@ -179,6 +180,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     getAudioForSyllableWithMultiplier(syllable : string, syllableLengthMultiplier : number) : audio {
         let tension = this.getCurrentSyllableTension();
+        console.log("the computed tension was " + tension);
         let thisSyllableLength = this.syllableLength * syllableLengthMultiplier;
         let attackTime = thisSyllableLength / 10;
         let tensionLowerBound = this.computeTensionLowerBound();
