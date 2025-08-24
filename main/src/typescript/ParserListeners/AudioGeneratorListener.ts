@@ -324,6 +324,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.audioStream = audioToAudioStream(this.audio);
     }
     exitNonEmptyProgramWithPitchSpecification =  (_ : NonEmptyProgramWithPitchSpecificationContext) => {
+        this.normalizeAndValidateAudio();
         this.audioStream = audioToAudioStream(this.audio);
     }
     exitEmptyProgram =  (_ : EmptyProgramContext) => {
