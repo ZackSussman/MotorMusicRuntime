@@ -308,11 +308,10 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         for (let sample of this.audio) {
             maxSampleValue = Math.max(maxSampleValue, Math.abs(sample[0]), Math.abs(sample[1]));
         }
-        let normalizationFactor = maxSampleValue * 2.0; //cap at 0.5 to ensure happy playback of sin waves
-        console.log("the max value we found was: " + maxSampleValue); 
+        let normalizationFactor = maxSampleValue;
         this.audio = this.audio.map((sample) => [sample[0] / normalizationFactor, sample[1] / normalizationFactor]);
         for (let sample of this.audio) {
-            if (Math.abs(sample[0]) > 0.5 || Math.abs(sample[1]) > 0.5 ) {
+            if (Math.abs(sample[0]) > 1.0 || Math.abs(sample[1]) > 1.0) {
                 throw new Error("Internal Error: audio sample out of range after normalization");
             }
         }
