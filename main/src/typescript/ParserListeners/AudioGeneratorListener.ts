@@ -168,7 +168,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
                 });
             }
         }
-        let preContainmentChunkAuduioSeekPosition = this.audio.length;
+        let preContainmentChunkAuduioSeekPosition = this.currentAudioSeekPosition;
         this.addToAudio(audioForContainmentSyllableGroup);
         this.currentAudioSeekPosition = preContainmentChunkAuduioSeekPosition
     }
