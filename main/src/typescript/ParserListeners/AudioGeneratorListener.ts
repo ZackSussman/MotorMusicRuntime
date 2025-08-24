@@ -116,6 +116,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
         //simple case: seek position is at end of the audio and we can just append samples
         if (this.currentAudioSeekPosition == this.audio.length) {
+            console.log("add to audio: simple case");
             for (let sample of a) {
                 this.audio.push(sample);
             }
@@ -135,7 +136,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             this.audio[i] = blendedSamples[i - this.currentAudioSeekPosition];
         }
         this.currentAudioSeekPosition += a.length;
-        console.log("current audio seek position: " + this.currentAudioSeekPosition);
     }
 
     enterDirectionSpec = (ctx: DirectionSpecContext) => {
@@ -188,7 +188,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         if (decay < attackTime) {
             decay = attackTime;
         }
-        console.log("about to make adsr with length " + thisSyllableLength);
         return applyAdsr
                 (
                     makeSin(this.pitchSpecification.syllableAndTensionToFrequency(syllable, tensionRampedFromZeroToOne), thisSyllableLength),
@@ -212,7 +211,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             return;
         }
         let audio = this.getAudioForSyllable(ctx.SYLLABLE().getText());
-        console.log("the length of the computed audio was " + audio.length);
         if (this.accumulatedSyllableGroupAudio.length == 0) {
             this.addToAudio(audio);
         }
