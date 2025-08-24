@@ -242,6 +242,7 @@ export class AnimationListener extends MotorMusicParserListener {
 
     
     private processSyllable(syllable : TerminalNode) {
+        console.log("processing syllable: " + syllable.getText());
         let thisSyllableRange : range = this.terminalNodeToRange(syllable);
         this.orderedLeafSyllableGroupData.at(-1).syllableRanges.push(thisSyllableRange);
         this.updateBracesInfosForSyllableRange(thisSyllableRange);
