@@ -113,7 +113,17 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     //use this, which is O(|a|) for linear audio generation
     addToAudio(a : audio) {
-        //current samples during the chunk of audio we need to add a to
+
+        //simple case: seek position is at end of the audio and we can just append samples
+        if (this.currentAudioSeekPosition == this.audio.length) {
+            for (let sample of a) {
+                this.audio.push(sample);
+            }
+            this.currentAudioSeekPosition = this.audio.length;
+            return;
+        }
+
+        //otherwise we need to take the samples that are currently there and mix them together
         let samplesToBlend = this.audio.slice(this.currentAudioSeekPosition, this.currentAudioSeekPosition + a.length);
         let blendedSamples : audio = [];
         
