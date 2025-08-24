@@ -215,6 +215,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 */
                 let colorsToSet = new Map();
                 let syllableRangeValues = animationInfo.leafSyllableGroup.syllableRanges;
+                console.log("from animation runtime: identified syllable ranges: " + syllableRangeValues[0]);
                 let ampersandRangeValues = animationInfo.leafSyllableGroup.ampersandRanges;
                 let bracesInfos = animationInfo.bracesInfo;
 
