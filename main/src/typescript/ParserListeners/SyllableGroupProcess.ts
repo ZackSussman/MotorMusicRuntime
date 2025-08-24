@@ -9,6 +9,7 @@ export class PreColoringProcessedSyllableGroupData {
     //ranges of all the syllables and ampersands in the group
     syllableRanges : range[]; //includes time tags
     ampersandRanges : range[];
+    syllables : string[]; //the actual syllables
 
     constructor() {
         this.syllableRanges = [];
@@ -81,6 +82,7 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
         }
         else {
             this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
+            this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
         }
 
         //the very last syllable in the containment group is always the 'SyllableGroupSingle', so at this point we are done processing the containment syllable group
@@ -97,6 +99,7 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
         else {
             this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
             this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).ampersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
+            this.containmentGroupMap.get(this.containmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
         }
     }
 
