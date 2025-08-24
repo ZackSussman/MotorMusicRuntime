@@ -305,17 +305,24 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
     //prevents clipping
-    private normalizeAudio() {
+    private normalizeAndValidateAudio() {
         let maxSampleValue = 0;
         for (let sample of this.audio) {
             maxSampleValue = Math.max(maxSampleValue, Math.abs(sample[0]), Math.abs(sample[1]));
         }
-        this.audio = this.audio.map((sample) => [sample[0] / maxSampleValue, sample[1] / maxSampleValue]);
+        let normalizationFactor = maxSampleValue / 2.0; //cap at 0.5 to ensure happy playback of sin waves
+        console.log("the max value we found was: " + maxSampleValue); 
+        this.audio = this.audio.map((sample) => [sample[0] / normalizationFactor, sample[1] / normalizationFactor]);
+        for (let sample of this.audio) {
+            if (Math.abs(sample[0]) > 1.0 || Math.abs(sample[1]) > 1.0) {
+                throw new Error("Internal Error: audio sample out of range after normalization");
+            }
+        }
     }
 
     //when finished, convert our built up audio to the audio stream
     exitNonEmptyProgramWithDefaultPitchSpecification =  (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
-        this.normalizeAudio();
+        this.normalizeAndValidateAudio();
         this.audioStream = audioToAudioStream(this.audio);
     }
     exitNonEmptyProgramWithPitchSpecification =  (_ : NonEmptyProgramWithPitchSpecificationContext) => {
