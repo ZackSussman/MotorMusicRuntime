@@ -149,13 +149,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
     enterContainment = (ctx: ContainmentContext) => {
-        this.currentBracesInScope.push(ctx);
         this.areWeCurrentlyInAContainmentGroup = true;
         let syllablesToCompute = this.containmentGroupData.get(ctx).syllables;
         let containmentLength = this.containmentGroupData.get(ctx).length;
         let audioForContainmentSyllableGroup : audio = [];
         for (let syllable of syllablesToCompute) {
-            console.log("making a containment with syllable " + syllable + " and length " + containmentLength);
             let audio = this.getAudioForSyllableWithMultiplier(syllable, containmentLength);
             if (audioForContainmentSyllableGroup.length == 0) {
                 audioForContainmentSyllableGroup = audio;
@@ -169,9 +167,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
                 });
             }
         }
+
         let preContainmentChunkAuduioSeekPosition = this.currentAudioSeekPosition;
         this.addToAudio(audioForContainmentSyllableGroup);
         this.currentAudioSeekPosition = preContainmentChunkAuduioSeekPosition
+        this.currentBracesInScope.push(ctx);
     }
 
     exitContainment = (ctx: ContainmentContext) => {
