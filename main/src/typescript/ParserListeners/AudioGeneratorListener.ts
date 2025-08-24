@@ -279,6 +279,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     
 
     enterEmpty = (_ : EmptyContext) => {
+        let numberSamplesForEmpty = durationToSamples(this.syllableLength);
+        if (this.currentAudioSeekPosition + numberSamplesForEmpty <= this.audio.length) {
+            this.currentAudioSeekPosition += numberSamplesForEmpty;
+            return;
+        }
         this.addToAudio(
             silence(this.syllableLength)
         )
@@ -286,6 +291,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     enterTimeTaggedEmpty = (ctx: TimeTaggedEmptyContext) => {
         let noSoundLength = Number(ctx.NUMBER().getText());
+        let numberSamplesForNoSound = durationToSamples(this.syllableLength * noSoundLength);
+        if (this.currentAudioSeekPosition + numberSamplesForNoSound <= this.audio.length) {
+            this.currentAudioSeekPosition += numberSamplesForNoSound;
+            return;
+        }
         this.addToAudio(
             silence(this.syllableLength * noSoundLength)
         )
