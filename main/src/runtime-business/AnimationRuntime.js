@@ -215,7 +215,6 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 */
                 let colorsToSet = new Map();
                 let syllableRangeValues = animationInfo.leafSyllableGroup.syllableRanges;
-                console.log("from animation runtime: identified syllable ranges: " + syllableRangeValues[0]);
                 let ampersandRangeValues = animationInfo.leafSyllableGroup.ampersandRanges;
                 let bracesInfos = animationInfo.bracesInfo;
 
@@ -243,7 +242,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 
                 //1--------------------- syllable ranges
                 let amountThroughSyllableGroup = animationInfo.leafSyllableGroup.currentLocation;
-              
+                console.log("current amount through syllable group is " + amountThroughSyllableGroup);
                 let ampersandBaselineColor;
                 let ampersandColorToUse;
                 if (ampersandRangeValues.length > 0) {
@@ -257,6 +256,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
 
                 let syllableBaselineColor = initialColorStateMap.get(serializeRange(syllableRangeValues[0])); //there is always at least one and they are the same color
                 let syllableColorToUse = morphToWhite(syllableBaselineColor, Math.pow(Math.sin(Math.PI * amountThroughSyllableGroup), .66) ); //square for a tighter animation   
+                console.log("computed syllable color to use is " + syllableColorToUse);
                 for (let syllableRange of syllableRangeValues) {
                     if (syllableColorToUse == undefined) {
                         console.log("setting syllable color to " + syllableColorToUse + " for range " + serializeRange(syllableRange));
