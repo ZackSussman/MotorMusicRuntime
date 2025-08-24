@@ -260,7 +260,6 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     if (syllableColorToUse == undefined) {
                         console.log("setting syllable color to " + syllableColorToUse + " for range " + serializeRange(syllableRange));
                     }
-                    console.log("setting syllable color to " + syllableColorToUse + " for range " + serializeRange(syllableRange));
                     colorsToSet.set(serializeRange(syllableRange), syllableColorToUse);
                 }
               
@@ -358,11 +357,9 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 }
                 //------------------------------------------------------------
 
-    
-
-                alterColors(editor, document, colorsToSet);
-
             }
+
+            alterColors(editor, document, colorsToSet);
         }
          animationRuntimeData.intervalId = setInterval(animationRuntime, actualFrameDuration);
     }
