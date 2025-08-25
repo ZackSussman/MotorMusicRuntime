@@ -22,6 +22,7 @@ import { TimeTaggedEmptyContext } from "./MotorMusicParser.js";
 import { SyllableGroupContext } from "./MotorMusicParser.js";
 import { TimeTaggedSyllableGroupContext } from "./MotorMusicParser.js";
 import { DirectionSpecContext } from "./MotorMusicParser.js";
+import { ContainmentContext } from "./MotorMusicParser.js";
 
 
 /**
@@ -257,5 +258,17 @@ export default class MotorMusicParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitDirectionSpec?: (ctx: DirectionSpecContext) => void;
+	/**
+	 * Enter a parse tree produced by the `Containment`
+	 * labeled alternative in `MotorMusicParser.gesture`.
+	 * @param ctx the parse tree
+	 */
+	enterContainment?: (ctx: ContainmentContext) => void;
+	/**
+	 * Exit a parse tree produced by the `Containment`
+	 * labeled alternative in `MotorMusicParser.gesture`.
+	 * @param ctx the parse tree
+	 */
+	exitContainment?: (ctx: ContainmentContext) => void;
 }
 

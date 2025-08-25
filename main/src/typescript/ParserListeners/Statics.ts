@@ -2,7 +2,7 @@
 import {Error} from "../Compile";
 import {ParserRuleContext, TerminalNode} from "antlr4";
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
-import { DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext, SyllableGroupMultiContext, SyllableGroupSingleContext, TimeTaggedSyllableGroupContext} from "../../../../antlr/generated/MotorMusicParser";
+import { ContainmentContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext, SyllableGroupMultiContext, SyllableGroupSingleContext, TimeTaggedSyllableGroupContext} from "../../../../antlr/generated/MotorMusicParser";
 
 import { resolvePitchSpecificationString, PitchSpecification, } from "../SoundSpecification/PitchSpecifications";
 import { resolve } from "path";
@@ -16,7 +16,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 
 	programText : string
 
-	mostRecentDirectionPerDirectionSpec : string[]
+	mostRecentDirectionPerBraceStructure : string[]
 
 	pitchSpecification : PitchSpecification = resolvePitchSpecificationString("Default()");
 
@@ -25,7 +25,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
         this.errors = [];
 		this.parsedText = "";
 		this.programText = programText
-		this.mostRecentDirectionPerDirectionSpec = [];
+		this.mostRecentDirectionPerBraceStructure = [];
     }
 
 	private addError(message : string, ctx : ParserRuleContext) {
@@ -74,11 +74,11 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	visitTerminal(node: TerminalNode): void {
 
 		function checkChar(this_ : MotorMusicParserStaticAnalysisListener, symbol : string) {
-			if (this_.mostRecentDirectionPerDirectionSpec.at(-1) === symbol) {
+			if (this_.mostRecentDirectionPerBraceStructure.at(-1) === symbol) {
 				this_.addErrorForTerminalNode("Duplicate direction specifier", node);
 			}
 			else {
-				this_.mostRecentDirectionPerDirectionSpec[this_.mostRecentDirectionPerDirectionSpec.length - 1] = symbol;
+				this_.mostRecentDirectionPerBraceStructure[this_.mostRecentDirectionPerBraceStructure.length - 1] = symbol;
 			}
 		}
 		let text = node.getText();
@@ -88,11 +88,19 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	}
 
 	enterDirectionSpec = (_: DirectionSpecContext) => {
-		this.mostRecentDirectionPerDirectionSpec.push("unknown");
+		this.mostRecentDirectionPerBraceStructure.push("unknown");
+	}
+
+	enterContainment = (_: ContainmentContext) => {
+		this.mostRecentDirectionPerBraceStructure.push("unknown");
+	}
+
+	exitContainment = (_: ContainmentContext) => {
+		this.mostRecentDirectionPerBraceStructure.pop();
 	}
 
 	exitDirectionSpec = (_ : DirectionSpecContext) => {
-		this.mostRecentDirectionPerDirectionSpec.pop();
+		this.mostRecentDirectionPerBraceStructure.pop();
 	}
 
 	enterNonEmptyProgramWithDefaultPitchSpecification = (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {

@@ -18,8 +18,8 @@ public class MotorMusicParser extends Parser {
 	public static final int
 		WS=1, SYLLABLE=2, NUMBER=3, LCURLY=4, RCURLY=5, LPAREN=6, RPAREN=7, LANGLE=8, 
 		RANGLE=9, LSQBRACKET=10, RSQBRACKET=11, UNDERSCORE=12, DOT=13, CARROT=14, 
-		AMPERSAND=15, PITCH_SPECIFICATION=16, PITCH_SPEC_WS=17, PITCH_SPECIFICATION_VALUE=18, 
-		PITCH_SPEC_NEWLINE=19;
+		AMPERSAND=15, UNRECOGNIZED=16, PITCH_SPECIFICATION=17, PITCH_SPEC_WS=18, 
+		PITCH_SPECIFICATION_VALUE=19, PITCH_SPEC_NEWLINE=20;
 	public static final int
 		RULE_compilationUnit = 0, RULE_pitch_specification_statement = 1, RULE_raised_gesture_list = 2, 
 		RULE_motion_spec_list = 3, RULE_syllable_group = 4, RULE_gesture = 5;
@@ -34,7 +34,7 @@ public class MotorMusicParser extends Parser {
 	private static String[] makeLiteralNames() {
 		return new String[] {
 			null, null, null, null, "'{'", "'}'", "'('", "')'", "'<'", "'>'", "'['", 
-			"']'", "'_'", "'.'", "'^'", "'&'", "'PITCH_SPECIFICATION:'"
+			"']'", "'_'", "'.'", "'^'", "'&'", null, "'PITCH_SPECIFICATION:'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
@@ -42,8 +42,8 @@ public class MotorMusicParser extends Parser {
 		return new String[] {
 			null, "WS", "SYLLABLE", "NUMBER", "LCURLY", "RCURLY", "LPAREN", "RPAREN", 
 			"LANGLE", "RANGLE", "LSQBRACKET", "RSQBRACKET", "UNDERSCORE", "DOT", 
-			"CARROT", "AMPERSAND", "PITCH_SPECIFICATION", "PITCH_SPEC_WS", "PITCH_SPECIFICATION_VALUE", 
-			"PITCH_SPEC_NEWLINE"
+			"CARROT", "AMPERSAND", "UNRECOGNIZED", "PITCH_SPECIFICATION", "PITCH_SPEC_WS", 
+			"PITCH_SPECIFICATION_VALUE", "PITCH_SPEC_NEWLINE"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -601,12 +601,26 @@ public class MotorMusicParser extends Parser {
 		}
 		public TimeTaggedSyllableGroupContext(GestureContext ctx) { copyFrom(ctx); }
 	}
+	@SuppressWarnings("CheckReturnValue")
+	public static class ContainmentContext extends GestureContext {
+		public Syllable_groupContext syllables;
+		public Motion_spec_listContext motion_spec;
+		public TerminalNode LCURLY() { return getToken(MotorMusicParser.LCURLY, 0); }
+		public TerminalNode RCURLY() { return getToken(MotorMusicParser.RCURLY, 0); }
+		public Syllable_groupContext syllable_group() {
+			return getRuleContext(Syllable_groupContext.class,0);
+		}
+		public Motion_spec_listContext motion_spec_list() {
+			return getRuleContext(Motion_spec_listContext.class,0);
+		}
+		public ContainmentContext(GestureContext ctx) { copyFrom(ctx); }
+	}
 
 	public final GestureContext gesture() throws RecognitionException {
 		GestureContext _localctx = new GestureContext(_ctx, getState());
 		enterRule(_localctx, 10, RULE_gesture);
 		try {
-			setState(71);
+			setState(76);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
 			case 1:
@@ -657,6 +671,20 @@ public class MotorMusicParser extends Parser {
 				match(RPAREN);
 				}
 				break;
+			case 6:
+				_localctx = new ContainmentContext(_localctx);
+				enterOuterAlt(_localctx, 6);
+				{
+				setState(71);
+				((ContainmentContext)_localctx).syllables = syllable_group();
+				setState(72);
+				match(LCURLY);
+				setState(73);
+				((ContainmentContext)_localctx).motion_spec = motion_spec_list();
+				setState(74);
+				match(RCURLY);
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -671,7 +699,7 @@ public class MotorMusicParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u0013J\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001\u0014O\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0001\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0001"+
 		"\u0000\u0001\u0000\u0001\u0000\u0001\u0000\u0003\u0000\u0015\b\u0000\u0001"+
@@ -683,40 +711,43 @@ public class MotorMusicParser extends Parser {
 		"\u0003\u0003\u00036\b\u0003\u0001\u0004\u0001\u0004\u0001\u0004\u0001"+
 		"\u0004\u0003\u0004<\b\u0004\u0001\u0005\u0001\u0005\u0001\u0005\u0001"+
 		"\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001"+
-		"\u0005\u0003\u0005H\b\u0005\u0001\u0005\u0000\u0000\u0006\u0000\u0002"+
-		"\u0004\u0006\b\n\u0000\u0000P\u0000\u0014\u0001\u0000\u0000\u0000\u0002"+
-		"\u0016\u0001\u0000\u0000\u0000\u0004\u001d\u0001\u0000\u0000\u0000\u0006"+
-		"5\u0001\u0000\u0000\u0000\b;\u0001\u0000\u0000\u0000\nG\u0001\u0000\u0000"+
-		"\u0000\f\u0015\u0005\u0000\u0000\u0001\r\u000e\u0003\n\u0005\u0000\u000e"+
-		"\u000f\u0005\u0000\u0000\u0001\u000f\u0015\u0001\u0000\u0000\u0000\u0010"+
-		"\u0011\u0003\u0002\u0001\u0000\u0011\u0012\u0003\n\u0005\u0000\u0012\u0013"+
-		"\u0005\u0000\u0000\u0001\u0013\u0015\u0001\u0000\u0000\u0000\u0014\f\u0001"+
-		"\u0000\u0000\u0000\u0014\r\u0001\u0000\u0000\u0000\u0014\u0010\u0001\u0000"+
-		"\u0000\u0000\u0015\u0001\u0001\u0000\u0000\u0000\u0016\u0017\u0005\u0010"+
-		"\u0000\u0000\u0017\u0018\u0005\u0012\u0000\u0000\u0018\u0003\u0001\u0000"+
-		"\u0000\u0000\u0019\u001e\u0003\n\u0005\u0000\u001a\u001b\u0003\n\u0005"+
-		"\u0000\u001b\u001c\u0003\u0004\u0002\u0000\u001c\u001e\u0001\u0000\u0000"+
-		"\u0000\u001d\u0019\u0001\u0000\u0000\u0000\u001d\u001a\u0001\u0000\u0000"+
-		"\u0000\u001e\u0005\u0001\u0000\u0000\u0000\u001f \u0003\u0004\u0002\u0000"+
-		" !\u0005\r\u0000\u0000!6\u0001\u0000\u0000\u0000\"#\u0003\u0004\u0002"+
-		"\u0000#$\u0005\u000e\u0000\u0000$6\u0001\u0000\u0000\u0000%&\u0003\u0004"+
-		"\u0002\u0000&\'\u0005\r\u0000\u0000\'(\u0003\u0006\u0003\u0000(6\u0001"+
-		"\u0000\u0000\u0000)*\u0003\u0004\u0002\u0000*+\u0005\u000e\u0000\u0000"+
-		"+,\u0003\u0006\u0003\u0000,6\u0001\u0000\u0000\u0000-.\u0003\u0004\u0002"+
-		"\u0000./\u0005\r\u0000\u0000/0\u0003\u0004\u0002\u000006\u0001\u0000\u0000"+
-		"\u000012\u0003\u0004\u0002\u000023\u0005\u000e\u0000\u000034\u0003\u0004"+
-		"\u0002\u000046\u0001\u0000\u0000\u00005\u001f\u0001\u0000\u0000\u0000"+
-		"5\"\u0001\u0000\u0000\u00005%\u0001\u0000\u0000\u00005)\u0001\u0000\u0000"+
-		"\u00005-\u0001\u0000\u0000\u000051\u0001\u0000\u0000\u00006\u0007\u0001"+
-		"\u0000\u0000\u00007<\u0005\u0002\u0000\u000089\u0005\u0002\u0000\u0000"+
-		"9:\u0005\u000f\u0000\u0000:<\u0003\b\u0004\u0000;7\u0001\u0000\u0000\u0000"+
-		";8\u0001\u0000\u0000\u0000<\t\u0001\u0000\u0000\u0000=H\u0005\f\u0000"+
-		"\u0000>?\u0005\u0003\u0000\u0000?H\u0005\f\u0000\u0000@H\u0003\b\u0004"+
-		"\u0000AB\u0005\u0003\u0000\u0000BH\u0003\b\u0004\u0000CD\u0005\u0006\u0000"+
-		"\u0000DE\u0003\u0006\u0003\u0000EF\u0005\u0007\u0000\u0000FH\u0001\u0000"+
-		"\u0000\u0000G=\u0001\u0000\u0000\u0000G>\u0001\u0000\u0000\u0000G@\u0001"+
-		"\u0000\u0000\u0000GA\u0001\u0000\u0000\u0000GC\u0001\u0000\u0000\u0000"+
-		"H\u000b\u0001\u0000\u0000\u0000\u0005\u0014\u001d5;G";
+		"\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0003"+
+		"\u0005M\b\u0005\u0001\u0005\u0000\u0000\u0006\u0000\u0002\u0004\u0006"+
+		"\b\n\u0000\u0000V\u0000\u0014\u0001\u0000\u0000\u0000\u0002\u0016\u0001"+
+		"\u0000\u0000\u0000\u0004\u001d\u0001\u0000\u0000\u0000\u00065\u0001\u0000"+
+		"\u0000\u0000\b;\u0001\u0000\u0000\u0000\nL\u0001\u0000\u0000\u0000\f\u0015"+
+		"\u0005\u0000\u0000\u0001\r\u000e\u0003\n\u0005\u0000\u000e\u000f\u0005"+
+		"\u0000\u0000\u0001\u000f\u0015\u0001\u0000\u0000\u0000\u0010\u0011\u0003"+
+		"\u0002\u0001\u0000\u0011\u0012\u0003\n\u0005\u0000\u0012\u0013\u0005\u0000"+
+		"\u0000\u0001\u0013\u0015\u0001\u0000\u0000\u0000\u0014\f\u0001\u0000\u0000"+
+		"\u0000\u0014\r\u0001\u0000\u0000\u0000\u0014\u0010\u0001\u0000\u0000\u0000"+
+		"\u0015\u0001\u0001\u0000\u0000\u0000\u0016\u0017\u0005\u0011\u0000\u0000"+
+		"\u0017\u0018\u0005\u0013\u0000\u0000\u0018\u0003\u0001\u0000\u0000\u0000"+
+		"\u0019\u001e\u0003\n\u0005\u0000\u001a\u001b\u0003\n\u0005\u0000\u001b"+
+		"\u001c\u0003\u0004\u0002\u0000\u001c\u001e\u0001\u0000\u0000\u0000\u001d"+
+		"\u0019\u0001\u0000\u0000\u0000\u001d\u001a\u0001\u0000\u0000\u0000\u001e"+
+		"\u0005\u0001\u0000\u0000\u0000\u001f \u0003\u0004\u0002\u0000 !\u0005"+
+		"\r\u0000\u0000!6\u0001\u0000\u0000\u0000\"#\u0003\u0004\u0002\u0000#$"+
+		"\u0005\u000e\u0000\u0000$6\u0001\u0000\u0000\u0000%&\u0003\u0004\u0002"+
+		"\u0000&\'\u0005\r\u0000\u0000\'(\u0003\u0006\u0003\u0000(6\u0001\u0000"+
+		"\u0000\u0000)*\u0003\u0004\u0002\u0000*+\u0005\u000e\u0000\u0000+,\u0003"+
+		"\u0006\u0003\u0000,6\u0001\u0000\u0000\u0000-.\u0003\u0004\u0002\u0000"+
+		"./\u0005\r\u0000\u0000/0\u0003\u0004\u0002\u000006\u0001\u0000\u0000\u0000"+
+		"12\u0003\u0004\u0002\u000023\u0005\u000e\u0000\u000034\u0003\u0004\u0002"+
+		"\u000046\u0001\u0000\u0000\u00005\u001f\u0001\u0000\u0000\u00005\"\u0001"+
+		"\u0000\u0000\u00005%\u0001\u0000\u0000\u00005)\u0001\u0000\u0000\u0000"+
+		"5-\u0001\u0000\u0000\u000051\u0001\u0000\u0000\u00006\u0007\u0001\u0000"+
+		"\u0000\u00007<\u0005\u0002\u0000\u000089\u0005\u0002\u0000\u00009:\u0005"+
+		"\u000f\u0000\u0000:<\u0003\b\u0004\u0000;7\u0001\u0000\u0000\u0000;8\u0001"+
+		"\u0000\u0000\u0000<\t\u0001\u0000\u0000\u0000=M\u0005\f\u0000\u0000>?"+
+		"\u0005\u0003\u0000\u0000?M\u0005\f\u0000\u0000@M\u0003\b\u0004\u0000A"+
+		"B\u0005\u0003\u0000\u0000BM\u0003\b\u0004\u0000CD\u0005\u0006\u0000\u0000"+
+		"DE\u0003\u0006\u0003\u0000EF\u0005\u0007\u0000\u0000FM\u0001\u0000\u0000"+
+		"\u0000GH\u0003\b\u0004\u0000HI\u0005\u0004\u0000\u0000IJ\u0003\u0006\u0003"+
+		"\u0000JK\u0005\u0005\u0000\u0000KM\u0001\u0000\u0000\u0000L=\u0001\u0000"+
+		"\u0000\u0000L>\u0001\u0000\u0000\u0000L@\u0001\u0000\u0000\u0000LA\u0001"+
+		"\u0000\u0000\u0000LC\u0001\u0000\u0000\u0000LG\u0001\u0000\u0000\u0000"+
+		"M\u000b\u0001\u0000\u0000\u0000\u0005\u0014\u001d5;L";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

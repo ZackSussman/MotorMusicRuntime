@@ -111,6 +111,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
      //dynamically sets some colors without repainting everything
     //CAUTION: this is only to be used if we are sure none of the ranges have changed (so only during animation)
     function alterColors(editor, document, colorsToSet) {
+        console.log("altering colors with colors to set: " + Array.from(colorsToSet.entries()).map(([range, color]) => `${range} -> ${color}`).join(", "));
         for (const range of colorsToSet.keys()) {
 
             /*there are two things we must take care of:
@@ -191,7 +192,6 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
             //update the colors based on the computed animation function 
             function animationRuntime() {
                 const elapsedTime = (audioRuntimeData.audioContext.currentTime - animationRuntimeData.startTime) * 1000;  // Time elapsed in ms
-                //console.log("elapside time is " + elapsedTime);
                 
                 let animationInfo = animationRuntimeData.getAnimationInfoFunction(Math.max(elapsedTime - DELAY_BEFORE_PLAYBACK_START + CORRECTION_FACTOR, 0)); //apply a .1 second shift to align with the delay the audio is forced to have
                 //it gives back undefined once elapside time has gone above what there is actual animation for 
@@ -215,11 +215,18 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 for each of the colors above, we must find all the ranges and add them into our color map 
                 */
                 let colorsToSet = new Map();
-                let syllableRangeValues = animationInfo.currentSyllableGroupSyllableRanges;
-                let ampersandRangeValues = animationInfo.currentSyllableGroupAmpersandRanges;
-                let parenInfos = animationInfo.parensInfo;
+                let syllableRangeValues = animationInfo.leafSyllableGroup.syllableRanges;
+                let ampersandRangeValues = animationInfo.leafSyllableGroup.ampersandRanges;
+                let bracesInfos = animationInfo.bracesInfo;
 
-                let rangesWeAreGoingToColorNow = (parenInfos.map(i => [i.openParenRange, i.closeParenRange].concat(i.directionIndicatorRanges))).flat().concat(syllableRangeValues).concat(ampersandRangeValues);
+                let rangesWeAreGoingToColorNow = (bracesInfos.map(i => [i.openBraceRange, i.closeBraceRange].concat(i.directionIndicatorRanges))).flat().concat(syllableRangeValues).concat(ampersandRangeValues);
+                for (let bracesInfo in bracesInfos) {
+                    if (bracesInfo.containerSyllableGroup != undefined) {
+                        rangesWeAreGoingToColorNow = rangesWeAreGoingToColorNow.concat(bracesInfo.containerSyllableGroup.syllableRanges);
+                        rangesWeAreGoingToColorNow = rangesWeAreGoingToColorNow.concat(bracesInfo.containerSyllableGroup.ampersandRanges);
+                    }
+                }
+
                 //console.log("the ranges we are going to color now are " + rangesWeAreGoingToColorNow);
                 for (let range of currentRangesBeingAnimated) {
                     if (!(deserializeRange(range) in rangesWeAreGoingToColorNow)) {
@@ -235,8 +242,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
             
                 
                 //1--------------------- syllable ranges
-                let amountThroughSyllableGroup = animationInfo.currentSyllableLocation;
-              
+                let amountThroughSyllableGroup = animationInfo.leafSyllableGroup.currentLocation;
                 let ampersandBaselineColor;
                 let ampersandColorToUse;
                 if (ampersandRangeValues.length > 0) {
@@ -251,17 +257,20 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 let syllableBaselineColor = initialColorStateMap.get(serializeRange(syllableRangeValues[0])); //there is always at least one and they are the same color
                 let syllableColorToUse = morphToWhite(syllableBaselineColor, Math.pow(Math.sin(Math.PI * amountThroughSyllableGroup), .66) ); //square for a tighter animation   
                 for (let syllableRange of syllableRangeValues) {
+                    if (syllableColorToUse == undefined) {
+                        console.log("setting syllable color to " + syllableColorToUse + " for range " + serializeRange(syllableRange));
+                    }
                     colorsToSet.set(serializeRange(syllableRange), syllableColorToUse);
                 }
               
                 //-----------------------
 
-                //2---------------------- paren ranges
-                for (let parenInfo of parenInfos) {
-                    let initialGroupingColorToUse = initialColorStateMap.get(serializeRange(parenInfo.openParenRange));
-                    let section = parenInfo.currentLocation.section;
-                    let amount = parenInfo.currentLocation.amount;
-                    let startsWithTowards = parenInfo.startsWithTowards;
+                //2---------------------- paren ranges + containing syllable group ranges
+                for (let bracesInfo of bracesInfos) {
+                    let initialGroupingColorToUse = initialColorStateMap.get(serializeRange(bracesInfo.openBraceRange));
+                    let section = bracesInfo.currentLocation.section;
+                    let amount = bracesInfo.currentLocation.amount;
+                    let startsWithTowards = bracesInfo.startsWithTowards;
                     let color
                     if (startsWithTowards && section % 2 == 0
                                         ||
@@ -273,7 +282,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     //we do a test here to see if we are in the very last section, and if so, 
                     //we must very slightly prematurely reset the color down to 0 so that 
                     //the brace isn't hanging at white after we lose scope of it
-                    if (section == parenInfo.directionIndicatorRanges.length && amount > 0.9) {
+                    if (section == bracesInfo.directionIndicatorRanges.length && amount > 0.9) {
                         //so we need to go down from 90% of the last 10%
                     // console.log("we are SETTING to " + (1 - (amount - .9) / .1));
                         color = morphToWhite(initialGroupingColorToUse, .9 * (1 - (amount - .9) / .1) );
@@ -283,9 +292,11 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     //all other scenarios will morph from white to normal
                     color = morphToWhite(initialGroupingColorToUse, 1 - amount);
                     }
-
-                    colorsToSet.set(serializeRange(parenInfo.openParenRange), color);
-                    colorsToSet.set(serializeRange(parenInfo.closeParenRange), color);
+                    if (color == undefined) {
+                        console.log("setting color: " + color + " for ranges " + serializeRange(bracesInfo.openBraceRange) + " and " + serializeRange(bracesInfo.closeBraceRange));
+                    }
+                    colorsToSet.set(serializeRange(bracesInfo.openBraceRange), color);
+                    colorsToSet.set(serializeRange(bracesInfo.closeBraceRange), color);
 
                     //console.log("the ranges are: ");
                     //for (let r of parenInfo.directionIndicatorRanges) {
@@ -293,7 +304,7 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     //}
 
                     //sort by starting x coordinate in the range to ensure they are in order w.r.t our sections
-                    parenInfo.directionIndicatorRanges.sort((r1, r2) => {
+                    bracesInfo.directionIndicatorRanges.sort((r1, r2) => {
                         if (r1[0] == r2[0]) {
                             return r1[1] - r2[1];
                         }
@@ -312,8 +323,8 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                 }
                     for (let i = bottom; i <= section; i++) {
                         //console.log("i is " + i);
-                        if (i < parenInfo.directionIndicatorRanges.length && i >= 0) {
-                            colorsToSet.set(serializeRange(parenInfo.directionIndicatorRanges[i]), color);
+                        if (i < bracesInfo.directionIndicatorRanges.length && i >= 0) {
+                            colorsToSet.set(serializeRange(bracesInfo.directionIndicatorRanges[i]), color);
                         }
                     }
                     /*
@@ -326,15 +337,32 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
                     
                         //colorsToSet.set(serializeRange(r), color);
                     });*/
+                
+                //do coloring for containing syllable group if it exists
+                if (bracesInfo.containerSyllableGroup != undefined) {
+                    let containingSyllableGroup = bracesInfo.containerSyllableGroup;
+                    let containingSyllableBaselineColor = initialColorStateMap.get(serializeRange(containingSyllableGroup.syllableRanges[0])); //there is always at least one and they are the same color
+                    let containingSyllableColorToUse = morphToWhite(containingSyllableBaselineColor, Math.pow(Math.sin(Math.PI * bracesInfo.currentLocation.globalAmount), .66) ); //square for a tighter animation   
+                    for (let syllableRange of containingSyllableGroup.syllableRanges) {
+                        colorsToSet.set(serializeRange(syllableRange), containingSyllableColorToUse);
+                    }
+                    if (containingSyllableGroup.ampersandRanges.length > 0) {
+                        let containingAmpersandBaselineColor = initialColorStateMap.get(serializeRange(containingSyllableGroup.ampersandRanges[0])); //ampersands baseline to the same color
+                        let containingAmpersandColorToUse = morphToWhite(containingAmpersandBaselineColor, Math.pow(Math.sin(Math.PI * bracesInfo.currentLocation.globalAmount), .66));
+                        for (let ampersandRange of containingSyllableGroup.ampersandRanges) {
+                            colorsToSet.set(serializeRange(ampersandRange), containingAmpersandColorToUse);
+                        }
+                    }
+                
                 }
                 //------------------------------------------------------------
 
-                alterColors(editor, document, colorsToSet);
-
             }
 
-            animationRuntimeData.intervalId = setInterval(animationRuntime, actualFrameDuration);
+            alterColors(editor, document, colorsToSet);
         }
+         animationRuntimeData.intervalId = setInterval(animationRuntime, actualFrameDuration);
+    }
 
     }
 
