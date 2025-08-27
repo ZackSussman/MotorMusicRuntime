@@ -3,21 +3,15 @@ parser grammar MotorMusicParser;
 options {tokenVocab = MotorMusicLexer;}
 
 compilationUnit:
-      e = EOF #EmptyProgram
-    | e = gesture EOF #NonEmptyProgramWithDefaultPitchSpecification
-    | s = pitch_specification_statement e = gesture EOF #NonEmptyProgramWithPitchSpecification
+      EOF #EmptyProgram
+    | p = exp_or_gesture EOF #NonEmptyProgram
 ;
 
-
-pitch_specification_statement:
-  PITCH_SPECIFICATION p = PITCH_SPECIFICATION_VALUE #PitchSpecificationStatement
-;
 
 raised_gesture_list:
     top = gesture #RaisedSingle
   | top = gesture rest = raised_gesture_list #RaisedMulti
 ;
-
 
 motion_spec_list:
      top = raised_gesture_list DOT  #SingleMotionSpecDown
@@ -29,15 +23,33 @@ motion_spec_list:
 ;
 
 syllable_group:
-    syllable = SYLLABLE #SyllableGroupSingle
-  | top = SYLLABLE AMPERSAND rest = syllable_group #SyllableGroupMulti
+    syllable = exp #SyllableGroupSingle
+  | top = exp AMPERSAND rest = syllable_group #SyllableGroupMulti
 ;
 
 gesture:
     UNDERSCORE #Empty
-  | number = NUMBER UNDERSCORE #TimeTaggedEmpty
+  | number = exp UNDERSCORE #TimeTaggedEmpty
   | syllables = syllable_group #SyllableGroup
-  | number = NUMBER syllables = syllable_group #TimeTaggedSyllableGroup
+  | number = exp syllables = syllable_group #TimeTaggedSyllableGroup
   | LPAREN motion_spec = motion_spec_list RPAREN #DirectionSpec
   | syllables = syllable_group LCURLY motion_spec = motion_spec_list RCURLY #Containment
 ;
+
+type:
+    builtin = IDENT #BuiltIn
+   | inType = type DASH RANGLE outType = type #FunctionType
+;
+
+exp:
+   symbol = IDENT #IdentExp
+  | number = NUMBER #NumberExp
+  | func = exp LPAREN arg = exp_or_gesture RPAREN #Eval
+  | FN decl_name = IDENT LPAREN argName = IDENT COLON inTyp = type RPAREN COLON outType = type EQUALS RANGLE out = exp_or_gesture SEMICOLON in = exp_or_gesture #Decl
+  | FN LPAREN arg = IDENT COLON inTyp = type RPAREN COLON outType = type EQUALS RANGLE out = exp_or_gesture #AnomDecl
+  | LPAREN within = exp_or_gesture RPAREN #WrappedExp;
+
+ 
+ exp_or_gesture:
+    e = exp #ExpExpOrGesture
+  | g = gesture #GestureExpOrGesture;

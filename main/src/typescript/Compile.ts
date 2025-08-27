@@ -29,7 +29,7 @@ function createParserFromLexer(lexer) {
 }
 
 
-export class Error {
+export class ParserError {
     startLine: number;
     endLine: number;
     startCol: number;
@@ -45,8 +45,8 @@ export class Error {
 }
 
 export class CollectorErrorListener extends ErrorListener<Token> {
-    private errors : Error[] = []
-    constructor(errors: Error[]) {
+    private errors : ParserError[] = []
+    constructor(errors: ParserError[]) {
         super()
         this.errors = errors
     }
@@ -55,7 +55,7 @@ export class CollectorErrorListener extends ErrorListener<Token> {
         if (offendingSymbol._text !== null) {
             endColumn = column + offendingSymbol._text.length;
         }
-        this.errors.push(new Error(line, line, column, endColumn, msg));
+        this.errors.push(new ParserError(line, line, column, endColumn, msg));
     }
 }
 
@@ -65,7 +65,7 @@ type animationFunction = (elapsedTime : number) => AnimationInfo
 
 
 
-function parse(input : string, errors : Error[]) {
+function parse(input : string, errors : ParserError[]) {
     const lexer = createLexer(input);
     lexer.removeErrorListeners();
     lexer.addErrorListener(new ConsoleErrorListener());
@@ -89,9 +89,9 @@ import {range} from "./ParserListeners/ParserListenerUtils";
 
 function makeProcessForSyllableTime(globalRuntimeData) {
     function process(input : string) : 
-        [Map<range, string>, animationFunction, audioStream , Error[]] 
+        [Map<range, string>, animationFunction, audioStream , ParserError[]] 
         {
-        let errors : Error[] = [];
+        let errors : ParserError[] = [];
         let tree = parse(input, errors)
         let staticAnalysisListener = new MotorMusicParserStaticAnalysisListener(input);
         ParseTreeWalker.DEFAULT.walk(staticAnalysisListener, tree);
