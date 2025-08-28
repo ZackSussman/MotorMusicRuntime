@@ -1,14 +1,13 @@
 import {ParserError} from "../Compile";
 import {ParserRuleContext, TerminalNode} from "antlr4";
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
-import { AnomDeclContext, BuiltInContext, ContainmentContext, DeclContext, DirectionSpecContext, EvalContext, WrappedExpContext, ExpContext, FunctionTypeContext, NumberExpContext, Exp_or_gestureContext, ExpExpOrGestureContext, GestureExpOrGestureContext, IdentExpContext } from "../../../../antlr/generated/MotorMusicParser";
+import { AnomDeclContext, BuiltInContext, ContainmentContext, DeclContext, DirectionSpecContext, EvalContext, WrappedExpContext, ExpContext, FunctionTypeContext, NumberExpContext, Exp_or_gestureContext, ExpExpOrGestureContext, GestureExpOrGestureContext, IdentExpContext, EmptyContext, TimeTaggedEmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedSyllableGroupContext, NonEmptyProgramContext, SyllableGroupContext } from "../../../../antlr/generated/MotorMusicParser";
 
-import { resolvePitchSpecificationString, PitchSpecification, } from "../SoundSpecification/PitchSpecifications";
 import { resolve } from "path";
 
 
-class Type {
-	private value : {number : void} | {syllable: void} | {raisedGesture : void} | {from: Type, to: Type };
+export class Type {
+	private value : {number : void} | {syllable: void} | {raisedGesture : void} | {syllables: void} | {from: Type, to: Type } ;
 
 	private constructor() {}
 
@@ -24,6 +23,8 @@ class Type {
 					return Type.raisedGesture();
 				case "syllable":
 					return Type.syllable();
+				case "syllables":
+					return Type.syllables();
 				default:
 					addError("Unknown built-in type: " + name, ctx);
 			}
@@ -51,6 +52,12 @@ class Type {
 		return res;
 	}
 
+	static syllables() {
+		let res = new Type();
+		res.value = {syllables: undefined};
+		return res;
+	}
+
 	static raisedGesture() {
 		let res = new Type();
 		res.value = {raisedGesture: undefined};
@@ -72,19 +79,37 @@ class Type {
 		return 'syllable' in this.value;
 	}
 
+	isSyllables() {
+		return 'syllables' in this.value;
+	}
+
+	isSyllabic() {
+		return this.isSyllable() || this.isSyllables();
+	}
+
 	isRaisedGesture() {
 		return 'raisedGesture' in this.value;
 	}
 
-	isFunction(type1 : Type, type2 : Type) {
+
+	isSpecificFunction(type1 : Type, type2 : Type) {
 		return 'from' in this.value && 'to' in this.value && this.value.from.equals(type1) && this.value.to.equals(type2);
+	}
+
+	isFunction() {
+		return 'from' in this.value && 'to' in this.value;
+	}
+
+
+	isGesture() {
+		return this.isSyllabic() || this.isRaisedGesture();
 	}
 
 	getFrom() {
 		if ("from" in this.value) {
 			return this.value.from;
 		}
-		throw new Error("Called getFrom on a non function type");
+		throw new Error("Called getFrom on a non function type: " + this.format());
 	}
 
 	getTo() {
@@ -104,6 +129,9 @@ class Type {
 		if (other.isSyllable() && this.isSyllable()) {
 			return true;
 		}
+		if (other.isSyllables() && this.isSyllables()) {
+			return true;
+		}
 		if (other.isRaisedGesture() && this.isRaisedGesture()) {
 			return true;
 		}
@@ -114,7 +142,7 @@ class Type {
 		} catch (e) {
 			return false;
 		}
-		return other.isFunction(from, to);
+		return other.isSpecificFunction(from, to);
 	}
 
 	format() {
@@ -127,8 +155,16 @@ class Type {
 		if (this.isRaisedGesture()) {
 			return "raisedGesture";
 		}
-		if ("from" in this.value && "to" in this.value) {
-			return "(" + this.value.from.format() + " -> " + this.value.to.format() + ")";
+		if (this.isSyllables()) {
+			return "syllables";
+		}
+		if ('from' in this.value && 'to' in this.value) {
+			// Function types are right-associative, so only wrap left side if it's a function
+			let fromStr = this.value.from.format();
+			if (fromStr.includes('->')) {
+				fromStr = "(" + fromStr + ")";
+			}
+			return fromStr + " -> " + this.value.to.format();
 		}
 		throw new Error("called format on invalid type: " + this.value);
 	}
@@ -162,6 +198,9 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
     constructor() {
         super();
         this.errors = [];
+        this.discoveredTypableContextTypes = new Map();
+        this.inScopeSubstitutableTypes = new Map();
+        this.inScopeFunctionTypes = new Map();
     }
 
 	private addError(message : string, ctx : ParserRuleContext) {
@@ -190,27 +229,53 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	enterExpExpOrGesture = (ctx: ExpExpOrGestureContext) => {
 		this.handleExpOrGesturePendingActions(ctx);
 	}
+	exitExpExpOrGesture = (ctx: ExpExpOrGestureContext) =>  {
+		let innerType = this.discoveredTypableContextTypes.get(ctx._e);
+		if (innerType != undefined) {
+			this.discoveredTypableContextTypes.set(ctx, innerType);
+		}
+		else if (this.errors.length == 0) {
+			throw new Error("exitExpExpOrGesture: fatal error in type checker :(");
+		}
+	}
 	enterGestureExpOrGesture = (ctx: GestureExpOrGestureContext) => {
 		this.handleExpOrGesturePendingActions(ctx);
 	}
+	exitGestureExpOrGesture = (ctx: GestureExpOrGestureContext) =>  {
+		let innerType = this.discoveredTypableContextTypes.get(ctx._g);
+		if (innerType != undefined) {
+			this.discoveredTypableContextTypes.set(ctx, innerType);
+		}
+		else if (this.errors.length == 0) {
+			throw new Error("exitGestureExpOrGesture: fatal error in type checker :(");
+		}
+	}
 
-
-	exitWrapped = (ctx : WrappedExpContext) => {
+	exitWrappedExp = (ctx : WrappedExpContext) => {
 		let innerType = this.discoveredTypableContextTypes.get(ctx._within);
 		if (innerType != undefined) {
 			this.discoveredTypableContextTypes.set(ctx, innerType);
+		}
+		else if (this.errors.length == 0) {
+			throw new Error("exitWrappedExp: fatal error in type checker :(");
 		}
 	}
 
 
 	exitNumberExp = (ctx: NumberExpContext) => {
+		if (Number(ctx.NUMBER().getText()) == 0) {
+			this.addError("number literal cannot be zero", ctx);
+			return;
+		}
 		this.discoveredTypableContextTypes.set(ctx, Type.number());
 	}
 
 	exitIdentExp = (ctx: IdentExpContext) => {
-		//an ident refers to the type it was said to if it's a function input, otherwise it's a syllable
 		if (this.inScopeSubstitutableTypes.has(ctx._symbol_.text)) {
 			this.discoveredTypableContextTypes.set(ctx, this.inScopeSubstitutableTypes.get(ctx._symbol_.text).at(-1));
+		}
+		else if (this.inScopeFunctionTypes.has(ctx._symbol_.text)) {
+			this.discoveredTypableContextTypes.set(ctx, this.inScopeFunctionTypes.get(ctx._symbol_.text));
 		}
 		else {
 			this.discoveredTypableContextTypes.set(ctx, Type.syllable());
@@ -226,6 +291,10 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 			}
 			return;
 		}
+		if (!functionType.isFunction()) {
+			this.addError("Tried to call a non-function type: " + functionType.format(), ctx._func);
+			return;
+		}
 		if (!functionType.getFrom().equals(inputType)) {
 			this.addError("function argument type does not match the type required by the function. The function expects a " + 
 				functionType.getFrom().format() + " but it received a " + inputType.format(), ctx);
@@ -235,26 +304,26 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 
 	enterAnomDecl = (ctx: AnomDeclContext) => {
 		if (ctx._arg.text in this.inScopeSubstitutableTypes) {
-			this.inScopeSubstitutableTypes.get(ctx._arg.text).push(Type.fromExpression(ctx._inTyp, this.addError));
+			this.inScopeSubstitutableTypes.get(ctx._arg.text).push(Type.fromExpression(ctx._inTyp, this.addError.bind(this)));
 		}
 		else {
-			this.inScopeSubstitutableTypes.set(ctx._arg.text, [Type.fromExpression(ctx._inTyp, this.addError)]);
+			this.inScopeSubstitutableTypes.set(ctx._arg.text, [Type.fromExpression(ctx._inTyp, this.addError.bind(this))]);
 		}
 	}
 
 	exitAnomDecl = (ctx: AnomDeclContext) => {
-		let declaredOutType = Type.fromExpression(ctx._outType, this.addError);
+		let declaredOutType = Type.fromExpression(ctx._outType, this.addError.bind(this));
 		let actualOutTypye = this.discoveredTypableContextTypes.get(ctx._out);
 		if (declaredOutType == undefined || actualOutTypye == undefined) {
 			if (this.errors.length == 0) {
-				throw new Error("fatal error in type checker :(");
+				throw new Error("exitAnomDecl: fatal error in type checker :(");
 			}
 			return;
 		}
 		if (!declaredOutType.equals(actualOutTypye)) {
 			this.addError("expected the function output to be a " + declaredOutType.format() + " but we received a " + actualOutTypye.format(), ctx);
 		}
-		let inType = Type.fromExpression(ctx._inTyp, this.addError);
+		let inType = Type.fromExpression(ctx._inTyp, this.addError.bind(this));
 		if (inType == undefined) {
 			return;
 		}
@@ -265,7 +334,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	enterDecl = (ctx : DeclContext) => {
 		//1) add the argument for the function into our maps
 		let argName = ctx._argName.text;
-		let argType = Type.fromExpression(ctx._inTyp, this.addError);
+		let argType = Type.fromExpression(ctx._inTyp, this.addError.bind(this));
 		if (argType == undefined) {
 			return;
 		}
@@ -284,10 +353,10 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 		let addFunctionToScope = () => {
 			let functionName = ctx._decl_name.text;
 			let outType = this.discoveredTypableContextTypes.get(ctx._out);
-			let declaredOutType = Type.fromExpression(ctx._outType, this.addError);
+			let declaredOutType = Type.fromExpression(ctx._outType, this.addError.bind(this));
 			if (declaredOutType == undefined || outType == undefined) {
 				if (this.errors.length == 0) {
-					throw new Error("fatal error in type checker :(");
+					throw new Error("enterDecl: fatal error in type checker :(");
 				}
 				return;
 			}
@@ -295,7 +364,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 				this.addError("expected the function output to be a " + declaredOutType.format() + " but we received a " + outType.format(), ctx);
 				return;
 			}
-			let inType = Type.fromExpression(ctx._inTyp, this.addError);
+			let inType = Type.fromExpression(ctx._inTyp, this.addError.bind(this));
 			if (inType == undefined) {
 				return;
 			}
@@ -317,6 +386,10 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 	}
 
 	exitDecl = (ctx: DeclContext) => {
+		let resultType = this.discoveredTypableContextTypes.get(ctx._in_);
+		if (resultType != undefined) {
+			this.discoveredTypableContextTypes.set(ctx, resultType);
+		}
 		this.inScopeFunctionTypes.delete(ctx._decl_name.text);
 	}
 	
@@ -324,11 +397,120 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 
 
 	//gestures------------------
+	exitEmpty = (ctx: EmptyContext) => {
+		this.discoveredTypableContextTypes.set(ctx, Type.syllable());
+	}
 
+	exitTimeTaggedEmpty = (ctx: TimeTaggedEmptyContext) => {
+		let timeTagType = this.discoveredTypableContextTypes.get(ctx._number_);
+		if (timeTagType == undefined) {
+			return;
+		}
+		if (!timeTagType.isNumber()) {
+			this.addError("time tag must be a number, we received a " + timeTagType.format(), ctx._number_);
+			return;
+		}
+		this.discoveredTypableContextTypes.set(ctx, Type.syllable());
+	}
 
+	exitSyllableGroupSingle = (ctx: SyllableGroupSingleContext) => {
+		let syllableType = this.discoveredTypableContextTypes.get(ctx._syllable);
+		if (syllableType == undefined) {
+			return;
+		}
+		if (!syllableType.isSyllable()) {
+			this.addError("expected a syllable within syllable group, found a " + syllableType.format(), ctx._syllable);
+			return;
+		}
+		this.discoveredTypableContextTypes.set(ctx, Type.syllable());
+	}
 
+	exitSyllableGroupMulti = (ctx: SyllableGroupMultiContext) => {
+		let topSyllableType = this.discoveredTypableContextTypes.get(ctx._top);
+		if (topSyllableType == undefined) {
+			return;
+		}
+		if (!topSyllableType.isSyllable()) {
+			this.addError("expected a syllable within syllable group, found a " + topSyllableType.format(), ctx._top);
+			return;
+		}
+		
+		let restOfSyllablesType = this.discoveredTypableContextTypes.get(ctx._rest);
+		if (restOfSyllablesType == undefined) {
+			return;
+		}
+		if (!restOfSyllablesType.isSyllabic()) {
+			this.addError("expected a syllabic type within rest of syllable group, found a " + restOfSyllablesType.format() + " (a syllablic type is either syllable or syllables)", ctx._rest);
+			return;
+		}
+		this.discoveredTypableContextTypes.set(ctx, Type.syllables());
+	}
 
+	exitSyllableGroup = (ctx: SyllableGroupContext) => {
+		let foundType = this.discoveredTypableContextTypes.get(ctx._syllables);
+		if (foundType == undefined && this.errors.length == 0) {
+			throw new Error("exitSyllableGroup: FATAL ERROR in type checker");
+		}
+		this.discoveredTypableContextTypes.set(ctx, foundType);
+
+	}
+
+	exitTimeTaggedSyllableGroup = (ctx: TimeTaggedSyllableGroupContext) => {
+		let timeTagType = this.discoveredTypableContextTypes.get(ctx._number_);
+		if (timeTagType == undefined) {
+			return;
+		}
+		if (!timeTagType.isNumber()) {
+			this.addError("time tag must be a number, we received a " + timeTagType.format(), ctx._number_);
+			return;
+		}
+		let syllableGroupType = this.discoveredTypableContextTypes.get(ctx._syllables);
+		if (syllableGroupType == undefined) {
+			return;
+		}
+		if (!syllableGroupType.isSyllabic()) {
+			this.addError("expected a syllabic type within syllable group, found a " + syllableGroupType.format() + " (a syllablic type is either syllable or syllables)", ctx._syllables);
+			return;
+		}
+		this.discoveredTypableContextTypes.set(ctx, Type.syllables());
+	}
+
+	exitDirectionSpec = (ctx: DirectionSpecContext) => {
+		if (this.errors.length > 0) {
+			return;
+		}
+		this.discoveredTypableContextTypes.set(ctx, Type.raisedGesture());
+	}
+
+	exitContainment = (ctx: ContainmentContext) => {
+		let syllableType = this.discoveredTypableContextTypes.get(ctx._syllables);
+		if (syllableType == undefined) {
+			return;
+		}
+		if (!syllableType.isSyllabic()) {
+			this.addError("expected a syllabic type for container, found a " + syllableType.format() + " (a syllablic type is either syllable or syllables)", ctx._syllables);
+			return;
+		}
+		if (this.errors.length > 0) {
+			return;
+		}
+		this.discoveredTypableContextTypes.set(ctx, Type.raisedGesture());
+	}
 
 	//-------------
+
+
+	exitNonEmptyProgram =  (ctx: NonEmptyProgramContext) => {
+		let programType = this.discoveredTypableContextTypes.get(ctx._p);
+		if (programType == undefined) {
+			if (this.errors.length == 0) {
+				throw new Error("exitNonEmptyProgram: fatal error in type checker :(");
+			}
+			return;
+		}
+		if (!programType.isGesture()) {
+			this.addError("program must be a gesture, found a " + programType.format(), ctx._p);
+		}
+	}
 
 }

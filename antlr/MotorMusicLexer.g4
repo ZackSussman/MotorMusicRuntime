@@ -7,7 +7,7 @@ WS: ('\r\n'+ | '\r'+ | '\n'+ | [ \t]+) -> channel(WS_CHANNEL);
 
 FN : 'fn';
 
-IDENT : ([qtplkjgfdszxcvbnmhrwaeiou] | [QTPLKJGFDSZXCVBNMHRWAEIOU])+;
+IDENT : ([abcdefghijklmnopqrstuvwxyz] | [ABCDEFGHIJKLMNOPQRSTUVWXYZ])+;
 
 NUMBER : [0-9]+[.][0-9]+ | [.][0-9]+ | [0-9]+;
 

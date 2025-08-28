@@ -12,12 +12,17 @@
     },
     "devDependencies": {
         "@types/node": "^24.0.3",
+        "ts-node": "^10.9.2",
         "typescript": "^5.6.2"
     },
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "node main/test/statics/run-tests.js",
+        "test:types": "npx ts-node --transpile-only main/test/statics/TestTypes.ts",
+        "test:static": "npx ts-node --transpile-only main/test/statics/TestStatics.ts",
+        "test:all": "npx ts-node --transpile-only main/test/statics/index.ts",
         "build": "cd main && tsc",
+        "build:tests": "cd main && tsc --outDir ../test-build --rootDirs test,src",
         "prepare": "npm run build"
     },
     "keywords": [],
