@@ -111,7 +111,6 @@ export function initializeAnimationRuntime(globalRuntimeData, audioRuntimeData, 
      //dynamically sets some colors without repainting everything
     //CAUTION: this is only to be used if we are sure none of the ranges have changed (so only during animation)
     function alterColors(editor, document, colorsToSet) {
-        console.log("altering colors with colors to set: " + Array.from(colorsToSet.entries()).map(([range, color]) => `${range} -> ${color}`).join(", "));
         for (const range of colorsToSet.keys()) {
 
             /*there are two things we must take care of:

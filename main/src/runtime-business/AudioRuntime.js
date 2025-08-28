@@ -1,6 +1,7 @@
 
 
 import { PLAYBACK_SAMPLE_RATE } from "../../generated-javascript/main/src/runtime-business/RuntimeConstants.js";
+import { numSamplesToDuration } from "../typescript/audio/Audio.js";
 
 export class AudioRuntimeData {
   audioContext; //initialize to {value: null}
@@ -31,6 +32,7 @@ export function initializeAudioRuntime(audioRuntimeData) {
     initializeAudioContext: initializeAudioContext,
 
     setComputedAudio: function setComputedAudio(audio) {
+      console.log("the length of the set computed audio is: " + numSamplesToDuration(audio.length));
       audioRuntimeData.computedAudio = audio;
     },
 
