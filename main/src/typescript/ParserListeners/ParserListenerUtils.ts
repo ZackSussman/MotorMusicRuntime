@@ -3,7 +3,7 @@
 //defines common procedures used throughout various parser listeners 
 
 import { TerminalNode } from "antlr4";
-import {Motion_spec_listContext, EndAwayFromMotionSpecContext, SingleMotionSpecDownContext, EndTowardsMotionSpecContext, SingleMotionSpecUpContext, TowardsPrefixMotionSpecContext, AwayPrefixMotionSpecContext} from "../../../../antlr/generated/MotorMusicParser";
+import {Motion_spec_listContext, EndAwayFromMotionSpecContext, SingleMotionSpecDownContext, EndTowardsMotionSpecContext, SingleMotionSpecUpContext, TowardsPrefixMotionSpecContext, AwayPrefixMotionSpecContext, ExpContext} from "../../../../antlr/generated/MotorMusicParser";
 
 export type range = [number, number, number, number];
 
@@ -13,6 +13,10 @@ export function serializeRange(r : range) : string {
 
 export function terminalNodeToRange(n : TerminalNode) : range {
     return [n.symbol.line, n.symbol.column + 1, n.symbol.line, n.symbol.column + n.getText().length + 1];
+}
+
+export function expContextToRange(ctx : ExpContext) : range {
+    return [ctx.start.line, ctx.start.column + 1, ctx.stop.line, ctx.stop.column + 1];
 }
 
 export function getAllDirectionSpecifierRangesFromMotionSpecListContext(ctx : Motion_spec_listContext) : range[] {

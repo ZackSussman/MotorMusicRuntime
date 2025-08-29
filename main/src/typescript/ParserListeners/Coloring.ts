@@ -2,8 +2,8 @@
 /// <reference path="../../../../node_modules/monaco-editor/monaco.d.ts" />
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 import { TerminalNode } from "antlr4";
-import {range, serializeRange, terminalNodeToRange, getAllDirectionSpecifierRangesFromMotionSpecListContext} from "./ParserListenerUtils";
-import {DirectionSpecContext, EmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext, SyllableGroupContext, ContainmentContext} from "../../../../antlr/generated/MotorMusicParser";
+import {range, serializeRange, terminalNodeToRange, expContextToRange, getAllDirectionSpecifierRangesFromMotionSpecListContext} from "./ParserListenerUtils";
+import {DirectionSpecContext, EmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, SyllableGroupContext, ContainmentContext} from "../../../../antlr/generated/MotorMusicParser";
 import { PreColoringProcessedSyllableGroupData, ContainingSyllableGroupData } from "./SyllableGroupProcess";
 
 //Here is where we dynamically decide the actual colors for all the tokens
@@ -91,12 +91,6 @@ export class ProgramColoringListener extends MotorMusicParserListener {
         return res.concat(getAllDirectionSpecifierRangesFromMotionSpecListContext(ctx._motion_spec));
     }
 
-    enterPitchSpecificationStatement =  (ctx: PitchSpecificationStatementContext) => {
-        this.pitchSpecificationRanges.push(terminalNodeToRange(ctx.PITCH_SPECIFICATION_VALUE()));
-        this.pitchSpecificationRanges.push(terminalNodeToRange(ctx.PITCH_SPECIFICATION()));
-    }
-   
-
     enterDirectionSpec = (ctx : DirectionSpecContext) => {
         let currentDepth = this.currentBracesInScope.length;
         //need to construct the initial Brace data for this ctx. The maxDepth won't be finalized until we push the Brace
@@ -180,7 +174,7 @@ export class ProgramColoringListener extends MotorMusicParserListener {
 
     enterTimeTaggedEmpty = (ctx: TimeTaggedEmptyContext) => {
         let underscoreRange = terminalNodeToRange(ctx.UNDERSCORE());
-        let timeTagRange = terminalNodeToRange(ctx.NUMBER());
+        let timeTagRange = expContextToRange(ctx._number_);
         if (this.currentBracesInScope.length === 0) {
             this.braceFreeSyllableGroupData = new BraceFreeSyllableGroupData([timeTagRange, underscoreRange], []);
         }
@@ -280,11 +274,6 @@ private hslToHex(h: number, s: number, l: number): string {
     //call this after walking the parse tree to generate the colors 
     public buildColorMap() : Map<range, string>{
         let res = new Map();
-
-        for (let range of this.pitchSpecificationRanges) {
-            //set it to white for these
-            res.set(serializeRange(range), "#FFFFFF"); //pitch specification is always at depth 0
-        }
 
         for (let braceData of this.finalizedData) { 
             //maxDepth starts at 0 

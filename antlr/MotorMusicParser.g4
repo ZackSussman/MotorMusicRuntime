@@ -47,9 +47,6 @@ type:
   | inType = input_type DASH RANGLE outType = type #FunctionType
 ;
 
-  
-
-
 
 exp:
    symbol = IDENT #IdentExp
