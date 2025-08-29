@@ -21,8 +21,10 @@ import { SyllableGroupContext } from "./MotorMusicParser";
 import { TimeTaggedSyllableGroupContext } from "./MotorMusicParser";
 import { DirectionSpecContext } from "./MotorMusicParser";
 import { ContainmentContext } from "./MotorMusicParser";
-import { FunctionTypeContext } from "./MotorMusicParser";
+import { BuiltInInputTypeContext } from "./MotorMusicParser";
+import { WrappedInputTypeContext } from "./MotorMusicParser";
 import { BuiltInContext } from "./MotorMusicParser";
+import { FunctionTypeContext } from "./MotorMusicParser";
 import { AnomDeclContext } from "./MotorMusicParser";
 import { DeclContext } from "./MotorMusicParser";
 import { NumberExpContext } from "./MotorMusicParser";
@@ -168,12 +170,19 @@ export default class MotorMusicParserVisitor<Result> extends ParseTreeVisitor<Re
 	 */
 	visitContainment?: (ctx: ContainmentContext) => Result;
 	/**
-	 * Visit a parse tree produced by the `FunctionType`
-	 * labeled alternative in `MotorMusicParser.type`.
+	 * Visit a parse tree produced by the `BuiltInInputType`
+	 * labeled alternative in `MotorMusicParser.input_type`.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	visitFunctionType?: (ctx: FunctionTypeContext) => Result;
+	visitBuiltInInputType?: (ctx: BuiltInInputTypeContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `WrappedInputType`
+	 * labeled alternative in `MotorMusicParser.input_type`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitWrappedInputType?: (ctx: WrappedInputTypeContext) => Result;
 	/**
 	 * Visit a parse tree produced by the `BuiltIn`
 	 * labeled alternative in `MotorMusicParser.type`.
@@ -181,6 +190,13 @@ export default class MotorMusicParserVisitor<Result> extends ParseTreeVisitor<Re
 	 * @return the visitor result
 	 */
 	visitBuiltIn?: (ctx: BuiltInContext) => Result;
+	/**
+	 * Visit a parse tree produced by the `FunctionType`
+	 * labeled alternative in `MotorMusicParser.type`.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	visitFunctionType?: (ctx: FunctionTypeContext) => Result;
 	/**
 	 * Visit a parse tree produced by the `AnomDecl`
 	 * labeled alternative in `MotorMusicParser.exp`.

@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "target": "ES2023",
+        "module": "CommonJS",
+        "moduleResolution": "Node",
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "outDir": "./build",
+        "rootDirs": [".", "../.."],
+        "lib": ["ES2023", "dom"],
+        "types": ["node"],
+        "skipLibCheck": true,
+        "allowJs": true,
+        "noEmitOnError": false
+    },
+    "include": [
+        "./**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "build",
+        "../../src/typescript/Compile.ts"
+    ],
+    "ts-node": {
+        "compilerOptions": {
+            "module": "CommonJS"
+        },
+        "transpileOnly": true
+    }
+}

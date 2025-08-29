@@ -36,10 +36,20 @@ gesture:
   | syllables = syllable_group LCURLY motion_spec = motion_spec_list RCURLY #Containment
 ;
 
-type:
-    builtin = IDENT #BuiltIn
-   | inType = type DASH RANGLE outType = type #FunctionType
+
+input_type:
+  builtin = IDENT #BuiltInInputType
+ | LPAREN literal = type RPAREN #WrappedInputType
 ;
+
+type:
+   builtin = IDENT #BuiltIn
+  | inType = input_type DASH RANGLE outType = type #FunctionType
+;
+
+  
+
+
 
 exp:
    symbol = IDENT #IdentExp

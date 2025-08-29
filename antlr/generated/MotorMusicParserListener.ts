@@ -21,8 +21,10 @@ import { SyllableGroupContext } from "./MotorMusicParser";
 import { TimeTaggedSyllableGroupContext } from "./MotorMusicParser";
 import { DirectionSpecContext } from "./MotorMusicParser";
 import { ContainmentContext } from "./MotorMusicParser";
-import { FunctionTypeContext } from "./MotorMusicParser";
+import { BuiltInInputTypeContext } from "./MotorMusicParser";
+import { WrappedInputTypeContext } from "./MotorMusicParser";
 import { BuiltInContext } from "./MotorMusicParser";
+import { FunctionTypeContext } from "./MotorMusicParser";
 import { AnomDeclContext } from "./MotorMusicParser";
 import { DeclContext } from "./MotorMusicParser";
 import { NumberExpContext } from "./MotorMusicParser";
@@ -255,17 +257,29 @@ export default class MotorMusicParserListener extends ParseTreeListener {
 	 */
 	exitContainment?: (ctx: ContainmentContext) => void;
 	/**
-	 * Enter a parse tree produced by the `FunctionType`
-	 * labeled alternative in `MotorMusicParser.type`.
+	 * Enter a parse tree produced by the `BuiltInInputType`
+	 * labeled alternative in `MotorMusicParser.input_type`.
 	 * @param ctx the parse tree
 	 */
-	enterFunctionType?: (ctx: FunctionTypeContext) => void;
+	enterBuiltInInputType?: (ctx: BuiltInInputTypeContext) => void;
 	/**
-	 * Exit a parse tree produced by the `FunctionType`
-	 * labeled alternative in `MotorMusicParser.type`.
+	 * Exit a parse tree produced by the `BuiltInInputType`
+	 * labeled alternative in `MotorMusicParser.input_type`.
 	 * @param ctx the parse tree
 	 */
-	exitFunctionType?: (ctx: FunctionTypeContext) => void;
+	exitBuiltInInputType?: (ctx: BuiltInInputTypeContext) => void;
+	/**
+	 * Enter a parse tree produced by the `WrappedInputType`
+	 * labeled alternative in `MotorMusicParser.input_type`.
+	 * @param ctx the parse tree
+	 */
+	enterWrappedInputType?: (ctx: WrappedInputTypeContext) => void;
+	/**
+	 * Exit a parse tree produced by the `WrappedInputType`
+	 * labeled alternative in `MotorMusicParser.input_type`.
+	 * @param ctx the parse tree
+	 */
+	exitWrappedInputType?: (ctx: WrappedInputTypeContext) => void;
 	/**
 	 * Enter a parse tree produced by the `BuiltIn`
 	 * labeled alternative in `MotorMusicParser.type`.
@@ -278,6 +292,18 @@ export default class MotorMusicParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitBuiltIn?: (ctx: BuiltInContext) => void;
+	/**
+	 * Enter a parse tree produced by the `FunctionType`
+	 * labeled alternative in `MotorMusicParser.type`.
+	 * @param ctx the parse tree
+	 */
+	enterFunctionType?: (ctx: FunctionTypeContext) => void;
+	/**
+	 * Exit a parse tree produced by the `FunctionType`
+	 * labeled alternative in `MotorMusicParser.type`.
+	 * @param ctx the parse tree
+	 */
+	exitFunctionType?: (ctx: FunctionTypeContext) => void;
 	/**
 	 * Enter a parse tree produced by the `AnomDecl`
 	 * labeled alternative in `MotorMusicParser.exp`.

@@ -1,7 +1,7 @@
 import {ParserError} from "../Compile";
 import {ParserRuleContext, TerminalNode} from "antlr4";
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
-import { AnomDeclContext, BuiltInContext, ContainmentContext, DeclContext, DirectionSpecContext, EvalContext, WrappedExpContext, ExpContext, FunctionTypeContext, NumberExpContext, Exp_or_gestureContext, ExpExpOrGestureContext, GestureExpOrGestureContext, IdentExpContext, EmptyContext, TimeTaggedEmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedSyllableGroupContext, NonEmptyProgramContext, SyllableGroupContext } from "../../../../antlr/generated/MotorMusicParser";
+import { AnomDeclContext, BuiltInContext, ContainmentContext, DeclContext, DirectionSpecContext, EvalContext, WrappedExpContext, ExpContext, FunctionTypeContext, NumberExpContext, Exp_or_gestureContext, ExpExpOrGestureContext, GestureExpOrGestureContext, IdentExpContext, EmptyContext, TimeTaggedEmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedSyllableGroupContext, NonEmptyProgramContext, SyllableGroupContext, TypeContext, Input_typeContext, BuiltInInputTypeContext, WrappedInputTypeContext } from "../../../../antlr/generated/MotorMusicParser";
 
 import { resolve } from "path";
 
@@ -13,8 +13,8 @@ export class Type {
 
 
 	//makes a type from an expression and otherwises raises an error
-	static fromExpression(ctx : ExpContext, addError) {
-		if (ctx instanceof BuiltInContext) {
+	static fromExpression(ctx : TypeContext | Input_typeContext, addError) {
+		if (ctx instanceof BuiltInContext || ctx instanceof BuiltInInputTypeContext) {
 			let name = ctx._builtin.text;
 			switch (name) {
 				case "number":
@@ -36,6 +36,9 @@ export class Type {
 				 return undefined;
 			 }
 			 return Type.function(inType, outType);
+		}
+		else if (ctx instanceof WrappedInputTypeContext) {
+			return Type.fromExpression(ctx._literal, addError);
 		}
 		return undefined;
 	}
@@ -418,9 +421,9 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 		if (syllableType == undefined) {
 			return;
 		}
-		if (!syllableType.isSyllable()) {
+		//substitutable case case
+		if (!this.inScopeSubstitutableTypes.has(ctx._syllable.getText()) && !syllableType.isSyllable()) {
 			this.addError("expected a syllable within syllable group, found a " + syllableType.format(), ctx._syllable);
-			return;
 		}
 		this.discoveredTypableContextTypes.set(ctx, Type.syllable());
 	}
@@ -472,7 +475,7 @@ export class MotorMusicParserStaticAnalysisListener extends MotorMusicParserList
 			this.addError("expected a syllabic type within syllable group, found a " + syllableGroupType.format() + " (a syllablic type is either syllable or syllables)", ctx._syllables);
 			return;
 		}
-		this.discoveredTypableContextTypes.set(ctx, Type.syllables());
+		this.discoveredTypableContextTypes.set(ctx, syllableGroupType);
 	}
 
 	exitDirectionSpec = (ctx: DirectionSpecContext) => {
