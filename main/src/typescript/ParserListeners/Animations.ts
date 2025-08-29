@@ -10,7 +10,7 @@ import { EmptyContext, DirectionSpecContext, TimeTaggedEmptyContext, SingleMotio
 import { TerminalNode } from "antlr4";
 import {ContainingSyllableGroupData, PreColoringProcessedSyllableGroupData} from "./SyllableGroupProcess";
 
-
+/*
 type range = [number, number, number, number];
 
 
@@ -394,4 +394,4 @@ export class AnimationListener extends MotorMusicParserListener {
         return new AnimationInfo(syllableGroupAnimationInfo, bracesAnimationInfos);
     }
 	
-}
+}*/

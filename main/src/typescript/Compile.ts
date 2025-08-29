@@ -61,7 +61,7 @@ export class CollectorErrorListener extends ErrorListener<Token> {
 
 
 
-type animationFunction = (elapsedTime : number) => AnimationInfo
+//type animationFunction = (elapsedTime : number) => AnimationInfo
 
 
 
@@ -79,7 +79,7 @@ function parse(input : string, errors : ParserError[]) {
 //this function is essentially the high level view of that entire process
 import {ParseTreeWalker} from "antlr4";
 import {MotorMusicParserStaticAnalysisListener} from "./ParserListeners/Statics";
-import {AnimationListener, AnimationInfo} from "./ParserListeners/Animations";
+//import {AnimationListener, AnimationInfo} from "./ParserListeners/Animations";
 import { ProgramColoringListener } from "./ParserListeners/Coloring";
 import { PrepareProcessedSyllableGroupDataListener } from "./ParserListeners/SyllableGroupProcess";
 //import {AudioGeneratorListener} from "./ParserListeners/AudioGeneratorListener";
@@ -89,7 +89,7 @@ import {range} from "./ParserListeners/ParserListenerUtils";
 
 function makeProcessForSyllableTime(globalRuntimeData) {
     function process(input : string) : 
-        [Map<range, string>, animationFunction, audioStream , ParserError[]] 
+        [Map<range, string>, audioStream , ParserError[]] 
         {
         let errors : ParserError[] = [];
         let tree = parse(input, errors)
@@ -105,12 +105,12 @@ function makeProcessForSyllableTime(globalRuntimeData) {
             let colorMapBuilder = new ProgramColoringListener(prepareProcessedSyllableGroupDataListener.syllableGroupMap, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
             ParseTreeWalker.DEFAULT.walk(colorMapBuilder, tree);
 
-            
+            /*
             let animationListener = new AnimationListener(globalRuntimeData.syllableTime, prepareProcessedSyllableGroupDataListener.syllableGroupMap, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
             ParseTreeWalker.DEFAULT.walk(animationListener, tree);
             function packageGetAnimationInfo(x : number) {
                 return animationListener.getAnimationInfoForTime(x);
-            }
+            }*/
     
             /*
             let audioGeneratorListener = new AudioGeneratorListener(globalRuntimeData.syllableTime, animationListener.bracesAccumData, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
@@ -119,9 +119,9 @@ function makeProcessForSyllableTime(globalRuntimeData) {
 
        
 
-            return [colorMapBuilder.buildColorMap(), packageGetAnimationInfo, undefined , errors];
+            return [colorMapBuilder.buildColorMap(), undefined , errors];
         }
-        return [undefined, undefined, undefined, errors];
+        return [undefined, undefined, errors];
     }
     return process
 }
