@@ -10,7 +10,7 @@ import { makeSin } from "../Audio/generators/Sin";
 //as for the tension, it is the parameter in the ongoing musical experience which we must use to make functional decisions as to how we 
 //ascribe to all the diffirent sound specifications 
 export function realizeSoundSpecifications(specifications : [string, SoundSpecification<any>][], duration : number, tension : number) : audio{
-
+    console.log("specifications is " + specifications.map(x => x[0]).join(", "));
     let attackTime = duration / 10;
     const MAX_AGOGIC_SHORTENING = Math.min(0.15 * duration, 0.15); //seconds
     let decay = (duration - attackTime) - MAX_AGOGIC_SHORTENING * (1.0 - tension);
