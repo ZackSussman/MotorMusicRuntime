@@ -146,6 +146,9 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
 
     private audioForSyllables(syllables : string[], syllableScale: number) : audio {
+        if (syllables.length == 0) {
+            throw new Error("Uh oh, audioForSyllables was called with an empty syllables array");
+        }
         let tension = this.getCurrentSyllableGroupTension();
         let tensionLowerBound = this.computeTensionLowerBound();
         let tensionRampedFromZeroToOne = 1;
