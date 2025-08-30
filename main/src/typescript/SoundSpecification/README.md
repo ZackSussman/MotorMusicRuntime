@@ -1,0 +1,1 @@
+Think of this as the code that implements how the musician thinks about musical ideas, including sound and music theory 

@@ -32,7 +32,6 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
     syllableGroupMap : Map<SyllableGroupContext, PreColoringProcessedSyllableGroupData>;
     containmentGroupMap : Map<ContainmentContext, ContainingSyllableGroupData>;
 
-
     //the stack of syllable group types that we are currently processing
     currentContainmentGroupContexts : ContainmentContext[];
 

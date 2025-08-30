@@ -1,18 +1,19 @@
 
 
 
-export abstract class PitchSpecification {
-    //converts the syllable and tension at a point in the program to the pitch that should be perceived for that syllable 
-    abstract syllableAndTensionToFrequency(syllable : string, tension : number) : number; //hz
-    //determines whether or not the syllable is valid for this particular way of specifying pitches
-    abstract validateSyllable(syllable : string) : boolean;
+import { SoundSpecification } from "./SoundSpecification";
+
+export abstract class PitchSpecification implements SoundSpecification<number>{
+    name = "Pitch";
+    abstract isSyllableInSpecification(syllable: string): boolean;
+    abstract syllableAndTensionToValue(syllable: string, tension: number): number | undefined;
 }
 
 
 //gives the same behavior as MotorMusic 0.0 
-export class Default extends PitchSpecification {
+export class AscendMajorScaleAsTensionIncreases extends PitchSpecification {
     //already validated by the parser
-    validateSyllable(syllable : string) : boolean {
+    isSyllableInSpecification(syllable : string) : boolean {
         // Regex: [qtplkjgfdszxcvbnmhrw]+[aeiuyo]*[qtplkjgfdszxcvbnmhrw]* | [aeiuyo]+[qtplkjgfdszxcvbnmhrw]*
         const regex = /^([qtplkjgfdszxcvbnmhrw]+[aeiuyo]*[qtplkjgfdszxcvbnmhrw]*|[aeiuyo]+[qtplkjgfdszxcvbnmhrw]*)$/; //no number here
         return regex.test(syllable);
@@ -20,7 +21,7 @@ export class Default extends PitchSpecification {
     
     //map the unit range that is used for tension values to the frequency value of a note from the major scale
     //this is the default method used to select pitch if the user did not want to use a pitch specification
-    syllableAndTensionToFrequency(_ : string, tension : number) : number {
+    syllableAndTensionToValue(_ : string, tension : number) : number | undefined {
         let major_scale_scan = [0, 2, 4, 5, 7, 9, 11, 12];
         let note = undefined
         //round for normal notes but not at the final transition
@@ -44,13 +45,13 @@ export class TwelveTET extends PitchSpecification {
     }
 
 
-    validateSyllable(syllable : string) : boolean {
+    isSyllableInSpecification(syllable : string) : boolean {
         // Valid note: C, C#, Cb, D, D#, Db, ..., B, B#, Bb, with optional octave 0-8
         const regex = /^(A|B|C|D|E|F|G)(#|b)?([0-8])?$/;
         return regex.test(syllable);
     }
 
-    syllableAndTensionToFrequency(syllable: string, _: number) : number {
+    syllableAndTensionToValue(syllable: string, _: number) : number | undefined {
         // Parse note and octave
         const match = syllable.match(/^(A|B|C|D|E|F|G)(#|b)?([0-8])?$/);
         if (!match) return NaN;
@@ -141,56 +142,12 @@ export class ShashavicSpecification extends PitchSpecification {
         return parseFloat(s);
     }
 
-    validateSyllable(syllable : string) : boolean {
+    isSyllableInSpecification(syllable : string) : boolean {
         return this.syllableToRatioMap.has(syllable);
     }
 
-    syllableAndTensionToFrequency(syllable: string, _: number) : number {
+    syllableAndTensionToValue(syllable: string, _: number) : number | undefined {
         return this.baseFrequency * this.syllableToRatioMap.get(syllable);
     }
 
-}
-
-export function resolvePitchSpecificationString(pitchSpecificationString : string) : PitchSpecification {
-    // Parse the class name and arguments
-    const match = pitchSpecificationString.match(/^(\w+)\s*\((.*)\)$/);
-    if (!match) {
-        throw new Error("Pitch specification string must be in format 'ClassName(args)'. We were given " + pitchSpecificationString);
-    }
-    
-    const className = match[1];
-    const argsString = match[2].trim();
-    
-    // Directly instantiate classes
-    switch (className) {
-        case "Default":
-            return new Default();
-        case "TwelveTET":
-            if (!argsString) {
-                throw new Error("TwelveTET requires a frequency argument");
-            }
-            const frequency = Number(argsString);
-            if (isNaN(frequency)) {
-                throw new Error("TwelveTET frequency must be a number");
-            }
-            return new TwelveTET(frequency);
-        default:
-            if (className.startsWith("Shashavic")) {
-                if (!argsString) {
-                    throw new Error("Shashavic pitch specifications require a base frequency argument");
-                }
-                // className like 'ShashavicName' => spreadsheet name is the remainder after 'Shashavic'
-                const name = className.replace("Shashavic", "").trim();
-                const baseFrequency = Number(argsString);
-                if (isNaN(baseFrequency)) {
-                    throw new Error("Shashavic base frequency must be a number");
-                }
-                try {
-                    return new ShashavicSpecification(baseFrequency, name);
-                } catch (error) {
-                    throw new Error(`ShashavicSpecification: ${name} is not in the library or could not be loaded: ${error.message}`);
-                }
-            }
-            throw new Error(`Unknown pitch specification class: ${className}`);
-    }
 }

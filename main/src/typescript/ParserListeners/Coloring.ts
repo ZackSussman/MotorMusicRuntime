@@ -3,7 +3,7 @@
 import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicParserListener";
 import { TerminalNode } from "antlr4";
 import {range, serializeRange, terminalNodeToRange, getAllDirectionSpecifierRangesFromMotionSpecListContext} from "./ParserListenerUtils";
-import {DirectionSpecContext, EmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, NonEmptyProgramWithPitchSpecificationContext, PitchSpecificationStatementContext, SyllableGroupContext, ContainmentContext} from "../../../../antlr/generated/MotorMusicParser";
+import {DirectionSpecContext, EmptyContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, SyllableGroupContext, ContainmentContext} from "../../../../antlr/generated/MotorMusicParser";
 import { PreColoringProcessedSyllableGroupData, ContainingSyllableGroupData } from "./SyllableGroupProcess";
 
 //Here is where we dynamically decide the actual colors for all the tokens
@@ -56,8 +56,6 @@ export class ProgramColoringListener extends MotorMusicParserListener {
 
     //the maximum depth obtained through the entire program
     maxDepth : number;
-
-    pitchSpecificationRanges : range[];
     //--------------------------------------------------------------
 
 
@@ -72,7 +70,6 @@ export class ProgramColoringListener extends MotorMusicParserListener {
         this.currentBracesInScope = [];
         this.finalizedData = [];
         this.maxDepth = -1;
-        this.pitchSpecificationRanges = [];
         this.syllableGroupData = syllableGroupData;
         this.containingSyllableGroupData = containmentGroupData;
     }
@@ -89,11 +86,6 @@ export class ProgramColoringListener extends MotorMusicParserListener {
         res.push(terminalNodeToRange(ctx.LCURLY()));
         res.push(terminalNodeToRange(ctx.RCURLY()));
         return res.concat(getAllDirectionSpecifierRangesFromMotionSpecListContext(ctx._motion_spec));
-    }
-
-    enterPitchSpecificationStatement =  (ctx: PitchSpecificationStatementContext) => {
-        this.pitchSpecificationRanges.push(terminalNodeToRange(ctx.PITCH_SPECIFICATION_VALUE()));
-        this.pitchSpecificationRanges.push(terminalNodeToRange(ctx.PITCH_SPECIFICATION()));
     }
    
 
@@ -280,11 +272,6 @@ private hslToHex(h: number, s: number, l: number): string {
     //call this after walking the parse tree to generate the colors 
     public buildColorMap() : Map<range, string>{
         let res = new Map();
-
-        for (let range of this.pitchSpecificationRanges) {
-            //set it to white for these
-            res.set(serializeRange(range), "#FFFFFF"); //pitch specification is always at depth 0
-        }
 
         for (let braceData of this.finalizedData) { 
             //maxDepth starts at 0 

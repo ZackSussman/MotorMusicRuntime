@@ -83,7 +83,7 @@ import {AnimationListener, AnimationInfo} from "./ParserListeners/Animations";
 import { ProgramColoringListener } from "./ParserListeners/Coloring";
 import { PrepareProcessedSyllableGroupDataListener } from "./ParserListeners/SyllableGroupProcess";
 import {AudioGeneratorListener} from "./ParserListeners/AudioGeneratorListener";
-import {audioStream} from "./audio/Audio";
+import {audioStream} from "./Audio/Audio";
 import {range} from "./ParserListeners/ParserListenerUtils";
 
 
@@ -111,7 +111,7 @@ function makeProcessForSyllableTime(globalRuntimeData) {
                 return animationListener.getAnimationInfoForTime(x);
             }
     
-            let audioGeneratorListener = new AudioGeneratorListener(globalRuntimeData.syllableTime, animationListener.bracesAccumData, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
+            let audioGeneratorListener = new AudioGeneratorListener(globalRuntimeData.syllableTime, prepareProcessedSyllableGroupDataListener.syllableGroupMap, animationListener.bracesAccumData, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
             ParseTreeWalker.DEFAULT.walk(audioGeneratorListener, tree);
 
 
