@@ -194,7 +194,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.currentLeafSyllableGroupIndex += 1;
     }
 
-    exitSyllableGroup = (_: SyllableGroupContext) => {
+    exitSyllableGroupSingle = (_: SyllableGroupSingleContext) => {
         if (this.areWeCurrentlyInAContainmentGroup) {
             this.areWeCurrentlyInAContainmentGroup = false;
         }
