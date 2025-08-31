@@ -6,7 +6,7 @@ import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicPars
 import {EmptyProgramContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, EmptyContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, ContainmentContext, SyllableGroupContext} from "../../../../antlr/generated/MotorMusicParser";
 import { durationToSamples } from "../Audio/Audio";
  import {DELAY_BEFORE_PLAYBACK_START} from "../../runtime-business/RuntimeConstants";
-import {audio, audioStream, audioToAudioStream, silence, seconds, sampleMap} from "../Audio/Audio";
+import {audio, audioStream, audioToAudioStream, silence, seconds, sampleMap, numSamplesToDuration} from "../Audio/Audio";
 import {makeSin} from "../Audio/generators/Sin";
 import {applyAdsr} from "../Audio/transformers/Envelope";
 
@@ -113,7 +113,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
         //simple case: seek position is at end of the audio and we can just append samples
         if (this.currentAudioSeekPosition == this.audio.length) {
-            console.log("add to audio: simple case");
+            //console.log("add to audio: simple case");
             for (let sample of a) {
                 this.audio.push(sample);
             }
@@ -149,12 +149,15 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         if (syllables.length == 0) {
             throw new Error("Uh oh, audioForSyllables was called with an empty syllables array");
         }
+        //console.log(`Generating audio for syllables: [${syllables.join(', ')}] with scale ${syllableScale}`);
         let tension = this.getCurrentSyllableGroupTension();
         let tensionLowerBound = this.computeTensionLowerBound();
         let tensionRampedFromZeroToOne = 1;
         if (tensionLowerBound < 1)
             tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
-        return realizeSoundSpecifications(syllables.map(syllable => [syllable, getSpecificationClassForSyllable(syllable)]), this.syllableLength * syllableScale, tensionRampedFromZeroToOne);
+        let result = realizeSoundSpecifications(syllables.map(syllable => [syllable, getSpecificationClassForSyllable(syllable)]), this.syllableLength * syllableScale, tensionRampedFromZeroToOne);
+       // console.log(`Generated ${result.length} samples for syllables (${result.length / 48000} seconds)`);
+        return result;
     }
     private audioForSyllableGroup(syllableGroupContext : SyllableGroupContext, scale = 1.0) : audio {
         //console.log("the syllable group context is: " + syllableGroupContext.getText());
@@ -239,8 +242,12 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     //when finished, convert our built up audio to the audio stream
     exitNonEmptyProgramWithDefaultPitchSpecification =  (_ : NonEmptyProgramWithDefaultPitchSpecificationContext) => {
+        //console.log(`AudioGeneratorListener: Generated ${this.audio.length} total audio samples`);
+        //console.log(`AudioGeneratorListener: Expected syllable length is ${this.syllableLength} seconds (${durationToSamples(this.syllableLength)} samples)`);
+        console.log(`AudioGeneratorListener: Total audio duration: ${ numSamplesToDuration(this.audio.length)} seconds`);
         this.normalizeAndValidateAudio();
         this.audioStream = audioToAudioStream(this.audio);
+        //console.log(`AudioGeneratorListener: Generated ${this.audioStream.length} audio buffers`);
     }
     exitEmptyProgram =  (_ : EmptyProgramContext) => {
         this.audioStream = [];
