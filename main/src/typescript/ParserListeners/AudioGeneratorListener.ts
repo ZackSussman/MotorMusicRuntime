@@ -125,6 +125,10 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         let samplesToBlend = this.audio.slice(this.currentAudioSeekPosition, this.currentAudioSeekPosition + a.length);
         let blendedSamples : audio = [];
 
+        if (samplesToBlend.length < a.length) {
+            throw new Error("BAD CONTAINER MATH BrOOOO");
+        }
+
         for (let i = 0; i < samplesToBlend.length; i++) {
             blendedSamples.push([(samplesToBlend[i][0] + a[i][0]), (samplesToBlend[i][1] + a[i][1])]);
         }
@@ -168,16 +172,16 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
     enterContainment = (ctx: ContainmentContext) => {
-        console.log(ctx._syllables.getText());
+       //(ctx._syllables.getText());
         this.areWeCurrentlyInAContainmentGroup = true;
         let syllablesToCompute = this.containmentGroupData.get(ctx).syllables;
         let containmentLength = this.containmentGroupData.get(ctx).length;
         console.log(ctx.getText() + ": " + containmentLength + " seconds"); 
         let audioForContainmentSyllableGroup : audio = this.audioForSyllables(syllablesToCompute, containmentLength);
 
-        let preContainmentChunkAuduioSeekPosition = this.currentAudioSeekPosition;
+        let preContainmentChunkAudioSeekPosition = this.currentAudioSeekPosition;
         this.addToAudio(audioForContainmentSyllableGroup);
-        this.currentAudioSeekPosition = preContainmentChunkAuduioSeekPosition
+        this.currentAudioSeekPosition = preContainmentChunkAudioSeekPosition
         this.currentBracesInScope.push(ctx);
     }
 
@@ -190,7 +194,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         if (this.areWeCurrentlyInAContainmentGroup) {
             return;
         }
-         console.log( ctx.getText());
+        // console.log( ctx.getText());
         let audio = this.audioForSyllableGroup(ctx);
        // console.log("added syllable: " + ctx.getText());
         //console.log("current audio seek position: " + this.currentAudioSeekPosition);
