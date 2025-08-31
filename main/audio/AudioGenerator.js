@@ -20,7 +20,7 @@ class AudioGenerator extends AudioWorkletProcessor {
         
         // If we've exhausted all sample arrays, output silence and stop
         if (this.sampleArraysIndex >= this.sampleArrays.length) {
-            console.log(`Audio playback finished. Processed ${this.sampleArraysIndex} buffers.`);
+            //console.log(`Audio playback finished. Processed ${this.sampleArraysIndex} buffers.`);
             for (let i = 0; i < bufferSize; i++) {
                 output[0][i] = 0;
                 output[1][i] = 0;
@@ -44,10 +44,10 @@ class AudioGenerator extends AudioWorkletProcessor {
         
         this.sampleArraysIndex += 1;
         
-        // Log progress every 100 buffers
+        /* log processing every 100 buffers
         if (this.sampleArraysIndex % 100 === 0) {
-            console.log(`Processed ${this.sampleArraysIndex}/${this.sampleArrays.length} audio buffers`);
-        }
+           console.log(`Processed ${this.sampleArraysIndex}/${this.sampleArrays.length} audio buffers`);
+        }*/
         
         return true;
     }

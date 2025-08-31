@@ -26,7 +26,9 @@ export function initializeAudioRuntime(audioRuntimeData) {
         
         // Monitor state changes
         audioRuntimeData.audioContext.onstatechange = () => {
-          console.log(`AudioContext state changed to: ${audioRuntimeData.audioContext.state}`);
+          if (audioRuntimeData.audioContext) {
+            console.log(`AudioContext state changed to: ${audioRuntimeData.audioContext.state}`);
+          }
         };
         
         audioRuntimeData.audioContext.resume();
