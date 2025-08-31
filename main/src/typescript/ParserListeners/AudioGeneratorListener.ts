@@ -166,6 +166,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
     enterContainment = (ctx: ContainmentContext) => {
+        console.log(ctx._syllables.getText());
         this.areWeCurrentlyInAContainmentGroup = true;
         let syllablesToCompute = this.containmentGroupData.get(ctx).syllables;
         let containmentLength = this.containmentGroupData.get(ctx).length;
@@ -183,13 +184,13 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
   
 
     enterSyllableGroup = (ctx : SyllableGroupContext) => { 
-        console.log("at syllable " + ctx.getText() + " the containment status is " + this.areWeCurrentlyInAContainmentGroup);
         if (this.areWeCurrentlyInAContainmentGroup) {
             return;
         }
+         console.log( ctx.getText());
         let audio = this.audioForSyllableGroup(ctx);
-        console.log("added syllable: " + ctx.getText());
-        console.log("current audio seek position: " + this.currentAudioSeekPosition);
+       // console.log("added syllable: " + ctx.getText());
+        //console.log("current audio seek position: " + this.currentAudioSeekPosition);
         this.addToAudio(audio);
         this.currentLeafSyllableGroupIndex += 1;
     }
