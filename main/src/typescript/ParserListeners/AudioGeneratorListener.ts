@@ -202,6 +202,10 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
     enterTimeTaggedSyllableGroup = (ctx : TimeTaggedSyllableGroupContext) => {
+        if (this.areWeCurrentlyInAContainmentGroup) {
+            return;
+        }
+        console.log(ctx.getText());
         let audio = this.audioForSyllableGroup(ctx, Number(ctx.NUMBER().getText()));
         this.addToAudio(audio);
         this.currentLeafSyllableGroupIndex += 1;
