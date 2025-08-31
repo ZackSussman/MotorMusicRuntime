@@ -187,6 +187,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             return;
         }
         let audio = this.audioForSyllableGroup(ctx);
+        console.log("added syllable: " + ctx.getText());
+        console.log("current audio seek position: " + this.currentAudioSeekPosition);
         this.addToAudio(audio);
         this.currentLeafSyllableGroupIndex += 1;
     }
