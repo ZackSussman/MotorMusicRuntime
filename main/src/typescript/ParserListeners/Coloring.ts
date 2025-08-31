@@ -298,7 +298,7 @@ private hslToHex(h: number, s: number, l: number): string {
                 res.set(serializeRange(range), this.brightenColor(colorToUse));
             }
             for (let range of this.braceFreeSyllableGroupData.ampersandRanges) {
-                console.log("darkening color for ampersand single object data");
+                //console.log("darkening color for ampersand single object data");
                 res.set(serializeRange(range), this.darkenColor(colorToUse));
             }
         }

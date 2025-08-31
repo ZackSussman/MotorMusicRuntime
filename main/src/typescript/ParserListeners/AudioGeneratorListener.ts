@@ -157,8 +157,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         return realizeSoundSpecifications(syllables.map(syllable => [syllable, getSpecificationClassForSyllable(syllable)]), this.syllableLength * syllableScale, tensionRampedFromZeroToOne);
     }
     private audioForSyllableGroup(syllableGroupContext : SyllableGroupContext, scale = 1.0) : audio {
-        console.log("the syllable group context is: " + syllableGroupContext.getText());
-        console.log("the syllables in it are: " + this.syllableGroupMap.get(syllableGroupContext).syllables.join(","));
+        //console.log("the syllable group context is: " + syllableGroupContext.getText());
+        //console.log("the syllables in it are: " + this.syllableGroupMap.get(syllableGroupContext).syllables.join(","));
         return this.audioForSyllables(this.syllableGroupMap.get(syllableGroupContext).syllables, scale);
     }
 

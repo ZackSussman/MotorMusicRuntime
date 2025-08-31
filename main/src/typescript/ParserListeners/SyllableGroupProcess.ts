@@ -78,14 +78,13 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
     }
 
     enterSyllableGroupSingle =  (ctx: SyllableGroupSingleContext) => {
-        console.log("ENTER SYLLABLE GROUP SINGLE");
         if (!this.areCurrentSyllablesFromAContainmentGroup) {
             this.syllableGroupMap.get(this.currentSyllableGroupContext).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
+            this.syllableGroupMap.get(this.currentSyllableGroupContext).syllables.push(ctx.SYLLABLE().getText());
         }
         else {
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
-            console.log("pushing to syllables: " + ctx.SYLLABLE().getText());
         }
 
         //the very last syllable in the containment group is always the 'SyllableGroupSingle', so at this point we are done processing the containment syllable group
@@ -107,16 +106,15 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
     }
 
     enterSyllableGroupMulti =  (ctx: SyllableGroupMultiContext) => {
-        console.log("ENTER SYLLABLE GROUP MULTI");
         if (!this.areCurrentSyllablesFromAContainmentGroup) {
             this.syllableGroupMap.get(this.currentSyllableGroupContext).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
             this.syllableGroupMap.get(this.currentSyllableGroupContext).ampersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
+            this.syllableGroupMap.get(this.currentSyllableGroupContext).syllables.push(ctx.SYLLABLE().getText());
         }
         else {
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).ampersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
-            console.log("pushing to syllables: " + ctx.SYLLABLE().getText());
         }
     }
 
