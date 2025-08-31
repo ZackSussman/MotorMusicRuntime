@@ -64,6 +64,16 @@ export function initializeAudioRuntime(audioRuntimeData) {
         audioRuntimeData.gainNode = null;
       }
 
+      // Always ensure the AudioWorklet module is loaded first
+      try {
+        const version = Date.now(); // Unique version for cache busting
+        await audioRuntimeData.audioContext.audioWorklet.addModule(`./audio/AudioGenerator.js?version=${version}`);
+      } catch (moduleError) {
+        console.error("Failed to load AudioWorklet module:", moduleError);
+        return;
+      }
+
+      // Now create the AudioWorkletNode
       try {
         audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext, "AudioGenerator", {
           channelCount: 2,
@@ -72,36 +82,16 @@ export function initializeAudioRuntime(audioRuntimeData) {
           processorOptions: {
             sampleArrays: audioRuntimeData.computedAudio,
           }
-      });
-      
-      // Add error monitoring
-      audioRuntimeData.processorNode.onprocessorerror = (event) => {
-        console.error("AudioWorklet processor error:", event);
-      };
-      
-      } catch (e) {
-        console.warn("First attempt to create AudioWorkletNode failed, trying to reload module:", e);
-        try {
-          const version = Date.now(); // Unique version for cache busting
-          await audioRuntimeData.audioContext.audioWorklet.addModule(`./audio/AudioGenerator.js?version=${version}`);
-          audioRuntimeData.processorNode = new AudioWorkletNode(audioRuntimeData.audioContext, "AudioGenerator", {
-            channelCount: 2,
-            channelCountMode: 'explicit',
-            channelInterpretation: 'speakers',
-            processorOptions: {
-              sampleArrays: audioRuntimeData.computedAudio,
-            }
-          });
-          
-          // Add error monitoring
-          audioRuntimeData.processorNode.onprocessorerror = (event) => {
-            console.error("AudioWorklet processor error:", event);
-          };
-          
-        } catch (e2) {
-          console.error("Error creating AudioWorkletNode:", e2);
-          return;
-        }
+        });
+        
+        // Add error monitoring
+        audioRuntimeData.processorNode.onprocessorerror = (event) => {
+          console.error("AudioWorklet processor error:", event);
+        };
+        
+      } catch (nodeError) {
+        console.error("Failed to create AudioWorkletNode:", nodeError);
+        return;
       }
 
       audioRuntimeData.gainNode = audioRuntimeData.audioContext.createGain();
