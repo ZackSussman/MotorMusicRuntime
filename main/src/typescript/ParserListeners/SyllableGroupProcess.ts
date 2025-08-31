@@ -78,6 +78,7 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
     }
 
     enterSyllableGroupSingle =  (ctx: SyllableGroupSingleContext) => {
+        console.log("ENTER SYLLABLE GROUP SINGLE");
         if (!this.areCurrentSyllablesFromAContainmentGroup) {
             this.syllableGroupMap.get(this.currentSyllableGroupContext).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
         }
@@ -106,6 +107,7 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
     }
 
     enterSyllableGroupMulti =  (ctx: SyllableGroupMultiContext) => {
+        console.log("ENTER SYLLABLE GROUP MULTI");
         if (!this.areCurrentSyllablesFromAContainmentGroup) {
             this.syllableGroupMap.get(this.currentSyllableGroupContext).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
             this.syllableGroupMap.get(this.currentSyllableGroupContext).ampersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
