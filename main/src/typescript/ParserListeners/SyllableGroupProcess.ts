@@ -84,6 +84,7 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
         else {
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
+            console.log("pushing to syllables: " + ctx.SYLLABLE().getText());
         }
 
         //the very last syllable in the containment group is always the 'SyllableGroupSingle', so at this point we are done processing the containment syllable group
@@ -113,6 +114,7 @@ export class PrepareProcessedSyllableGroupDataListener extends MotorMusicParserL
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllableRanges.push(terminalNodeToRange(ctx.SYLLABLE()));
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).ampersandRanges.push(terminalNodeToRange(ctx.AMPERSAND()));
             this.containmentGroupMap.get(this.currentContainmentGroupContexts.at(-1)).syllables.push(ctx.SYLLABLE().getText());
+            console.log("pushing to syllables: " + ctx.SYLLABLE().getText());
         }
     }
 
