@@ -1,29 +1,40 @@
 class AudioGenerator extends AudioWorkletProcessor {
     sampleArraysIndex;
     sampleArrays;
+    
     constructor(options) {
         super();
         this.sampleArraysIndex = 0;
         this.sampleArrays = [...options.processorOptions.sampleArrays];
     }   
+    
     process(inputs, outputs, parameters) {
-        //console.log("processing at " + currentTime);
+        const output = outputs[0];
+        const bufferSize = output[0].length;
+        
+        // If we've exhausted all sample arrays, output silence and stop
         if (this.sampleArraysIndex >= this.sampleArrays.length) {
-            for (let output of outputs) {
-                for (let i = 0; i < output[0].length; i++) {
-                    output[0][i] = 0;
-                    output[1][i] = 0;
-                }
+            for (let i = 0; i < bufferSize; i++) {
+                output[0][i] = 0;
+                output[1][i] = 0;
             }
-            return true;
+            return false; // Signal that processing should stop
         }
-        let sampleArray = this.sampleArrays[this.sampleArraysIndex];
-        for (let output of outputs) {
-            for (let i = 0; i < output[0].length; i++) {
-                output[0][i] = sampleArray[i][0];
-                output[1][i] = sampleArray[i][1];
-            }
+        
+        const sampleArray = this.sampleArrays[this.sampleArraysIndex];
+        
+        // Strict buffer size checking - error if mismatch
+        if (sampleArray.length !== bufferSize) {
+            console.error(`Buffer size mismatch: expected ${bufferSize}, got ${sampleArray.length}`);
+            throw new Error(`Buffer size mismatch: expected ${bufferSize}, got ${sampleArray.length}`);
         }
+        
+        // Copy samples directly - no partial buffer handling
+        for (let i = 0; i < bufferSize; i++) {
+            output[0][i] = sampleArray[i][0];
+            output[1][i] = sampleArray[i][1];
+        }
+        
         this.sampleArraysIndex += 1;
         return true;
     }

@@ -44,6 +44,8 @@ export function initializeAudioRuntime(audioRuntimeData) {
         throw new Error("error: cannot playback when computedAudio is undefined");
       }
 
+      console.log("Starting playback with", audioRuntimeData.computedAudio.length, "audio buffers");
+
       try {
         await audioRuntimeData.audioContext.resume();
       } catch (error) {
@@ -71,7 +73,14 @@ export function initializeAudioRuntime(audioRuntimeData) {
             sampleArrays: audioRuntimeData.computedAudio,
           }
       });
+      
+      // Add error monitoring
+      audioRuntimeData.processorNode.onprocessorerror = (event) => {
+        console.error("AudioWorklet processor error:", event);
+      };
+      
       } catch (e) {
+        console.warn("First attempt to create AudioWorkletNode failed, trying to reload module:", e);
         try {
           const version = Date.now(); // Unique version for cache busting
           await audioRuntimeData.audioContext.audioWorklet.addModule(`./audio/AudioGenerator.js?version=${version}`);
@@ -83,6 +92,12 @@ export function initializeAudioRuntime(audioRuntimeData) {
               sampleArrays: audioRuntimeData.computedAudio,
             }
           });
+          
+          // Add error monitoring
+          audioRuntimeData.processorNode.onprocessorerror = (event) => {
+            console.error("AudioWorklet processor error:", event);
+          };
+          
         } catch (e2) {
           console.error("Error creating AudioWorkletNode:", e2);
           return;
