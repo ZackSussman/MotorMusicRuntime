@@ -22,6 +22,13 @@ export function initializeAudioRuntime(audioRuntimeData) {
   function initializeAudioContext() {
       if (!audioRuntimeData.audioContext || audioRuntimeData.audioContext.state === 'closed') {
         audioRuntimeData.audioContext = new AudioContext({ latencyHint: "interactive", sampleRate: PLAYBACK_SAMPLE_RATE});
+        console.log(`AudioContext created with state: ${audioRuntimeData.audioContext.state}, sample rate: ${audioRuntimeData.audioContext.sampleRate}`);
+        
+        // Monitor state changes
+        audioRuntimeData.audioContext.onstatechange = () => {
+          console.log(`AudioContext state changed to: ${audioRuntimeData.audioContext.state}`);
+        };
+        
         audioRuntimeData.audioContext.resume();
       }
       return audioRuntimeData.audioContext;
@@ -88,6 +95,11 @@ export function initializeAudioRuntime(audioRuntimeData) {
         audioRuntimeData.processorNode.onprocessorerror = (event) => {
           console.error("AudioWorklet processor error:", event);
         };
+        
+        // Monitor when the processor node stops
+        audioRuntimeData.processorNode.addEventListener('message', (event) => {
+          console.log("Message from AudioWorklet:", event.data);
+        });
         
       } catch (nodeError) {
         console.error("Failed to create AudioWorkletNode:", nodeError);
