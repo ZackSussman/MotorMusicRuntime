@@ -132,6 +132,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         for (let i = this.currentAudioSeekPosition; i < this.currentAudioSeekPosition + blendedSamples.length; i++) {
             this.audio[i] = blendedSamples[i - this.currentAudioSeekPosition];
         }
+
+        console.log("current accumulated length: " + numSamplesToDuration(this.audio.length));
         this.currentAudioSeekPosition += a.length;
     }
 
