@@ -133,7 +133,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             this.audio[i] = blendedSamples[i - this.currentAudioSeekPosition];
         }
 
-        console.log("current accumulated length: " + numSamplesToDuration(this.audio.length));
+        //console.log("current accumulated length: " + numSamplesToDuration(this.audio.length));
         this.currentAudioSeekPosition += a.length;
     }
 
@@ -172,6 +172,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.areWeCurrentlyInAContainmentGroup = true;
         let syllablesToCompute = this.containmentGroupData.get(ctx).syllables;
         let containmentLength = this.containmentGroupData.get(ctx).length;
+        console.log(ctx.getText() + ": " + containmentLength + " seconds"); 
         let audioForContainmentSyllableGroup : audio = this.audioForSyllables(syllablesToCompute, containmentLength);
 
         let preContainmentChunkAuduioSeekPosition = this.currentAudioSeekPosition;
