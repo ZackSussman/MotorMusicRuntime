@@ -13,11 +13,13 @@ class AudioGenerator extends AudioWorkletProcessor {
         const output = outputs[0];
         const bufferSize = output[0].length;
         
+        /*
         // Log buffer size on first call
         if (this.sampleArraysIndex === 0) {
             console.log(`AudioWorklet buffer size: ${bufferSize}, our audio buffer size: ${this.sampleArrays.length > 0 ? this.sampleArrays[0].length : 'N/A'}`);
         }
-        
+        */
+       
         // If we've exhausted all sample arrays, output silence and stop
         if (this.sampleArraysIndex >= this.sampleArrays.length) {
             //console.log(`Audio playback finished. Processed ${this.sampleArraysIndex} buffers.`);

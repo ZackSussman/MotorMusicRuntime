@@ -22,15 +22,16 @@ export function initializeAudioRuntime(audioRuntimeData) {
   function initializeAudioContext() {
       if (!audioRuntimeData.audioContext || audioRuntimeData.audioContext.state === 'closed') {
         audioRuntimeData.audioContext = new AudioContext({ latencyHint: "interactive", sampleRate: PLAYBACK_SAMPLE_RATE});
-       // console.log(`AudioContext created with state: ${audioRuntimeData.audioContext.state}, sample rate: ${audioRuntimeData.audioContext.sampleRate}`);
+        console.log(`AudioContext created with state: ${audioRuntimeData.audioContext.state}, sample rate: ${audioRuntimeData.audioContext.sampleRate}`);
         
-       /*
+        /*
         // Monitor state changes
         audioRuntimeData.audioContext.onstatechange = () => {
           if (audioRuntimeData.audioContext) {
             console.log(`AudioContext state changed to: ${audioRuntimeData.audioContext.state}`);
           }
-        };*/
+        };
+        */
         
         audioRuntimeData.audioContext.resume();
       }
@@ -42,7 +43,7 @@ export function initializeAudioRuntime(audioRuntimeData) {
     initializeAudioContext: initializeAudioContext,
 
     setComputedAudio: function setComputedAudio(audio) {
-      //console.log("the length of the set computed audio is: " + numSamplesToDuration(audio.length));
+      console.log("the length of the set computed audio is: " + numSamplesToDuration(audio.length));
       audioRuntimeData.computedAudio = audio;
     },
 
@@ -54,7 +55,7 @@ export function initializeAudioRuntime(audioRuntimeData) {
         throw new Error("error: cannot playback when computedAudio is undefined");
       }
 
-     // console.log("Starting playback with", audioRuntimeData.computedAudio.length, "audio buffers");
+      console.log("Starting playback with", audioRuntimeData.computedAudio.length, "audio buffers");
 
       try {
         await audioRuntimeData.audioContext.resume();
