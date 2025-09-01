@@ -102,7 +102,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
                 tension *= (1 - percentThroughChunk) + MIN_TENSION * percentThroughChunk;
             }
         }
-        console.log("we are reteurning the tension " + tension);
         return tension
     }
     
@@ -135,6 +134,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         let tensionRampedFromZeroToOne = 1;
         if (tensionLowerBound < 1)
             tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
+      
+        console.log("ramped tension: " + tensionRampedFromZeroToOne);
         let result = realizeSoundSpecifications(syllables.map(syllable => [syllable, getSpecificationClassForSyllable(syllable)]), this.syllableLength * syllableScale, tensionRampedFromZeroToOne);
        // console.log(`Generated ${result.length} samples for syllables (${result.length / 48000} seconds)`);
         return result;
