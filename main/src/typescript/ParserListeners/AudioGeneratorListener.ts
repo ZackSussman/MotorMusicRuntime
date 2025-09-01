@@ -6,7 +6,7 @@ import MotorMusicParserListener from "../../../../antlr/generated/MotorMusicPars
 import {EmptyProgramContext, SyllableGroupSingleContext, SyllableGroupMultiContext, TimeTaggedEmptyContext, TimeTaggedSyllableGroupContext, EmptyContext, DirectionSpecContext, NonEmptyProgramWithDefaultPitchSpecificationContext, ContainmentContext, SyllableGroupContext} from "../../../../antlr/generated/MotorMusicParser";
 import { durationToSamples } from "../Audio/Audio";
  import {DELAY_BEFORE_PLAYBACK_START} from "../../runtime-business/RuntimeConstants";
-import {audio, audioStream, audioToAudioStream, silence, seconds, sampleMap, numSamplesToDuration} from "../Audio/Audio";
+import {audio, audioStream, audioToAudioStream, silence, seconds, sampleMap, numSamplesToDuration, mix} from "../Audio/Audio";
 import {makeSin} from "../Audio/generators/Sin";
 import {applyAdsr} from "../Audio/transformers/Envelope";
 
@@ -39,12 +39,10 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     
     containmentGroupData : Map<ContainmentContext, ContainingSyllableGroupData>;
 
-    //as we build up the audio stream, we may not be adding onto the very end. This is due to the containment contruct, where
-    //we add on the containment syllable group before its contained samples. In this case, we set this value to the beginning
-    //of that group. Otherwise this value should point to the end of the audio stream. 
-    currentAudioSeekPosition : number;
-
     syllableGroupMap : Map<SyllableGroupContext, PreColoringProcessedSyllableGroupData>;
+
+    //we accumulate the audios for each containment group here 
+    currentContainmentAudios : audio[];
 
     constructor(syllableLength : number, 
                 syllableGroupMap : Map<SyllableGroupContext, PreColoringProcessedSyllableGroupData>,
@@ -59,7 +57,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.currentLeafSyllableGroupIndex = 0;
         this.areWeCurrentlyInAContainmentGroup = false;
         this.containmentGroupData = containmentGroupData;
-        this.currentAudioSeekPosition = this.audio.length;
     }
 
 
@@ -110,35 +107,10 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     //use this, which is O(|a|) for linear audio generation
     addToAudio(a : audio) {
-
-        //simple case: seek position is at end of the audio and we can just append samples
-        if (this.currentAudioSeekPosition == this.audio.length) {
-            //console.log("add to audio: simple case");
-            for (let sample of a) {
-                this.audio.push(sample);
-            }
-            this.currentAudioSeekPosition = this.audio.length;
-            return;
+        let audioToAddTo = this.currentContainmentAudios.at(-1) ?? this.audio;
+        for (let sample of a) {
+            audioToAddTo.push(sample);
         }
-
-        //otherwise we need to take the samples that are currently there and mix them together
-        let samplesToBlend = this.audio.slice(this.currentAudioSeekPosition, this.currentAudioSeekPosition + a.length);
-        let blendedSamples : audio = [];
-
-        if (samplesToBlend.length < a.length) {
-            //throw new Error("BAD CONTAINER MATH BrOOOO");
-        }
-
-        for (let i = 0; i < samplesToBlend.length; i++) {
-            blendedSamples.push([(samplesToBlend[i][0] + a[i][0]), (samplesToBlend[i][1] + a[i][1])]);
-        }
-
-        for (let i = this.currentAudioSeekPosition; i < this.currentAudioSeekPosition + blendedSamples.length; i++) {
-            this.audio[i] = blendedSamples[i - this.currentAudioSeekPosition];
-        }
-
-        //console.log("current accumulated length: " + numSamplesToDuration(this.audio.length));
-        this.currentAudioSeekPosition += a.length;
     }
 
     enterDirectionSpec = (ctx: DirectionSpecContext) => {
@@ -172,21 +144,25 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
     enterContainment = (ctx: ContainmentContext) => {
-       //(ctx._syllables.getText());
+        this.currentContainmentAudios.push([]);
         this.areWeCurrentlyInAContainmentGroup = true;
-        let syllablesToCompute = this.containmentGroupData.get(ctx).syllables;
-        let containmentLength = this.containmentGroupData.get(ctx).length;
-        console.log(ctx.getText() + ": " + containmentLength + " seconds"); 
-        let audioForContainmentSyllableGroup : audio = this.audioForSyllables(syllablesToCompute, containmentLength);
-
-        let preContainmentChunkAudioSeekPosition = this.currentAudioSeekPosition;
-        this.addToAudio(audioForContainmentSyllableGroup);
-        this.currentAudioSeekPosition = preContainmentChunkAudioSeekPosition
         this.currentBracesInScope.push(ctx);
     }
 
     exitContainment = (ctx: ContainmentContext) => {
         this.currentBracesInScope.pop();
+
+        let containmentSyllablesToCompute = this.containmentGroupData.get(ctx).syllables;
+        let containmentLength = this.containmentGroupData.get(ctx).length;
+        let audioForContainmentSyllableGroup : audio = this.audioForSyllables(containmentSyllablesToCompute, containmentLength);
+
+        let containedAudio = this.currentContainmentAudios.pop();
+
+        if (containedAudio === undefined) {
+            throw new Error("Internal Error: containedAudio is undefined in exitContainment");
+        }
+
+        this.addToAudio(mix(audioForContainmentSyllableGroup, containedAudio));
     }
   
 

@@ -52,4 +52,15 @@ export function audioToAudioStream(audio : audio) : audioStream {
 
 
 
+export function mix(a : audio, b : audio, mixAmount = .5) : audio {
+    let mixed : audio = [];
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        mixed.push([
+            (a[i]?.[0] ?? 0) * (1 - mixAmount) + (b[i]?.[0] ?? 0) * mixAmount,
+            (a[i]?.[1] ?? 0) * (1 - mixAmount) + (b[i]?.[1] ?? 0) * mixAmount
+        ]);
+    }
+    return mixed;
+}
+
 
