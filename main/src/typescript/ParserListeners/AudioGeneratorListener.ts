@@ -126,7 +126,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         let blendedSamples : audio = [];
 
         if (samplesToBlend.length < a.length) {
-            throw new Error("BAD CONTAINER MATH BrOOOO");
+            //throw new Error("BAD CONTAINER MATH BrOOOO");
         }
 
         for (let i = 0; i < samplesToBlend.length; i++) {
