@@ -29,7 +29,7 @@ export function realizeSoundSpecifications(specifications : [string, SoundSpecif
             0,
             0,
             .5 + 2 * (1 - tension)
-        ).map((sample) => sampleMap(sample, (sample) => sample * Math.sqrt(tension)));
+        ).map((sample) => sampleMap(sample, (sample) => sample * Math.sqrt((tension + 1)/2)));
     }
 
     for (let [syllable, specification] of specifications) {
