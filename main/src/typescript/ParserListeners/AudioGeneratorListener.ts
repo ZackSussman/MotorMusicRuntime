@@ -102,6 +102,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
                 tension *= (1 - percentThroughChunk) + MIN_TENSION * percentThroughChunk;
             }
         }
+        console.log("we are reteurning the tension " + tension);
         return tension
     }
     
@@ -173,7 +174,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         }
         // console.log( ctx.getText());
         let audio = this.audioForSyllableGroup(ctx);
-        console.log("added syllable: " + ctx.getText());
         this.addToAudio(audio);
         this.currentLeafSyllableGroupIndex += 1;
     }
