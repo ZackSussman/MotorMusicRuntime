@@ -189,7 +189,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         if (this.areWeCurrentlyInAContainmentGroup) {
             return;
         }
-        console.log(ctx.getText());
+        //console.log(ctx.getText());
         let audio = this.audioForSyllableGroup(ctx, Number(ctx.NUMBER().getText()));
         this.addToAudio(audio);
         this.currentLeafSyllableGroupIndex += 1;
