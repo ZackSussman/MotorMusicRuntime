@@ -95,11 +95,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             let firstIndexAfterThisChunk = parenInfo.sectionStartIndices[currentSectionIndex + 1];
             let areWeGoingTowards = (parenInfo.startsWithTowards) == (currentSectionIndex % 2 == 0);
             let percentThroughChunk = (this.currentLeafSyllableGroupIndex - currentSectionFirstSyllableIndex) / (firstIndexAfterThisChunk - currentSectionFirstSyllableIndex);
-            console.log("currentSectionIndex: " + currentSectionIndex);
-            console.log("currentSectionFirstSyllableIndex: " + currentSectionFirstSyllableIndex);
-            console.log("firstIndexAfterThisChunk: " + firstIndexAfterThisChunk);
-            console.log("areWeGoingTowards: " + areWeGoingTowards);
-            console.log("percentThroughChunk: " + percentThroughChunk);
+            console.log("the section start indices are " + parenInfo.sectionStartIndices.join(","));
             if (areWeGoingTowards) {          
                 tension *= percentThroughChunk + MIN_TENSION * (1 - percentThroughChunk);
             }
