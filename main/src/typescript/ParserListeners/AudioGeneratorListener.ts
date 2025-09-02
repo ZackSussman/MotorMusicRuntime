@@ -130,6 +130,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         }
         //console.log(`Generating audio for syllables: [${syllables.join(', ')}] with scale ${syllableScale}`);
         let tension = this.getCurrentSyllableGroupTension();
+        console.log("the tension is " + tension);
         let tensionLowerBound = this.computeTensionLowerBound();
         let tensionRampedFromZeroToOne = 1;
         console.log("the tension lower bound is " + tensionLowerBound);
