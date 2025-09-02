@@ -95,6 +95,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             let firstIndexAfterThisChunk = parenInfo.sectionStartIndices[currentSectionIndex + 1];
             let areWeGoingTowards = (parenInfo.startsWithTowards) == (currentSectionIndex % 2 == 0);
             let percentThroughChunk = (this.currentLeafSyllableGroupIndex - currentSectionFirstSyllableIndex) / (firstIndexAfterThisChunk - currentSectionFirstSyllableIndex);
+            console.log("currentSectionIndex: " + currentSectionIndex);
+            console.log("currentSectionFirstSyllableIndex: " + currentSectionFirstSyllableIndex);
+            console.log("firstIndexAfterThisChunk: " + firstIndexAfterThisChunk);
+            console.log("areWeGoingTowards: " + areWeGoingTowards);
+            console.log("percentThroughChunk: " + percentThroughChunk);
             if (areWeGoingTowards) {          
                 tension *= percentThroughChunk + MIN_TENSION * (1 - percentThroughChunk);
             }
@@ -130,15 +135,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         }
         //console.log(`Generating audio for syllables: [${syllables.join(', ')}] with scale ${syllableScale}`);
         let tension = this.getCurrentSyllableGroupTension();
-        console.log("the tension is " + tension);
         let tensionLowerBound = this.computeTensionLowerBound();
         let tensionRampedFromZeroToOne = 1;
-        console.log("the tension lower bound is " + tensionLowerBound);
-        console.log("is it less than one? " + (tensionLowerBound < 1).toString());
         if (tensionLowerBound < 1)
             tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
       
-        console.log("ramped tension: " + tensionRampedFromZeroToOne);
         let result = realizeSoundSpecifications(syllables.map(syllable => [syllable, getSpecificationClassForSyllable(syllable)]), this.syllableLength * syllableScale, tensionRampedFromZeroToOne);
        // console.log(`Generated ${result.length} samples for syllables (${result.length / 48000} seconds)`);
         return result;
