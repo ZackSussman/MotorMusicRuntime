@@ -132,6 +132,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         let tension = this.getCurrentSyllableGroupTension();
         let tensionLowerBound = this.computeTensionLowerBound();
         let tensionRampedFromZeroToOne = 1;
+        console.log("the tension lower bound is " + tensionLowerBound);
+        console.log("is it less than one? " + (tensionLowerBound < 1).toString());
         if (tensionLowerBound < 1)
             tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
       
