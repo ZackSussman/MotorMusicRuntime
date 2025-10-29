@@ -105,6 +105,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
                 tension *= (1 - percentThroughChunk) + MIN_TENSION * percentThroughChunk;
             }
         }
+        console.log("we computed the tension value of " + tension + " for syllable group number " + this.currentLeafSyllableGroupIndex);
         return tension
     }
     
