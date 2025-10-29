@@ -174,13 +174,14 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
   
 
     enterSyllableGroup = (ctx : SyllableGroupContext) => { 
+        this.currentLeafSyllableGroupIndex += 1;
+        console.log("entered syllable group, the index is " + this.currentLeafSyllableGroupIndex);
         if (this.areWeCurrentlyInAContainmentGroup) {
             return;
         }
         // console.log( ctx.getText());
         let audio = this.audioForSyllableGroup(ctx);
         this.addToAudio(audio);
-        this.currentLeafSyllableGroupIndex += 1;
     }
 
     exitSyllableGroupSingle = (_: SyllableGroupSingleContext) => {
