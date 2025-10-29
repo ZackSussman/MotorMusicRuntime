@@ -82,6 +82,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     private getCurrentSyllableGroupTension() {
         const MIN_TENSION = 0.5
         let tension = 1;
+        console.log("entered getCurrentSyllableGroupTension");
         console.log("current braces in scope are: " + this.currentBracesInScope.map(ctx => ctx.getText()).join(", "));
         for (let directionSpecCtx of this.currentBracesInScope) {
             let parenInfo = this.bracesAccumData.get(directionSpecCtx);
