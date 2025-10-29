@@ -82,6 +82,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     private getCurrentSyllableGroupTension() {
         const MIN_TENSION = 0.5
         let tension = 1;
+        console.log("current braces in scope are: " + this.currentBracesInScope.map(ctx => ctx.getText()).join(", "));
         for (let directionSpecCtx of this.currentBracesInScope) {
             let parenInfo = this.bracesAccumData.get(directionSpecCtx);
             //need to determine for this particular level of motion, whether we are currently headed towards or away from, 
@@ -109,9 +110,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     //use this, which is O(|a|) for linear audio generation
     addToAudio(a : audio) {
-        let audioToAddTo = this.currentContainmentAudios.at(-1) ?? this.audio;
+        //If currentContainmentAudios is empty, then we just add a to the total audio
+        //Otherwise, we must build the sound into the latest containment audio
+        let audioToAddATo = this.currentContainmentAudios.at(-1) ?? this.audio;
         for (let sample of a) {
-            audioToAddTo.push(sample);
+            audioToAddATo.push(sample);
         }
     }
 
@@ -122,7 +125,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     exitDirectionSpec = (_: DirectionSpecContext) => {
         this.currentBracesInScope.pop();
     }
-
 
 
     private audioForSyllables(syllables : string[], syllableScale: number) : audio {
@@ -137,7 +139,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             tensionRampedFromZeroToOne = tension/(1 - tensionLowerBound) - (tensionLowerBound/(1 - tensionLowerBound));
       
         let result = realizeSoundSpecifications(syllables.map(syllable => [syllable, getSpecificationClassForSyllable(syllable)]), this.syllableLength * syllableScale, tensionRampedFromZeroToOne);
-       // console.log(`Generated ${result.length} samples for syllables (${result.length / 48000} seconds)`);
+        // console.log(`Generated ${result.length} samples for syllables (${result.length / 48000} seconds)`);
         return result;
     }
     private audioForSyllableGroup(syllableGroupContext : SyllableGroupContext, scale = 1.0) : audio {
@@ -155,9 +157,9 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     exitContainment = (ctx: ContainmentContext) => {
         this.currentBracesInScope.pop();
 
-        let containmentSyllablesToCompute = this.containmentGroupData.get(ctx).syllables;
+        let containingSyllablesToCompute = this.containmentGroupData.get(ctx).syllables;
         let containmentLength = this.containmentGroupData.get(ctx).length;
-        let audioForContainmentSyllableGroup : audio = this.audioForSyllables(containmentSyllablesToCompute, containmentLength);
+        let audioForContainingSyllableGroup : audio = this.audioForSyllables(containingSyllablesToCompute, containmentLength);
 
         let containedAudio = this.currentContainmentAudios.pop();
 
@@ -165,7 +167,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             throw new Error("Internal Error: containedAudio is undefined in exitContainment");
         }
 
-        this.addToAudio(mix(audioForContainmentSyllableGroup, containedAudio));
+        this.addToAudio(mix(audioForContainingSyllableGroup, containedAudio));
     }
   
 

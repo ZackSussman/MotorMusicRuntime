@@ -33,6 +33,7 @@ export function realizeSoundSpecifications(specifications : [string, SoundSpecif
     }
 
     for (let [syllable, specification] of specifications) {
+        //only implement for pitch specifications for now
         if (specification.name === "Pitch") {
             let frequency = specification.syllableAndTensionToValue(syllable, tension);
             pitchImplementations.push(makeSinForFrequency(frequency));
