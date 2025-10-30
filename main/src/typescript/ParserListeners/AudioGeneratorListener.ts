@@ -61,6 +61,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.areWeCurrentlyInAContainmentGroup = false;
         this.containmentGroupData = containmentGroupData;
         this.currentContainedAudios = [];
+        this.currentContainingGroupAudios = [];
     }
 
 
