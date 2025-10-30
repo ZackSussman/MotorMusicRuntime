@@ -172,8 +172,8 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     enterSyllableGroup = (ctx : SyllableGroupContext) => { 
         console.log("entered syllable group " + ctx.getText() + ", the index is " + this.currentLeafSyllableGroupIndex);
+        console.log("were we in a containment group? " + this.areWeCurrentlyInAContainmentGroup);
         if (this.areWeCurrentlyInAContainmentGroup) {
-            console.log("were we in a containment group? " + this.areWeCurrentlyInAContainmentGroup);
             return;
         }
         // console.log( ctx.getText());
