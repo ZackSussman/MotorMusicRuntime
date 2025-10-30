@@ -82,8 +82,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     private getCurrentSyllableGroupTension() {
         const MIN_TENSION = 0.5
         let tension = 1;
-        console.log("entered getCurrentSyllableGroupTension");
-        console.log("current braces in scope are: " + this.currentBracesInScope.map(ctx => ctx.getText()).join(", "));
         for (let directionSpecCtx of this.currentBracesInScope) {
             let parenInfo = this.bracesAccumData.get(directionSpecCtx);
             //need to determine for this particular level of motion, whether we are currently headed towards or away from, 
@@ -97,7 +95,6 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
             let firstIndexAfterThisChunk = parenInfo.sectionStartIndices[currentSectionIndex + 1];
             let areWeGoingTowards = (parenInfo.startsWithTowards) == (currentSectionIndex % 2 == 0);
             let percentThroughChunk = (this.currentLeafSyllableGroupIndex - currentSectionFirstSyllableIndex) / (firstIndexAfterThisChunk - currentSectionFirstSyllableIndex);
-            console.log("the section start indices are " + parenInfo.sectionStartIndices.join(","));
             if (areWeGoingTowards) {          
                 tension *= percentThroughChunk + MIN_TENSION * (1 - percentThroughChunk);
             }
@@ -174,7 +171,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
   
 
     enterSyllableGroup = (ctx : SyllableGroupContext) => { 
-        console.log("sentered syllable group, the index is " + this.currentLeafSyllableGroupIndex);
+        console.log("entered syllable group " + ctx.getText() + ", the index is " + this.currentLeafSyllableGroupIndex);
         if (this.areWeCurrentlyInAContainmentGroup) {
             return;
         }

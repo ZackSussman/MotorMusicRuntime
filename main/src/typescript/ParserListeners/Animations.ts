@@ -299,6 +299,7 @@ export class AnimationListener extends MotorMusicParserListener {
 
     exitContainment = (ctx : ContainmentContext) => {
         let dataToUpdate = this.bracesAccumData.get(ctx);
+        
         dataToUpdate.sectionStartIndices.push(this.orderedLeafSyllableGroupData.length);
         this.currentBracesInScope.pop();
     }
