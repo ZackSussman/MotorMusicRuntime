@@ -12,7 +12,8 @@ export function getSpecificationClassForSyllable(syllable : string) : SoundSpeci
     //1) pitch specifications
         new AscendMajorScaleAsTensionIncreases(),
         new TwelveTET(440),
-        new ShashavicSpecification(440, "ShashavicDefault"),
+        //TODO: debug issues that arose with the Shashavic specification
+        //new ShashavicSpecification(440, "ShashavicDefault"), 
         // Add other specifications here as needed
     ];
 
