@@ -1,26 +1,26 @@
-// Generated from MotorMusicParser.g4 by ANTLR 4.13.1
+// Generated from ./MotorMusicParser.g4 by ANTLR 4.13.2
 
 import {ParseTreeListener} from "antlr4";
 
 
-import { EmptyProgramContext } from "./MotorMusicParser";
-import { NonEmptyProgramWithDefaultPitchSpecificationContext } from "./MotorMusicParser";
-import { RaisedSingleContext } from "./MotorMusicParser";
-import { RaisedMultiContext } from "./MotorMusicParser";
-import { SingleMotionSpecDownContext } from "./MotorMusicParser";
-import { SingleMotionSpecUpContext } from "./MotorMusicParser";
-import { TowardsPrefixMotionSpecContext } from "./MotorMusicParser";
-import { AwayPrefixMotionSpecContext } from "./MotorMusicParser";
-import { EndAwayFromMotionSpecContext } from "./MotorMusicParser";
-import { EndTowardsMotionSpecContext } from "./MotorMusicParser";
-import { SyllableGroupSingleContext } from "./MotorMusicParser";
-import { SyllableGroupMultiContext } from "./MotorMusicParser";
-import { EmptyContext } from "./MotorMusicParser";
-import { TimeTaggedEmptyContext } from "./MotorMusicParser";
-import { SyllableGroupContext } from "./MotorMusicParser";
-import { TimeTaggedSyllableGroupContext } from "./MotorMusicParser";
-import { DirectionSpecContext } from "./MotorMusicParser";
-import { ContainmentContext } from "./MotorMusicParser";
+import { EmptyProgramContext } from "./MotorMusicParser.js";
+import { NonEmptyProgramWithDefaultPitchSpecificationContext } from "./MotorMusicParser.js";
+import { RaisedSingleContext } from "./MotorMusicParser.js";
+import { RaisedMultiContext } from "./MotorMusicParser.js";
+import { SingleMotionSpecDownContext } from "./MotorMusicParser.js";
+import { SingleMotionSpecUpContext } from "./MotorMusicParser.js";
+import { TowardsPrefixMotionSpecContext } from "./MotorMusicParser.js";
+import { AwayPrefixMotionSpecContext } from "./MotorMusicParser.js";
+import { EndAwayFromMotionSpecContext } from "./MotorMusicParser.js";
+import { EndTowardsMotionSpecContext } from "./MotorMusicParser.js";
+import { SyllableGroupSingleContext } from "./MotorMusicParser.js";
+import { SyllableGroupMultiContext } from "./MotorMusicParser.js";
+import { EmptyContext } from "./MotorMusicParser.js";
+import { TimeTaggedEmptyContext } from "./MotorMusicParser.js";
+import { SyllableGroupContext } from "./MotorMusicParser.js";
+import { TimeTaggedSyllableGroupContext } from "./MotorMusicParser.js";
+import { DirectionSpecContext } from "./MotorMusicParser.js";
+import { ContainmentContext } from "./MotorMusicParser.js";
 
 
 /**

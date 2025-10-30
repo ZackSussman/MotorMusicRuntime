@@ -1,4 +1,4 @@
-// Generated from MotorMusicParser.g4 by ANTLR 4.13.1
+// Generated from ./MotorMusicParser.g4 by ANTLR 4.13.2
 // noinspection ES6UnusedImports,JSUnusedGlobalSymbols,JSUnusedLocalSymbols
 
 import {
@@ -12,8 +12,6 @@ import {
 	Interval, IntervalSet
 } from 'antlr4';
 import MotorMusicParserListener from "./MotorMusicParserListener.js";
-import MotorMusicParserVisitor from "./MotorMusicParserVisitor.js";
-
 // for running tests with parameters, TODO: discuss strategy for typed parameters in CI
 // eslint-disable-next-line no-unused-vars
 type int = number;
@@ -35,7 +33,7 @@ export default class MotorMusicParser extends Parser {
 	public static readonly CARROT = 14;
 	public static readonly AMPERSAND = 15;
 	public static readonly UNRECOGNIZED = 16;
-	public static readonly EOF = Token.EOF;
+	public static override readonly EOF = Token.EOF;
 	public static readonly RULE_compilationUnit = 0;
 	public static readonly RULE_raised_gesture_list = 1;
 	public static readonly RULE_motion_spec_list = 2;
@@ -435,7 +433,7 @@ export class CompilationUnitContext extends ParserRuleContext {
     public get ruleIndex(): number {
     	return MotorMusicParser.RULE_compilationUnit;
 	}
-	public copyFrom(ctx: CompilationUnitContext): void {
+	public override copyFrom(ctx: CompilationUnitContext): void {
 		super.copyFrom(ctx);
 	}
 }
@@ -461,14 +459,6 @@ export class NonEmptyProgramWithDefaultPitchSpecificationContext extends Compila
 	 		listener.exitNonEmptyProgramWithDefaultPitchSpecification(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitNonEmptyProgramWithDefaultPitchSpecification) {
-			return visitor.visitNonEmptyProgramWithDefaultPitchSpecification(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 export class EmptyProgramContext extends CompilationUnitContext {
 	public _e!: Token;
@@ -489,14 +479,6 @@ export class EmptyProgramContext extends CompilationUnitContext {
 	 		listener.exitEmptyProgram(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitEmptyProgram) {
-			return visitor.visitEmptyProgram(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 
 
@@ -508,7 +490,7 @@ export class Raised_gesture_listContext extends ParserRuleContext {
     public get ruleIndex(): number {
     	return MotorMusicParser.RULE_raised_gesture_list;
 	}
-	public copyFrom(ctx: Raised_gesture_listContext): void {
+	public override copyFrom(ctx: Raised_gesture_listContext): void {
 		super.copyFrom(ctx);
 	}
 }
@@ -535,14 +517,6 @@ export class RaisedMultiContext extends Raised_gesture_listContext {
 	 		listener.exitRaisedMulti(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitRaisedMulti) {
-			return visitor.visitRaisedMulti(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 export class RaisedSingleContext extends Raised_gesture_listContext {
 	public _top!: GestureContext;
@@ -563,14 +537,6 @@ export class RaisedSingleContext extends Raised_gesture_listContext {
 	 		listener.exitRaisedSingle(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitRaisedSingle) {
-			return visitor.visitRaisedSingle(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 
 
@@ -582,7 +548,7 @@ export class Motion_spec_listContext extends ParserRuleContext {
     public get ruleIndex(): number {
     	return MotorMusicParser.RULE_motion_spec_list;
 	}
-	public copyFrom(ctx: Motion_spec_listContext): void {
+	public override copyFrom(ctx: Motion_spec_listContext): void {
 		super.copyFrom(ctx);
 	}
 }
@@ -612,14 +578,6 @@ export class AwayPrefixMotionSpecContext extends Motion_spec_listContext {
 	 		listener.exitAwayPrefixMotionSpec(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitAwayPrefixMotionSpec) {
-			return visitor.visitAwayPrefixMotionSpec(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 export class EndTowardsMotionSpecContext extends Motion_spec_listContext {
 	public _top!: Raised_gesture_listContext;
@@ -647,14 +605,6 @@ export class EndTowardsMotionSpecContext extends Motion_spec_listContext {
 	 		listener.exitEndTowardsMotionSpec(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitEndTowardsMotionSpec) {
-			return visitor.visitEndTowardsMotionSpec(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 export class SingleMotionSpecUpContext extends Motion_spec_listContext {
 	public _top!: Raised_gesture_listContext;
@@ -678,14 +628,6 @@ export class SingleMotionSpecUpContext extends Motion_spec_listContext {
 	 		listener.exitSingleMotionSpecUp(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitSingleMotionSpecUp) {
-			return visitor.visitSingleMotionSpecUp(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 export class SingleMotionSpecDownContext extends Motion_spec_listContext {
 	public _top!: Raised_gesture_listContext;
@@ -707,14 +649,6 @@ export class SingleMotionSpecDownContext extends Motion_spec_listContext {
 	public exitRule(listener: MotorMusicParserListener): void {
 	    if(listener.exitSingleMotionSpecDown) {
 	 		listener.exitSingleMotionSpecDown(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitSingleMotionSpecDown) {
-			return visitor.visitSingleMotionSpecDown(this);
-		} else {
-			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -744,14 +678,6 @@ export class TowardsPrefixMotionSpecContext extends Motion_spec_listContext {
 	 		listener.exitTowardsPrefixMotionSpec(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitTowardsPrefixMotionSpec) {
-			return visitor.visitTowardsPrefixMotionSpec(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 export class EndAwayFromMotionSpecContext extends Motion_spec_listContext {
 	public _top!: Raised_gesture_listContext;
@@ -779,14 +705,6 @@ export class EndAwayFromMotionSpecContext extends Motion_spec_listContext {
 	 		listener.exitEndAwayFromMotionSpec(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitEndAwayFromMotionSpec) {
-			return visitor.visitEndAwayFromMotionSpec(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 
 
@@ -798,7 +716,7 @@ export class Syllable_groupContext extends ParserRuleContext {
     public get ruleIndex(): number {
     	return MotorMusicParser.RULE_syllable_group;
 	}
-	public copyFrom(ctx: Syllable_groupContext): void {
+	public override copyFrom(ctx: Syllable_groupContext): void {
 		super.copyFrom(ctx);
 	}
 }
@@ -819,14 +737,6 @@ export class SyllableGroupSingleContext extends Syllable_groupContext {
 	public exitRule(listener: MotorMusicParserListener): void {
 	    if(listener.exitSyllableGroupSingle) {
 	 		listener.exitSyllableGroupSingle(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitSyllableGroupSingle) {
-			return visitor.visitSyllableGroupSingle(this);
-		} else {
-			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -856,14 +766,6 @@ export class SyllableGroupMultiContext extends Syllable_groupContext {
 	 		listener.exitSyllableGroupMulti(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitSyllableGroupMulti) {
-			return visitor.visitSyllableGroupMulti(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 
 
@@ -875,7 +777,7 @@ export class GestureContext extends ParserRuleContext {
     public get ruleIndex(): number {
     	return MotorMusicParser.RULE_gesture;
 	}
-	public copyFrom(ctx: GestureContext): void {
+	public override copyFrom(ctx: GestureContext): void {
 		super.copyFrom(ctx);
 	}
 }
@@ -895,14 +797,6 @@ export class EmptyContext extends GestureContext {
 	public exitRule(listener: MotorMusicParserListener): void {
 	    if(listener.exitEmpty) {
 	 		listener.exitEmpty(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitEmpty) {
-			return visitor.visitEmpty(this);
-		} else {
-			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -931,14 +825,6 @@ export class DirectionSpecContext extends GestureContext {
 	 		listener.exitDirectionSpec(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitDirectionSpec) {
-			return visitor.visitDirectionSpec(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 export class TimeTaggedEmptyContext extends GestureContext {
 	public _number_!: Token;
@@ -962,14 +848,6 @@ export class TimeTaggedEmptyContext extends GestureContext {
 	 		listener.exitTimeTaggedEmpty(this);
 		}
 	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitTimeTaggedEmpty) {
-			return visitor.visitTimeTaggedEmpty(this);
-		} else {
-			return visitor.visitChildren(this);
-		}
-	}
 }
 export class SyllableGroupContext extends GestureContext {
 	public _syllables!: Syllable_groupContext;
@@ -988,14 +866,6 @@ export class SyllableGroupContext extends GestureContext {
 	public exitRule(listener: MotorMusicParserListener): void {
 	    if(listener.exitSyllableGroup) {
 	 		listener.exitSyllableGroup(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitSyllableGroup) {
-			return visitor.visitSyllableGroup(this);
-		} else {
-			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -1020,14 +890,6 @@ export class TimeTaggedSyllableGroupContext extends GestureContext {
 	public exitRule(listener: MotorMusicParserListener): void {
 	    if(listener.exitTimeTaggedSyllableGroup) {
 	 		listener.exitTimeTaggedSyllableGroup(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitTimeTaggedSyllableGroup) {
-			return visitor.visitTimeTaggedSyllableGroup(this);
-		} else {
-			return visitor.visitChildren(this);
 		}
 	}
 }
@@ -1058,14 +920,6 @@ export class ContainmentContext extends GestureContext {
 	public exitRule(listener: MotorMusicParserListener): void {
 	    if(listener.exitContainment) {
 	 		listener.exitContainment(this);
-		}
-	}
-	// @Override
-	public accept<Result>(visitor: MotorMusicParserVisitor<Result>): Result {
-		if (visitor.visitContainment) {
-			return visitor.visitContainment(this);
-		} else {
-			return visitor.visitChildren(this);
 		}
 	}
 }
