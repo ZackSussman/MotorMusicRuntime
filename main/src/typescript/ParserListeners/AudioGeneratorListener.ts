@@ -41,8 +41,11 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
 
     syllableGroupMap : Map<SyllableGroupContext, PreColoringProcessedSyllableGroupData>;
 
-    //we accumulate the audios for each containment group here 
-    currentContainmentAudios : audio[];
+    //we must accumulate the below two separately because they must be computed at different times, and then used together to augment each other
+    //we accumulate the audios for each contained group here 
+    currentContainedAudios : audio[];
+    //accumulate the audios for each containing group here 
+    currentContainingGroupAudios : audio[];
 
     constructor(syllableLength : number, 
                 syllableGroupMap : Map<SyllableGroupContext, PreColoringProcessedSyllableGroupData>,
@@ -57,7 +60,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
         this.currentLeafSyllableGroupIndex = 0;
         this.areWeCurrentlyInAContainmentGroup = false;
         this.containmentGroupData = containmentGroupData;
-        this.currentContainmentAudios = [];
+        this.currentContainedAudios = [];
     }
 
 
@@ -111,7 +114,7 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     addToAudio(a : audio) {
         //If currentContainmentAudios is empty, then we just add a to the total audio
         //Otherwise, we must build the sound into the latest containment audio
-        let audioToAddATo = this.currentContainmentAudios.at(-1) ?? this.audio;
+        let audioToAddATo = this.currentContainedAudios.at(-1) ?? this.audio;
         for (let sample of a) {
             audioToAddATo.push(sample);
         }
@@ -148,22 +151,25 @@ export class AudioGeneratorListener extends MotorMusicParserListener {
     }
 
     enterContainment = (ctx: ContainmentContext) => {
-        this.currentContainmentAudios.push([]);
+        this.currentContainedAudios.push([]);
         this.areWeCurrentlyInAContainmentGroup = true;
         this.currentBracesInScope.push(ctx);
+        //the current leaf syllable index must have been incremented by the last syllable group before this, making it the correct leaf syllable index to reference
+        //for the tension value of the containing syllable group when computing its audio 
+        let containingSyllablesToCompute = this.containmentGroupData.get(ctx).syllables;
+        let containmentLength = this.containmentGroupData.get(ctx).length; 
+        let audioForContainingSyllableGroup : audio = this.audioForSyllables(containingSyllablesToCompute, containmentLength); 
+        this.currentContainingGroupAudios.push(audioForContainingSyllableGroup);
     }
 
     exitContainment = (ctx: ContainmentContext) => {
         this.currentBracesInScope.pop();
 
-        let containingSyllablesToCompute = this.containmentGroupData.get(ctx).syllables;
-        let containmentLength = this.containmentGroupData.get(ctx).length;
-        let audioForContainingSyllableGroup : audio = this.audioForSyllables(containingSyllablesToCompute, containmentLength);
+        let audioForContainingSyllableGroup = this.currentContainingGroupAudios.pop();
+        let containedAudio = this.currentContainedAudios.pop();
 
-        let containedAudio = this.currentContainmentAudios.pop();
-
-        if (containedAudio === undefined) {
-            throw new Error("Internal Error: containedAudio is undefined in exitContainment");
+        if (containedAudio === undefined || audioForContainingSyllableGroup === undefined) {
+            throw new Error("Internal Error: containedAudio or audioForContainingSyllableGroup is undefined in exitContainment");
         }
 
         this.addToAudio(mix(audioForContainingSyllableGroup, containedAudio));
