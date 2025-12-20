@@ -86,19 +86,14 @@ import {AudioGeneratorListener} from "./ParserListeners/AudioGeneratorListener";
 import {audioStream} from "./Audio/Audio";
 import {range} from "./ParserListeners/ParserListenerUtils";
 
-
-function makeProcessForSyllableTime(globalRuntimeData) {
-    function process(input : string) : 
-        [Map<range, string>, animationFunction, audioStream , Error[]] 
-        {
+function makeProcessVisual(globalRuntimeData) {
+    function processVisual(input : string) : [Map<range, string>, animationFunction, Error[]] {
         let errors : Error[] = [];
-        let tree = parse(input, errors)
+        let tree = parse(input, errors);
         let staticAnalysisListener = new MotorMusicParserStaticAnalysisListener(input);
         ParseTreeWalker.DEFAULT.walk(staticAnalysisListener, tree);
         errors = errors.concat(staticAnalysisListener.errors);
         if (errors.length === 0) {
-
-
             let prepareProcessedSyllableGroupDataListener = new PrepareProcessedSyllableGroupDataListener();
             ParseTreeWalker.DEFAULT.walk(prepareProcessedSyllableGroupDataListener, tree);
 
@@ -110,24 +105,51 @@ function makeProcessForSyllableTime(globalRuntimeData) {
             function packageGetAnimationInfo(x : number) {
                 return animationListener.getAnimationInfoForTime(x);
             }
+
+            return [colorMapBuilder.buildColorMap(), packageGetAnimationInfo, errors];
+        }
+        return [undefined, undefined, errors];
+    }
+    return processVisual;
+}
+
+function makeProcessAudio(globalRuntimeData) {
+    function processAudio(input : string) : 
+        [audioStream , Error[]] 
+        {
+        let errors : Error[] = [];
+        let tree = parse(input, errors)
+        let staticAnalysisListener = new MotorMusicParserStaticAnalysisListener(input);
+        ParseTreeWalker.DEFAULT.walk(staticAnalysisListener, tree);
+        errors = errors.concat(staticAnalysisListener.errors);
+        if (errors.length === 0) {
+            let prepareProcessedSyllableGroupDataListener = new PrepareProcessedSyllableGroupDataListener();
+            ParseTreeWalker.DEFAULT.walk(prepareProcessedSyllableGroupDataListener, tree);
+            
+            let colorMapBuilder = new ProgramColoringListener(prepareProcessedSyllableGroupDataListener.syllableGroupMap, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
+            ParseTreeWalker.DEFAULT.walk(colorMapBuilder, tree);
+
+            let animationListener = new AnimationListener(globalRuntimeData.syllableTime, prepareProcessedSyllableGroupDataListener.syllableGroupMap, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
+            ParseTreeWalker.DEFAULT.walk(animationListener, tree);
+            function packageGetAnimationInfo(x : number) {
+                return animationListener.getAnimationInfoForTime(x);
+            }
     
             let audioGeneratorListener = new AudioGeneratorListener(globalRuntimeData.syllableTime, prepareProcessedSyllableGroupDataListener.syllableGroupMap, animationListener.bracesAccumData, prepareProcessedSyllableGroupDataListener.containmentGroupMap);
             ParseTreeWalker.DEFAULT.walk(audioGeneratorListener, tree);
-
-
-       
-
-            return [colorMapBuilder.buildColorMap(), packageGetAnimationInfo, audioGeneratorListener.audioStream, errors];
+            
+            return [audioGeneratorListener.audioStream, errors];
         }
-        return [undefined, undefined, undefined, errors];
+        return [undefined, errors];
     }
-    return process
+    return processAudio
 }
 
 
 
 export function initializeGlobalRuntime(globalRuntimeData) {
     return {
-        process: makeProcessForSyllableTime(globalRuntimeData)
+        processVisual: makeProcessVisual(globalRuntimeData),
+        processAudio: makeProcessAudio(globalRuntimeData)
     };
 }
